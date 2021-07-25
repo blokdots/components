@@ -1,0 +1,25 @@
+{
+  "name": "@blokdots/components",
+  "version": "1.0.1",
+  "description": "blokdots Virtual Components to use in your projects.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "esbuild ./src/index.js --platform=node --bundle --outfile=dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blokdots/components.git"
+  },
+  "keywords": [
+    "blokdots"
+  ],
+  "author": "blokdots",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/blokdots/components/issues"
+  },
+  "homepage": "https://github.com/blokdots/components#readme",
+  "devDependencies": {
+    "esbuild": "^0.12.15"
+  }
+}
