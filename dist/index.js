@@ -112,7 +112,7 @@ var SignalTower_default = SignalTower;
 // src/Timer/Timer.js
 var import_events4 = __toModule(require("events"));
 var Timer = class extends import_events4.default {
-  constructor(value) {
+  constructor(value = 0) {
     super();
     this.value = value;
     this.interval = void 0;
