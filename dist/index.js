@@ -137,7 +137,7 @@ var Timer = class extends import_events4.default {
     this.emit("change", this.value);
     this.emit("reset");
   }
-  setValue(value) {
+  setTo(value) {
     this.value = value;
     this.emit("change", this.value);
   }

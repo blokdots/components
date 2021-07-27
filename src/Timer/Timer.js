@@ -33,7 +33,7 @@ class Timer extends EventEmitter {
     this.emit("reset");
   }
 
-  setValue(value) {
+  setTo(value) {
     this.value = value;
     this.emit("change", this.value);
   }
