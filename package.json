@@ -4,14 +4,17 @@
   "description": "blokdots Virtual Components to use in your projects.",
   "main": "dist/index.js",
   "scripts": {
-    "build": "esbuild ./src/index.js --platform=node --bundle --outfile=dist/index.js"
+    "build": "esbuild ./src/index.js --platform=node --bundle --outfile=dist/index.js",
+    "prettier": "prettier --write 'src/**/*.js'"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/blokdots/components.git"
   },
   "keywords": [
-    "blokdots"
+    "blokdots",
+    "Arduino",
+    "hardware prototyping"
   ],
   "author": "blokdots",
   "license": "MIT",
@@ -20,6 +23,7 @@
   },
   "homepage": "https://github.com/blokdots/components#readme",
   "devDependencies": {
-    "esbuild": "^0.12.15"
+    "esbuild": "^0.12.15",
+    "prettier": "^2.3.2"
   }
 }
