@@ -7,4 +7,5 @@ export { default as Counter } from "./Counter";
 export { default as Encoder } from "./Encoder";
 export { default as Metronome } from "./Metronome";
 export { default as SignalTower } from "./SignalTower";
+export { default as SocketIOIntegration } from "./SocketIOIntegration";
 export { default as Timer } from "./Timer";
