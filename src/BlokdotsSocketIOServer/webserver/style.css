@@ -1,0 +1,339 @@
+/* Variables */
+:root {
+  /* fonts */
+  --font-family-reg: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  --font-family-mono: "SF Mono", "Roboto Mono", "Menlo", monospace;
+
+  --font-size-reg: 16px;
+  --font-size-small: 13px;
+  --font-size-tiny: 10px;
+
+  --font-weight-med: 500;
+  --font-weight-reg: 400;
+  --font-weight-thin: 300;
+
+  /* Sizes */
+  --max-width: 640px;
+
+  /* Colors */
+
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  --color-font-reg: var(--color-black);
+  --color-font-med: #808080;
+  --color-font-dis: #b3b3b3;
+
+  --color-gray-1: #f8f8f8;
+  --color-gray-2: #f5f5f5;
+  --color-gray-3: #f2f2f2;
+  --color-gray-4: #f0f0f0;
+  --color-gray-5: #eaeaea;
+  --color-gray-6: #dcdcdc;
+  --color-gray-7: #c1c1c1;
+  --color-gray-8: #a8a8a8;
+  --color-gray-9: #606060;
+
+  --color-brand: #fbe941;
+  --color-brand-medium: #fbd841;
+  --color-brand-dark: #f7c510;
+
+  --color-red: #e74c3c;
+  --color-green: #1abc9c;
+  --color-green-dark: #17a387;
+  --color-blue: #5d9bc5;
+  --color-violet: #9f63b7;
+  --color-orange: #f39c12;
+  --color-yellow: var(--color-brand-medium);
+
+  --color-alert-high: var(--color-red);
+  --color-alert-medium: var(--color-orange);
+  --color-alert-low: var(--color-yellow);
+
+  /* Sizes */
+
+  --border-radius-reg: 2px;
+  --windows-menu-bar-height: 28px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-white: #39393a;
+    --color-black: #ffffff;
+
+    --color-gray-1: #424243;
+    --color-gray-2: #4d4d4d;
+    --color-gray-3: #808080;
+    --color-gray-4: #3d3d3e;
+    --color-gray-5: #2d2d2e;
+    --color-gray-6: #505051;
+    --color-gray-7: #565657;
+    --color-gray-8: #6f6f74;
+    --color-gray-9: #78787c;
+
+    --color-font-reg: var(--color-black);
+    --color-font-med: #909090;
+    --color-font-dis: var(--color-gray-6);
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --max-width: 100vw;
+  }
+}
+
+/* Reset */
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+a,
+img,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td {
+  border: 0;
+  outline: 0;
+  font-weight: inherit;
+  font-style: inherit;
+  font-size: 100%;
+  font-family: inherit;
+  vertical-align: baseline;
+  margin: 0;
+  padding: 0;
+}
+:focus {
+  outline: 0;
+}
+ol,
+ul {
+  list-style: none;
+}
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+caption,
+th,
+td {
+  text-align: left;
+  font-weight: 400;
+}
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+  content: "";
+}
+.clearfix:after {
+  content: ".";
+  display: block;
+  clear: both;
+  visibility: hidden;
+  line-height: 0;
+  height: 0;
+}
+.clearfix {
+  display: inline-block;
+}
+html[xmlns] .clearfix {
+  display: block;
+}
+* html .clearfix {
+  height: 1%;
+}
+.clear {
+  clear: both;
+  height: 0;
+  width: 0;
+  margin: 0;
+  padding: 0;
+}
+.no,
+.ausblenden {
+  display: none;
+}
+header,
+section,
+footer,
+aside,
+nav,
+article,
+figure {
+  display: block;
+}
+
+/* Actual Style */
+* {
+  position: relative;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  font-family: var(--font-family-reg);
+
+  color: var(--color-font-reg);
+  background: var(--color-white);
+
+  font-size: var(--font-size-reg);
+  line-height: 1.6;
+  font-weight: var(--font-weight-reg);
+}
+
+h1 {
+  font-weight: 500;
+  margin: 1rem 0;
+}
+
+a {
+  color: var(--color-green);
+}
+
+p + p {
+  margin-top: 8px;
+}
+
+#wrapper {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 20px;
+}
+
+#testInput {
+  margin: 3rem 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+#testInput label {
+  display: flex;
+  flex: 1;
+  align-items: center;
+}
+#testInput input,
+button {
+  outline: none;
+  border: none;
+  background: none;
+  border-radius: 0;
+  font-family: var(--font-family-reg);
+  font-size: var(--font-size-reg);
+  color: var(--color-font-reg);
+}
+#testInput label span {
+  flex: 0;
+  padding-right: 3px;
+}
+#testInput input {
+  border-bottom: solid 1px var(--color-gray-7);
+  flex: 1;
+}
+#testInput input::placeholder {
+  color: var(--color-font-dis);
+}
+#testInput button {
+  cursor: pointer;
+  background: var(--color-green);
+  border-radius: var(--border-radius-reg);
+  padding: 0.3em 0.6em;
+  color: #fff;
+  flex-grow: 0;
+}
+@media (max-width: 600px) {
+  #testInput {
+    flex-direction: column;
+  }
+  #testInput label {
+    width: 100%;
+    flex: 1;
+  }
+  #testInput button {
+    width: 100%;
+    flex-grow: 1;
+  }
+  #testInput label span {
+    flex: 1;
+  }
+  #testInput label input {
+    flex: 3;
+  }
+}
+
+#socket-history {
+  margin: 40px 0;
+}
+#socket-history li {
+  width: 100%;
+  padding: 8px 0;
+  border-top: solid 1px var(--color-gray-6);
+}
+
+#serverAddress,
+#connectionStatus,
+.code {
+  font-family: var(--font-family-mono);
+  font-size: 0.9em;
+  background: var(--color-gray-4);
+  padding: 2px 4px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+#connectionStatus.ok,
+.code.ok {
+  background-color: var(--color-green);
+  color: #fff;
+}
+
+.messageTime {
+  color: var(--color-gray-8);
+  font-family: var(--font-family-mono);
+  margin-right: 8px;
+}
+.messageArrow {
+  height: 0.8em;
+  margin-right: 8px;
+}
+.messageContentDisplay {
+}
+.messageValueDisplay:before {
+  content: "[";
+  color: var(--color-gray-8);
+}
+.messageValueDisplay:after {
+  content: "]";
+  color: var(--color-gray-8);
+}
+.messageValueDisplay {
+  font-family: var(--font-family-mono);
+  color: var(--color-gray-8);
+  margin-left: 8px;
+}
+.messageValueDisplay-is-number {
+  color: var(--color-violet);
+}
