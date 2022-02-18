@@ -45209,6 +45209,7 @@ __export(exports, {
   BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT: () => BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT,
   Counter: () => Counter_default,
   Encoder: () => Encoder_default,
+  HapticLabs: () => HapticLabs_default,
   Metronome: () => Metronome_default,
   SignalTower: () => SignalTower_default,
   SocketIOIntegration: () => SocketIOIntegration_default,
@@ -45529,6 +45530,25 @@ var Encoder = class extends import_events2.default {
 };
 var Encoder_default = Encoder;
 
+// src/HapticLabs/HapticLabs.js
+var import_johnny_five2 = __toModule(require_johnny_five());
+var HapticLabs = class {
+  constructor({ slot, board, initialValue = 0 }) {
+    this.value = initialValue;
+    this.track1 = new import_johnny_five2.default.Pin({
+      pin: slot,
+      type: "digital",
+      board
+    });
+    this.track2 = new import_johnny_five2.default.Pin({
+      pin: slot + 1,
+      type: "digital",
+      board
+    });
+  }
+};
+var HapticLabs_default = HapticLabs;
+
 // src/Metronome/Metronome.js
 var import_events3 = __toModule(require("events"));
 var Metronome = class extends import_events3.default {
@@ -45684,6 +45704,7 @@ var Timer_default = Timer;
   BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT,
   Counter,
   Encoder,
+  HapticLabs,
   Metronome,
   SignalTower,
   SocketIOIntegration,
