@@ -45436,7 +45436,7 @@ var BlokdotsSocketIOServer = class {
     }
     if (integration.handlers.length === 0) {
       integration.ioNamespace.disconnectSockets();
-      this.activeIntegrations[integrationName] = null;
+      delete this.activeIntegrations[integrationName];
       this.emitInfo();
     }
   }

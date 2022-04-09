@@ -203,7 +203,7 @@ class BlokdotsSocketIOServer {
     // Nobody is listening anymore, remove the integration
     if (integration.handlers.length === 0) {
       integration.ioNamespace.disconnectSockets();
-      this.activeIntegrations[integrationName] = null;
+      delete this.activeIntegrations[integrationName];
 
       this.emitInfo();
     }
