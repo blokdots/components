@@ -45215,7 +45215,8 @@ __export(exports, {
   SocketIOIntegration: () => SocketIOIntegration_default,
   Timer: () => Timer_default,
   getBlokdotsSocketIOServer: () => BlokdotsSocketIOServer_default,
-  getBlokdotsSocketIOServerAddress: () => getBlokdotsSocketIOServerAddress
+  getBlokdotsSocketIOServerAddress: () => getBlokdotsSocketIOServerAddress,
+  utils: () => utils_default
 });
 
 // node_modules/socket.io/wrapper.mjs
@@ -45699,6 +45700,14 @@ var Timer = class extends import_events5.default {
   }
 };
 var Timer_default = Timer;
+
+// src/utils.js
+var utils = {
+  rgbToHex: (r, g, b) => {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  }
+};
+var utils_default = utils;
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT,
@@ -45710,7 +45719,8 @@ var Timer_default = Timer;
   SocketIOIntegration,
   Timer,
   getBlokdotsSocketIOServer,
-  getBlokdotsSocketIOServerAddress
+  getBlokdotsSocketIOServerAddress,
+  utils
 });
 /*
 object-assign

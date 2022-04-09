@@ -10,3 +10,4 @@ export { default as Metronome } from "./Metronome";
 export { default as SignalTower } from "./SignalTower";
 export { default as SocketIOIntegration } from "./SocketIOIntegration";
 export { default as Timer } from "./Timer";
+export { default as utils } from "./utils.js";
