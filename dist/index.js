@@ -12939,7 +12939,7 @@ var require_extension = __commonJS({
 var require_websocket2 = __commonJS({
   "node_modules/engine.io/node_modules/ws/lib/websocket.js"(exports, module2) {
     "use strict";
-    var EventEmitter7 = require("events");
+    var EventEmitter8 = require("events");
     var https = require("https");
     var http2 = require("http");
     var net = require("net");
@@ -12969,7 +12969,7 @@ var require_websocket2 = __commonJS({
     var subprotocolRegex = /^[!#$%&'*+\-.0-9A-Z^_`|a-z~]+$/;
     var protocolVersions = [8, 13];
     var closeTimeout = 30 * 1e3;
-    var WebSocket2 = class extends EventEmitter7 {
+    var WebSocket2 = class extends EventEmitter8 {
       constructor(address, protocols, options) {
         super();
         this._binaryType = BINARY_TYPES[0];
@@ -13748,7 +13748,7 @@ var require_subprotocol = __commonJS({
 var require_websocket_server = __commonJS({
   "node_modules/engine.io/node_modules/ws/lib/websocket-server.js"(exports, module2) {
     "use strict";
-    var EventEmitter7 = require("events");
+    var EventEmitter8 = require("events");
     var http2 = require("http");
     var https = require("https");
     var net = require("net");
@@ -13763,7 +13763,7 @@ var require_websocket_server = __commonJS({
     var RUNNING = 0;
     var CLOSING = 1;
     var CLOSED = 2;
-    var WebSocketServer = class extends EventEmitter7 {
+    var WebSocketServer = class extends EventEmitter8 {
       constructor(options, callback) {
         super();
         options = {
@@ -20074,7 +20074,7 @@ var require_extension2 = __commonJS({
 var require_websocket4 = __commonJS({
   "node_modules/ws/lib/websocket.js"(exports, module2) {
     "use strict";
-    var EventEmitter7 = require("events");
+    var EventEmitter8 = require("events");
     var https = require("https");
     var http2 = require("http");
     var net = require("net");
@@ -20099,7 +20099,7 @@ var require_websocket4 = __commonJS({
     var readyStates = ["CONNECTING", "OPEN", "CLOSING", "CLOSED"];
     var protocolVersions = [8, 13];
     var closeTimeout = 30 * 1e3;
-    var WebSocket2 = class extends EventEmitter7 {
+    var WebSocket2 = class extends EventEmitter8 {
       constructor(address, protocols, options) {
         super();
         this._binaryType = BINARY_TYPES[0];
@@ -20818,7 +20818,7 @@ var require_stream2 = __commonJS({
 var require_websocket_server2 = __commonJS({
   "node_modules/ws/lib/websocket-server.js"(exports, module2) {
     "use strict";
-    var EventEmitter7 = require("events");
+    var EventEmitter8 = require("events");
     var http2 = require("http");
     var https = require("https");
     var net = require("net");
@@ -20832,7 +20832,7 @@ var require_websocket_server2 = __commonJS({
     var RUNNING = 0;
     var CLOSING = 1;
     var CLOSED = 2;
-    var WebSocketServer = class extends EventEmitter7 {
+    var WebSocketServer = class extends EventEmitter8 {
       constructor(options, callback) {
         super();
         options = {
@@ -21066,9 +21066,9 @@ var require_ws2 = __commonJS({
 // node_modules/johnny-five/lib/mixins/emitter.js
 var require_emitter = __commonJS({
   "node_modules/johnny-five/lib/mixins/emitter.js"(exports, module2) {
-    var EventEmitter7 = require("events");
+    var EventEmitter8 = require("events");
     var wm = new WeakMap();
-    var Emitter = class extends EventEmitter7 {
+    var Emitter = class extends EventEmitter8 {
       pause() {
         wm.set(this, {
           ...this._events
@@ -21086,7 +21086,7 @@ var require_emitter = __commonJS({
         }
       }
     };
-    Object.assign(Emitter.prototype, EventEmitter7.prototype);
+    Object.assign(Emitter.prototype, EventEmitter8.prototype);
     module2.exports = Emitter;
   }
 });
@@ -22514,7 +22514,7 @@ var require_chalk = __commonJS({
 // node_modules/johnny-five/lib/mixins/collection.js
 var require_collection = __commonJS({
   "node_modules/johnny-five/lib/mixins/collection.js"(exports, module2) {
-    var EventEmitter7 = require("events");
+    var EventEmitter8 = require("events");
     var Emitter = require_emitter();
     var Collection = class {
       constructor(numsOrObjects) {
@@ -22687,7 +22687,7 @@ var require_collection = __commonJS({
         return this.length;
       }
     };
-    Object.assign(Collection.Emitter.prototype, EventEmitter7.prototype, Emitter.prototype);
+    Object.assign(Collection.Emitter.prototype, EventEmitter8.prototype, Emitter.prototype);
     Collection.prototype[Symbol.iterator] = Array.prototype[Symbol.iterator];
     module2.exports = Collection;
   }
@@ -25497,7 +25497,7 @@ var require_poller = __commonJS({
   "node_modules/@serialport/bindings/lib/poller.js"(exports, module2) {
     var debug = require_src4();
     var logger = debug("serialport/bindings/poller");
-    var EventEmitter7 = require("events");
+    var EventEmitter8 = require("events");
     var PollerBindings = require_bindings()("bindings.node").Poller;
     var EVENTS = {
       UV_READABLE: 1,
@@ -25525,7 +25525,7 @@ var require_poller = __commonJS({
         this.emit("disconnect", null);
       }
     }
-    var Poller = class extends EventEmitter7 {
+    var Poller = class extends EventEmitter8 {
       constructor(fd, FDPoller = PollerBindings) {
         logger("Creating poller");
         super();
@@ -31569,7 +31569,7 @@ var require_withinable = __commonJS({
 var require_thermometer = __commonJS({
   "node_modules/johnny-five/lib/thermometer.js"(exports, module2) {
     var Board = require_board();
-    var EventEmitter7 = require("events");
+    var EventEmitter8 = require("events");
     var Withinable = require_withinable();
     var {
       toFixed,
@@ -31785,7 +31785,7 @@ var require_thermometer = __commonJS({
       drivers = activeDrivers.get(board);
       const key = `${driverName}_${options.pin}`;
       if (!drivers[key]) {
-        driver = new EventEmitter7();
+        driver = new EventEmitter8();
         Object.defineProperties(driver, Drivers[driverName]);
         driver.initialize(board, options);
         drivers[key] = driver;
@@ -45209,6 +45209,7 @@ __export(exports, {
   BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT: () => BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT,
   Counter: () => Counter_default,
   Encoder: () => Encoder_default,
+  FigmaIntegration: () => FigmaIntegration_default,
   HapticLabs: () => HapticLabs_default,
   Metronome: () => Metronome_default,
   SignalTower: () => SignalTower_default,
@@ -45531,6 +45532,92 @@ var Encoder = class extends import_events2.default {
 };
 var Encoder_default = Encoder;
 
+// src/FigmaIntegration/FigmaIntegration.js
+var EventEmitter3 = require("events");
+var INTEGRATION_NAME = "figma";
+var FigmaIntegration = class extends EventEmitter3 {
+  constructor() {
+    super();
+    this.server = null;
+    this.integration = null;
+    BlokdotsSocketIOServer_default().then((server) => {
+      this.server = server;
+      this.integration = server.registerIntegration({
+        integrationName: INTEGRATION_NAME
+      });
+    });
+  }
+  sendReaction(message, shouldUpdateState = true) {
+    this.emit("reaction", message);
+    this.integration.ioNamespace.emit("reaction", message);
+    if (shouldUpdateState) {
+      this.emit("updateState", message);
+    }
+  }
+  cleanUp() {
+    this.server.unregisterIntegration({
+      integrationName: INTEGRATION_NAME
+    });
+  }
+  rotate(parameters) {
+    this.sendReaction({
+      target: parameters.layer,
+      reaction: "rotate",
+      parameters: { value: parameters.value, relation: parameters.relation },
+      timestamp: Date.now()
+    });
+  }
+  setText(parameters) {
+    this.sendReaction({
+      target: parameters.layer,
+      reaction: "setText",
+      parameters: { string: parameters.string },
+      timestamp: Date.now()
+    });
+  }
+  setPosition(parameters) {
+    this.sendReaction({
+      target: parameters.layer,
+      reaction: "setPosition",
+      parameters: {
+        x: parameters.x,
+        y: parameters.y,
+        relation: parameters.relation
+      },
+      timestamp: Date.now()
+    });
+  }
+  setOpacity(parameters) {
+    this.sendReaction({
+      target: parameters.layer,
+      reaction: "setOpacity",
+      parameters: { value: parseFloat(parameters.value) / 100 },
+      timestamp: Date.now()
+    });
+  }
+  setSize(parameters) {
+    this.sendReaction({
+      target: parameters.layer,
+      reaction: "setSize",
+      parameters: {
+        width: parameters.width,
+        height: parameters.height,
+        relation: parameters.relation
+      },
+      timestamp: Date.now()
+    });
+  }
+  setColor(parameters) {
+    this.sendReaction({
+      target: parameters.layer,
+      reaction: "setColor",
+      parameters: { value: parameters.value },
+      timestamp: Date.now()
+    });
+  }
+};
+var FigmaIntegration_default = FigmaIntegration;
+
 // src/HapticLabs/HapticLabs.js
 var import_johnny_five2 = __toModule(require_johnny_five());
 var HapticLabs = class {
@@ -45608,8 +45695,8 @@ var SignalTower = class extends import_events4.default {
 var SignalTower_default = SignalTower;
 
 // src/SocketIOIntegration/SocketIOIntegration.js
-var EventEmitter5 = require("events");
-var SocketIOIntegration = class extends EventEmitter5 {
+var EventEmitter6 = require("events");
+var SocketIOIntegration = class extends EventEmitter6 {
   constructor(integrationName = "blokdots", messageEventName = "blokdots", format = { message: "msg", value: "val" }) {
     super();
     this.integrationName = integrationName;
@@ -45713,6 +45800,7 @@ var utils_default = utils;
   BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT,
   Counter,
   Encoder,
+  FigmaIntegration,
   HapticLabs,
   Metronome,
   SignalTower,
