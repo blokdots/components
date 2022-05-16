@@ -55,6 +55,16 @@ class Encoder extends EventEmitter {
 
     this.waveform = "";
   }
+
+  cleanUp() {
+    if (this.upButton && this.upButton._events) {
+      this.upButton.removeAllListeners();
+    }
+
+    if (this.downButton && this.downButton._events) {
+      this.downButton.removeAllListeners();
+    }
+  }
 }
 
 export default Encoder;
