@@ -2,7 +2,7 @@ import EventEmitter from "events";
 import five from "johnny-five";
 
 class Encoder extends EventEmitter {
-  constructor({ slot, board, initialValue = 0 }) {
+  constructor({ slot, board, initialValue = 0, debounce = 7 }) {
     super();
     this.value = initialValue;
 
@@ -11,21 +11,23 @@ class Encoder extends EventEmitter {
 
     this.upButton = new five.Button({
       pin: slot,
-      holdtime: 500,
+      debounce,
       board,
     });
     this.downButton = new five.Button({
       pin: slot + 1,
-      holdtime: 500,
+      debounce,
       board,
     });
 
     this.upButton.on("up", () => {
+      console.log("Encoder up");
       this.waveform += "1";
       this.handleWaveform();
     });
 
     this.downButton.on("up", () => {
+      console.log("Encoder down");
       this.waveform += "0";
       this.handleWaveform();
     });
