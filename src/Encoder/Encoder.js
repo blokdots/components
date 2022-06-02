@@ -21,13 +21,11 @@ class Encoder extends EventEmitter {
     });
 
     this.upButton.on("up", () => {
-      console.log("Encoder up");
       this.waveform += "1";
       this.handleWaveform();
     });
 
     this.downButton.on("up", () => {
-      console.log("Encoder down");
       this.waveform += "0";
       this.handleWaveform();
     });
