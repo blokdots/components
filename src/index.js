@@ -7,6 +7,7 @@ export { default as Counter } from "./Counter";
 export { default as Encoder } from "./Encoder";
 export { default as FigmaIntegration } from "./FigmaIntegration";
 export { default as HapticLabs } from "./HapticLabs";
+export { default as Joystick } from "./Joystick";
 export { default as Metronome } from "./Metronome";
 export { default as SignalTower } from "./SignalTower";
 export { default as SocketIOIntegration } from "./SocketIOIntegration";
