@@ -28,7 +28,7 @@
     "prettier": "^2.3.2"
   },
   "dependencies": {
-    "johnny-five": "^2.1.0",
+    "johnny-five": "git://github.com/blokdots/johnny-five.git",
     "socket.io": "^4.4.1",
     "ws": "^7.5.3"
   }
