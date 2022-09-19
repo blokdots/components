@@ -12940,7 +12940,7 @@ var require_extension = __commonJS({
 var require_websocket2 = __commonJS({
   "node_modules/engine.io/node_modules/ws/lib/websocket.js"(exports, module2) {
     "use strict";
-    var EventEmitter9 = require("events");
+    var EventEmitter10 = require("events");
     var https = require("https");
     var http2 = require("http");
     var net = require("net");
@@ -12970,7 +12970,7 @@ var require_websocket2 = __commonJS({
     var subprotocolRegex = /^[!#$%&'*+\-.0-9A-Z^_`|a-z~]+$/;
     var protocolVersions = [8, 13];
     var closeTimeout = 30 * 1e3;
-    var WebSocket2 = class extends EventEmitter9 {
+    var WebSocket2 = class extends EventEmitter10 {
       constructor(address, protocols, options) {
         super();
         this._binaryType = BINARY_TYPES[0];
@@ -13749,7 +13749,7 @@ var require_subprotocol = __commonJS({
 var require_websocket_server = __commonJS({
   "node_modules/engine.io/node_modules/ws/lib/websocket-server.js"(exports, module2) {
     "use strict";
-    var EventEmitter9 = require("events");
+    var EventEmitter10 = require("events");
     var http2 = require("http");
     var https = require("https");
     var net = require("net");
@@ -13764,7 +13764,7 @@ var require_websocket_server = __commonJS({
     var RUNNING = 0;
     var CLOSING = 1;
     var CLOSED = 2;
-    var WebSocketServer = class extends EventEmitter9 {
+    var WebSocketServer = class extends EventEmitter10 {
       constructor(options, callback) {
         super();
         options = {
@@ -19699,7 +19699,7 @@ var require_extension2 = __commonJS({
 var require_websocket4 = __commonJS({
   "node_modules/ws/lib/websocket.js"(exports, module2) {
     "use strict";
-    var EventEmitter9 = require("events");
+    var EventEmitter10 = require("events");
     var https = require("https");
     var http2 = require("http");
     var net = require("net");
@@ -19724,7 +19724,7 @@ var require_websocket4 = __commonJS({
     var readyStates = ["CONNECTING", "OPEN", "CLOSING", "CLOSED"];
     var protocolVersions = [8, 13];
     var closeTimeout = 30 * 1e3;
-    var WebSocket2 = class extends EventEmitter9 {
+    var WebSocket2 = class extends EventEmitter10 {
       constructor(address, protocols, options) {
         super();
         this._binaryType = BINARY_TYPES[0];
@@ -20443,7 +20443,7 @@ var require_stream2 = __commonJS({
 var require_websocket_server2 = __commonJS({
   "node_modules/ws/lib/websocket-server.js"(exports, module2) {
     "use strict";
-    var EventEmitter9 = require("events");
+    var EventEmitter10 = require("events");
     var http2 = require("http");
     var https = require("https");
     var net = require("net");
@@ -20457,7 +20457,7 @@ var require_websocket_server2 = __commonJS({
     var RUNNING = 0;
     var CLOSING = 1;
     var CLOSED = 2;
-    var WebSocketServer = class extends EventEmitter9 {
+    var WebSocketServer = class extends EventEmitter10 {
       constructor(options, callback) {
         super();
         options = {
@@ -20691,9 +20691,9 @@ var require_ws2 = __commonJS({
 // node_modules/johnny-five/lib/mixins/emitter.js
 var require_emitter = __commonJS({
   "node_modules/johnny-five/lib/mixins/emitter.js"(exports, module2) {
-    var EventEmitter9 = require("events");
+    var EventEmitter10 = require("events");
     var wm = new WeakMap();
-    var Emitter = class extends EventEmitter9 {
+    var Emitter = class extends EventEmitter10 {
       pause() {
         wm.set(this, {
           ...this._events
@@ -20711,7 +20711,7 @@ var require_emitter = __commonJS({
         }
       }
     };
-    Object.assign(Emitter.prototype, EventEmitter9.prototype);
+    Object.assign(Emitter.prototype, EventEmitter10.prototype);
     module2.exports = Emitter;
   }
 });
@@ -22139,7 +22139,7 @@ var require_chalk = __commonJS({
 // node_modules/johnny-five/lib/mixins/collection.js
 var require_collection = __commonJS({
   "node_modules/johnny-five/lib/mixins/collection.js"(exports, module2) {
-    var EventEmitter9 = require("events");
+    var EventEmitter10 = require("events");
     var Emitter = require_emitter();
     var Collection = class {
       constructor(numsOrObjects) {
@@ -22312,7 +22312,7 @@ var require_collection = __commonJS({
         return this.length;
       }
     };
-    Object.assign(Collection.Emitter.prototype, EventEmitter9.prototype, Emitter.prototype);
+    Object.assign(Collection.Emitter.prototype, EventEmitter10.prototype, Emitter.prototype);
     Collection.prototype[Symbol.iterator] = Array.prototype[Symbol.iterator];
     module2.exports = Collection;
   }
@@ -24612,7 +24612,7 @@ var require_poller = __commonJS({
   "node_modules/@serialport/bindings/lib/poller.js"(exports, module2) {
     var debug = require_src();
     var logger = debug("serialport/bindings/poller");
-    var EventEmitter9 = require("events");
+    var EventEmitter10 = require("events");
     var PollerBindings = require_bindings()("bindings.node").Poller;
     var EVENTS = {
       UV_READABLE: 1,
@@ -24640,7 +24640,7 @@ var require_poller = __commonJS({
         this.emit("disconnect", null);
       }
     }
-    var Poller = class extends EventEmitter9 {
+    var Poller = class extends EventEmitter10 {
       constructor(fd, FDPoller = PollerBindings) {
         logger("Creating poller");
         super();
@@ -30684,7 +30684,7 @@ var require_withinable = __commonJS({
 var require_thermometer = __commonJS({
   "node_modules/johnny-five/lib/thermometer.js"(exports, module2) {
     var Board = require_board();
-    var EventEmitter9 = require("events");
+    var EventEmitter10 = require("events");
     var Withinable = require_withinable();
     var {
       toFixed,
@@ -30900,7 +30900,7 @@ var require_thermometer = __commonJS({
       drivers = activeDrivers.get(board);
       const key = `${driverName}_${options.pin}`;
       if (!drivers[key]) {
-        driver = new EventEmitter9();
+        driver = new EventEmitter10();
         Object.defineProperties(driver, Drivers[driverName]);
         driver.initialize(board, options);
         drivers[key] = driver;
@@ -44326,6 +44326,7 @@ __export(exports, {
   Encoder: () => Encoder_default,
   FigmaIntegration: () => FigmaIntegration_default,
   HapticLabs: () => HapticLabs_default,
+  InvertableSensor: () => InvertableSensor_default,
   Joystick: () => Joystick_default,
   Metronome: () => Metronome_default,
   SignalTower: () => SignalTower_default,
@@ -44761,13 +44762,39 @@ var HapticLabs = class {
 };
 var HapticLabs_default = HapticLabs;
 
-// src/Joystick/Joystick.js
+// src/InvertableSensor/InvertableSensor.js
 var import_events3 = __toModule(require("events"));
 var import_johnny_five3 = __toModule(require_johnny_five());
-var Joystick = class extends import_events3.default {
+var InvertableSensor = class extends import_events3.default {
+  constructor({ invert = false, ...componentProps }) {
+    super();
+    this.j5Object = new import_johnny_five3.default.Sensor(componentProps);
+    this.invert = invert;
+    this.j5Object.on("change", (v) => {
+      this.emit("change", this.transformValue(v));
+    });
+  }
+  transformValue = (value) => {
+    if (this.invert) {
+      value = 1023 - value;
+    }
+    return value;
+  };
+  cleanUp() {
+    if (this.j5Object && this.j5Object._events) {
+      this.j5Object.removeAllListeners();
+    }
+  }
+};
+var InvertableSensor_default = InvertableSensor;
+
+// src/Joystick/Joystick.js
+var import_events4 = __toModule(require("events"));
+var import_johnny_five4 = __toModule(require_johnny_five());
+var Joystick = class extends import_events4.default {
   constructor({ slot, board, invertX = false, invertY = false }) {
     super();
-    this.j5Object = new import_johnny_five3.default.Joystick({
+    this.j5Object = new import_johnny_five4.default.Joystick({
       pins: [slot, `A${parseInt(slot.substring(1)) + 1}`],
       board
     });
@@ -44782,8 +44809,8 @@ var Joystick = class extends import_events3.default {
     let pressed = 0;
     let x = Math.round(value.x * 100);
     let y = Math.round(value.y * 100);
-    x = import_johnny_five3.default.Fn.constrain(x, -50, 50);
-    y = import_johnny_five3.default.Fn.constrain(y, -50, 50);
+    x = import_johnny_five4.default.Fn.constrain(x, -50, 50);
+    y = import_johnny_five4.default.Fn.constrain(y, -50, 50);
     if (this.invertX)
       x *= -1;
     if (this.invertY)
@@ -44805,8 +44832,8 @@ var Joystick = class extends import_events3.default {
 var Joystick_default = Joystick;
 
 // src/Metronome/Metronome.js
-var import_events4 = __toModule(require("events"));
-var Metronome = class extends import_events4.default {
+var import_events5 = __toModule(require("events"));
+var Metronome = class extends import_events5.default {
   constructor(frequency = 1e3) {
     super();
     this.frequency = frequency;
@@ -44848,8 +44875,8 @@ var Metronome = class extends import_events4.default {
 var Metronome_default = Metronome;
 
 // src/SignalTower/SignalTower.js
-var import_events5 = __toModule(require("events"));
-var SignalTower = class extends import_events5.default {
+var import_events6 = __toModule(require("events"));
+var SignalTower = class extends import_events6.default {
   constructor() {
     super();
     this.value = void 0;
@@ -44862,8 +44889,8 @@ var SignalTower = class extends import_events5.default {
 var SignalTower_default = SignalTower;
 
 // src/SocketIOIntegration/SocketIOIntegration.js
-var EventEmitter7 = require("events");
-var SocketIOIntegration = class extends EventEmitter7 {
+var EventEmitter8 = require("events");
+var SocketIOIntegration = class extends EventEmitter8 {
   constructor(integrationName = "blokdots", messageEventName = "blokdots", format = { message: "msg", value: "val" }) {
     super();
     this.integrationName = integrationName;
@@ -44921,8 +44948,8 @@ var SocketIOIntegration = class extends EventEmitter7 {
 var SocketIOIntegration_default = SocketIOIntegration;
 
 // src/Timer/Timer.js
-var import_events6 = __toModule(require("events"));
-var Timer = class extends import_events6.default {
+var import_events7 = __toModule(require("events"));
+var Timer = class extends import_events7.default {
   constructor(value = 0) {
     super();
     this.value = value;
@@ -44969,6 +44996,7 @@ var utils_default = utils;
   Encoder,
   FigmaIntegration,
   HapticLabs,
+  InvertableSensor,
   Joystick,
   Metronome,
   SignalTower,
