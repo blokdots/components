@@ -88,6 +88,18 @@
   resolved "https://registry.yarnpkg.com/@types/cors/-/cors-2.8.12.tgz#6b2c510a7ad7039e98e7b8d3d6598f4359e5c080"
   integrity sha512-vt+kDhq/M2ayberEtJcIN/hxXy1Pk+59g2FV/ZQceeaTyCtCucjL2Q7FXlFjtWn4n15KCr1NE2lNNFhp0lEThw==
 
+"@types/johnny-five@*":
+  version "1.3.7"
+  resolved "https://registry.yarnpkg.com/@types/johnny-five/-/johnny-five-1.3.7.tgz#e77ac8f1034e19f61552cceaaad272efdecf7f9c"
+  integrity sha512-a5KXfuUWebkMlv2LHkGujhjq1hEZkz1tvacdt8G9lge2eX9jUGE6tgXGux+mqGvcWccuSimxaa7IVe1UO15QQA==
+  dependencies:
+    "@types/node" "*"
+
+"@types/node@*":
+  version "18.11.18"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.11.18.tgz#8dfb97f0da23c2293e554c5a50d61ef134d7697f"
+  integrity sha512-DHQpWGjyQKSHj3ebjFI/wRKcqQcdR+MoFBygntYOZytCqNfkd2ZC4ARDJ2DQqhjH5p85Nnd3jhUJIXrszFX/JA==
+
 "@types/node@>=10.0.0":
   version "17.0.13"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.13.tgz#5ed7ed7c662948335fcad6c412bb42d99ea754e3"
@@ -399,10 +411,9 @@ isarray@~1.0.0:
   resolved "https://registry.yarnpkg.com/isarray/-/isarray-1.0.0.tgz#bb935d48582cba168c06834957a54a3e07124f11"
   integrity sha1-u5NdSFgsuhaMBoNJV6VKPgcSTxE=
 
-johnny-five@^2.1.0:
+"johnny-five@git://github.com/blokdots/johnny-five.git":
   version "2.1.0"
-  resolved "https://registry.yarnpkg.com/johnny-five/-/johnny-five-2.1.0.tgz#12b70d41f716e9fc275308e9e960c4ba2b66e005"
-  integrity sha512-0Z6qa9Tlt7vUShW8gzewXTJgckhMfbaM7ZhbApOhkAW0PrLIOQms/DjOptE/oitE70tD3O8YJ7OlNSMe+en2DQ==
+  resolved "git://github.com/blokdots/johnny-five.git#16c44915772e4143789697cf07f34389edf16940"
   dependencies:
     chalk "2.1.0"
     color-convert "~1.2.2"
@@ -509,6 +520,19 @@ object-assign@^4, object-assign@^4.1.0:
   resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
   integrity sha1-IQmtx5ZYh8/AXLvUQsrIv7s2CGM=
 
+oled-font-5x7@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/oled-font-5x7/-/oled-font-5x7-1.0.3.tgz#93ecf6b156b9f77691c9c746a36e39abe51788e9"
+  integrity sha512-l25WvKft8CgXYxtaqKdYrAS1P91rnUUUIiOXojAOvjNCsfFzIl1aEsE2JuaRgMh1Euo7slm5lX0w+1qNkL8PpQ==
+
+"oled-js@git://github.com/blokdots/oled-js#blokdots":
+  version "5.1.2"
+  resolved "git://github.com/blokdots/oled-js#bb718f5ff340106ce4a834fb63c5bd34b0b3e28d"
+  dependencies:
+    "@types/johnny-five" "*"
+  optionalDependencies:
+    qr-image "^3.2.0"
+
 once@^1.3.1, once@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/once/-/once-1.4.0.tgz#583b1aa775961d4b113ac17d9c50baef9dd76bd1"
@@ -554,6 +578,11 @@ pump@^3.0.0:
   dependencies:
     end-of-stream "^1.1.0"
     once "^1.3.1"
+
+qr-image@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/qr-image/-/qr-image-3.2.0.tgz#9fa8295beae50c4a149cf9f909a1db464a8672e8"
+  integrity sha512-rXKDS5Sx3YipVsqmlMJsJsk6jXylEpiHRC2+nJy66fxA5ExYyGa4PqwteW69SaVmAb2OQ18HbYriT7cGQMbduw==
 
 rc@^1.2.7:
   version "1.2.8"
