@@ -20465,6 +20465,32 @@ var require_websocket4 = __commonJS({
         opts.socketPath = parts[0];
         opts.path = parts[1];
       }
+      if (opts.followRedirects) {
+        if (websocket._redirects === 0) {
+          websocket._originalUnixSocket = isUnixSocket;
+          websocket._originalSecure = isSecure;
+          websocket._originalHostOrSocketPath = isUnixSocket ? opts.socketPath : parsedUrl.host;
+          const headers = options && options.headers;
+          options = { ...options, headers: {} };
+          if (headers) {
+            for (const [key2, value] of Object.entries(headers)) {
+              options.headers[key2.toLowerCase()] = value;
+            }
+          }
+        } else {
+          const isSameHost = isUnixSocket ? websocket._originalUnixSocket ? opts.socketPath === websocket._originalHostOrSocketPath : false : websocket._originalUnixSocket ? false : parsedUrl.host === websocket._originalHostOrSocketPath;
+          if (!isSameHost || websocket._originalSecure && !isSecure) {
+            delete opts.headers.authorization;
+            delete opts.headers.cookie;
+            if (!isSameHost)
+              delete opts.headers.host;
+            opts.auth = void 0;
+          }
+        }
+        if (opts.auth && !options.headers.authorization) {
+          options.headers.authorization = "Basic " + Buffer.from(opts.auth).toString("base64");
+        }
+      }
       let req = websocket._req = get(opts);
       if (opts.timeout) {
         req.on("timeout", () => {
@@ -20503,6 +20529,10 @@ var require_websocket4 = __commonJS({
         if (websocket.readyState !== WebSocket2.CONNECTING)
           return;
         req = websocket._req = null;
+        if (res.headers.upgrade.toLowerCase() !== "websocket") {
+          abortHandshake(websocket, socket, "Invalid Upgrade header");
+          return;
+        }
         const digest = createHash("sha1").update(key + GUID).digest("base64");
         if (res.headers["sec-websocket-accept"] !== digest) {
           abortHandshake(websocket, socket, "Invalid Sec-WebSocket-Accept header");
