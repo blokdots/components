@@ -1,8 +1,24 @@
 import EventEmitter from "events";
-import five from "johnny-five";
+import five, { Board } from "johnny-five";
 
 class Encoder extends EventEmitter {
-  constructor({ slot, board, initialValue = 0, debounce = 7 }) {
+  value: number;
+  waveform: string;
+  waveformTimeout?: NodeJS.Timeout;
+  upButton: five.Button;
+  downButton: five.Button;
+
+  constructor({
+    slot,
+    board,
+    initialValue = 0,
+    debounce = 7,
+  }: {
+    slot: number;
+    board: Board;
+    initialValue?: number;
+    debounce?: number;
+  }) {
     super();
     this.value = initialValue;
 
@@ -11,11 +27,13 @@ class Encoder extends EventEmitter {
 
     this.upButton = new five.Button({
       pin: slot,
+      // @ts-ignore — There is an issue with the types for the johnny-five library
       debounce,
       board,
     });
     this.downButton = new five.Button({
       pin: slot + 1,
+      // @ts-ignore — There is an issue with the types for the johnny-five library
       debounce,
       board,
     });
@@ -57,11 +75,15 @@ class Encoder extends EventEmitter {
   }
 
   cleanUp() {
+    // @ts-ignore — There is an issue with the types for the johnny-five library
     if (this.upButton && this.upButton._events) {
+      // @ts-ignore — There is an issue with the types for the johnny-five library
       this.upButton.removeAllListeners();
     }
 
+    // @ts-ignore — There is an issue with the types for the johnny-five library
     if (this.downButton && this.downButton._events) {
+      // @ts-ignore — There is an issue with the types for the johnny-five library
       this.downButton.removeAllListeners();
     }
   }

@@ -19,7 +19,22 @@ class FigmaIntegration extends EventEmitter {
     });
   }
 
-  sendReaction(message, shouldUpdateState = true) {
+  sendReaction(
+    message: {
+      target: string;
+      reaction:
+        | "rotate"
+        | "setText"
+        | "setPosition"
+        | "setRotation"
+        | "setSize"
+        | "setOpacity"
+        | "setColor";
+      parameters: any;
+      timestamp: number;
+    },
+    shouldUpdateState = true
+  ) {
     this.emit("reaction", message);
 
     this.integration.ioNamespace.emit("reaction", message);
@@ -35,7 +50,7 @@ class FigmaIntegration extends EventEmitter {
     });
   }
 
-  rotate(parameters) {
+  rotate(parameters: { layer: string; value: number; relation: string }) {
     this.sendReaction({
       target: parameters.layer,
       reaction: "rotate",
@@ -44,7 +59,7 @@ class FigmaIntegration extends EventEmitter {
     });
   }
 
-  setText(parameters) {
+  setText(parameters: { layer: string; string: string }) {
     this.sendReaction({
       target: parameters.layer,
       reaction: "setText",
@@ -53,7 +68,12 @@ class FigmaIntegration extends EventEmitter {
     });
   }
 
-  setPosition(parameters) {
+  setPosition(parameters: {
+    layer: string;
+    x: number;
+    y: number;
+    relation: string;
+  }) {
     this.sendReaction({
       target: parameters.layer,
       reaction: "setPosition",
@@ -66,16 +86,21 @@ class FigmaIntegration extends EventEmitter {
     });
   }
 
-  setOpacity(parameters) {
+  setOpacity(parameters: { layer: string; value: number }) {
     this.sendReaction({
       target: parameters.layer,
       reaction: "setOpacity",
-      parameters: { value: parseFloat(parameters.value) / 100 },
+      parameters: { value: parameters.value / 100 },
       timestamp: Date.now(),
     });
   }
 
-  setSize(parameters) {
+  setSize(parameters: {
+    layer: string;
+    width: number;
+    height: number;
+    relation: string;
+  }) {
     this.sendReaction({
       target: parameters.layer,
       reaction: "setSize",
@@ -88,7 +113,7 @@ class FigmaIntegration extends EventEmitter {
     });
   }
 
-  setColor(parameters) {
+  setColor(parameters: { layer: string; value: string }) {
     this.sendReaction({
       target: parameters.layer,
       reaction: "setColor",
