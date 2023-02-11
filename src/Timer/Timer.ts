@@ -1,11 +1,14 @@
 import EventEmitter from "events";
 
 class Timer extends EventEmitter {
+  value: number;
+  interval?: NodeJS.Timeout;
+
   constructor(value = 0) {
     super();
     this.value = value;
 
-    this.interval = undefined;
+    this.interval;
   }
 
   startInterval() {
@@ -40,7 +43,7 @@ class Timer extends EventEmitter {
     this.emit("reset");
   }
 
-  setTo(value) {
+  setTo(value: number) {
     this.value = value;
     this.emit("change", this.value);
   }

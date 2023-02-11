@@ -1,8 +1,18 @@
-import { default as getBlokdotsSocketIOServer } from "../BlokdotsSocketIOServer";
+import {
+  default as getBlokdotsSocketIOServer,
+  BlokdotsSocketIOServer,
+  Integration,
+} from "../BlokdotsSocketIOServer";
 
-const EventEmitter = require("events");
+import EventEmitter from "events";
 
 class SocketIOIntegration extends EventEmitter {
+  integrationName: string;
+  messageEventName: string;
+  format: { message: string; value: string };
+  server?: BlokdotsSocketIOServer;
+  integration?: Integration;
+
   constructor(
     integrationName = "blokdots",
     messageEventName = "blokdots",
@@ -14,8 +24,8 @@ class SocketIOIntegration extends EventEmitter {
     this.messageEventName = messageEventName;
     this.format = format;
 
-    this.server = null;
-    this.integration = null;
+    this.server;
+    this.integration;
 
     this.onMessage = this.onMessage.bind(this);
 
@@ -33,7 +43,7 @@ class SocketIOIntegration extends EventEmitter {
     });
   }
 
-  onMessage(data) {
+  onMessage(data: { [key: string]: any }) {
     const message = {
       message: data[this.format.message],
       value: data[this.format.value],
@@ -44,12 +54,15 @@ class SocketIOIntegration extends EventEmitter {
     this.emit("updateState", message);
   }
 
-  send(message, shouldUpdateState = true) {
+  send(
+    message: { message: string; value?: any; direction: "in" | "out" },
+    shouldUpdateState = true
+  ) {
     if (!message.direction) message.direction = "out";
 
     this.emit("send", message);
 
-    this.integration.ioNamespace.emit(this.messageEventName, {
+    this.integration?.ioNamespace.emit(this.messageEventName, {
       [this.format.message]: message.message,
       [this.format.value]: message.value,
     });
@@ -60,7 +73,7 @@ class SocketIOIntegration extends EventEmitter {
   }
 
   cleanUp() {
-    this.server.unregisterIntegration({
+    this.server?.unregisterIntegration({
       integrationName: this.integrationName,
       handlers: [
         {

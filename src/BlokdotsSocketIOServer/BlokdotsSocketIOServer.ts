@@ -1,4 +1,4 @@
-import { Server } from "socket.io";
+import { Server, Socket, Namespace, DisconnectReason } from "socket.io";
 import WebSocket from "ws";
 import { networkInterfaces } from "os";
 
@@ -9,12 +9,75 @@ export const BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT = 8777;
 export const getBlokdotsSocketIOServerAddress = () => {
   const currentIP = Object.values(networkInterfaces())
     .flat()
-    .find((i) => i.family === "IPv4" && !i.internal).address;
+    .find((i) => i?.family === "IPv4" && !i.internal)?.address;
+
+  if (!currentIP) return null;
 
   return `http://${currentIP}:${BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT}`;
 };
 
-class BlokdotsSocketIOServer {
+type OnClientConnectListener = ({
+  integration,
+  connections,
+}: {
+  integration: string;
+  connections: number;
+}) => void;
+
+type OnClientDisconnectListener = ({
+  integration,
+  connections,
+  reason,
+}: {
+  integration: string;
+  connections: number;
+  reason: DisconnectReason;
+}) => void;
+
+type Handler = {
+  eventName: string;
+  callback: (...args: any[]) => void;
+};
+
+export interface Integration {
+  id: string;
+  url: string;
+  connections: number;
+  handlers: Array<Handler>;
+  onClientConnect: Array<OnClientConnectListener>;
+  onClientDisconnect: Array<OnClientDisconnectListener>;
+  ioNamespace: Namespace;
+}
+
+type IntegrationInfo = Omit<
+  Integration,
+  | "ioNamespace"
+  | "handlers"
+  | "onClientDisconnect"
+  | "onClientConnect"
+  | "ioNamespace"
+>;
+
+interface ServerToClientEvents {
+  info: () => { url: string; integrations: IntegrationInfo };
+}
+
+interface ClientToServerEvents {
+  requestInfo: () => void;
+  disconnect: () => void;
+  // [key: string]: () => void;
+}
+
+interface InterServerEvents {}
+
+interface SocketData {}
+
+export class BlokdotsSocketIOServer {
+  io: Server | null;
+  activeIntegrations: {
+    [key: string]: Integration;
+  };
+
   constructor() {
     this.activeIntegrations = {};
     this.io = null;
@@ -25,14 +88,19 @@ class BlokdotsSocketIOServer {
   async init() {
     return new Promise((resolve) => {
       this.start();
-      resolve();
+      resolve(null);
     });
   }
 
   start() {
     const httpServer = setupHttpServer();
 
-    this.io = new Server(httpServer, {
+    this.io = new Server<
+      ClientToServerEvents,
+      ServerToClientEvents,
+      InterServerEvents,
+      SocketData
+    >(httpServer, {
       wsEngine: WebSocket.Server,
       pingInterval: 5000,
       pingTimeout: 5000,
@@ -58,12 +126,19 @@ class BlokdotsSocketIOServer {
     });
   }
 
-  emitInfo(socket) {
+  emitInfo(socket?: Socket) {
+    if (!this.io) return;
+
     // If no specific socket requested it, we send it to all
     // sockets in the general namespace
-    if (!socket) socket = this.io.sockets;
+    let socketsToEmitTo: Socket | Namespace;
+    if (!socket) {
+      socketsToEmitTo = this.io.sockets;
+    } else {
+      socketsToEmitTo = socket;
+    }
 
-    socket.emit("info", {
+    socketsToEmitTo.emit("info", {
       url: getBlokdotsSocketIOServerAddress(),
       integrations: Object.values(this.activeIntegrations).map((i) => ({
         id: i.id,
@@ -73,8 +148,9 @@ class BlokdotsSocketIOServer {
     });
   }
 
-  stop(callback) {
-    this.io.closeServer(callback);
+  stop(callback: () => void) {
+    if (!this.io) return;
+    this.io.close(callback);
   }
 
   registerIntegration({
@@ -82,7 +158,14 @@ class BlokdotsSocketIOServer {
     handlers = [],
     onClientConnect,
     onClientDisconnect,
+  }: {
+    integrationName: string;
+    handlers?: Array<Handler>;
+    onClientConnect?: OnClientConnectListener;
+    onClientDisconnect?: OnClientDisconnectListener;
   }) {
+    if (!this.io) return;
+
     let integration = this.activeIntegrations[integrationName];
 
     // The namespace already exists
@@ -108,6 +191,7 @@ class BlokdotsSocketIOServer {
         ioNamespace: this.io.of("/" + integrationName),
         onClientConnect: onClientConnect ? [onClientConnect] : [],
         onClientDisconnect: onClientDisconnect ? [onClientDisconnect] : [],
+        connections: 0,
       };
 
       integration = this.activeIntegrations[integrationName];
@@ -172,6 +256,11 @@ class BlokdotsSocketIOServer {
     handlers = [],
     onClientConnect,
     onClientDisconnect,
+  }: {
+    integrationName: string;
+    handlers?: Array<Handler>;
+    onClientConnect?: OnClientConnectListener;
+    onClientDisconnect?: OnClientConnectListener;
   }) {
     let integration = this.activeIntegrations[integrationName];
 
@@ -210,15 +299,15 @@ class BlokdotsSocketIOServer {
   }
 }
 
-let blokdotsSocketIOServer = null;
+let blokdotsSocketIOServer: BlokdotsSocketIOServer | null = null;
 
 const getBlokdotsSocketIOServer = async () => {
-  return new Promise((resolve) => {
+  return new Promise((resolve: (v: BlokdotsSocketIOServer) => void) => {
     // If the server hasn’t been setup yet, do that, then resolve the promise
     if (blokdotsSocketIOServer === null) {
       blokdotsSocketIOServer = new BlokdotsSocketIOServer();
       blokdotsSocketIOServer.init().then(() => {
-        resolve(blokdotsSocketIOServer);
+        resolve(blokdotsSocketIOServer as BlokdotsSocketIOServer);
       });
     } else {
       // Else resolve the promise with the existing server immediately

@@ -1,6 +1,8 @@
 import EventEmitter from "events";
 
 class Counter extends EventEmitter {
+  value: number;
+
   constructor(initialValue = 0) {
     super();
     this.value = initialValue;
@@ -16,7 +18,7 @@ class Counter extends EventEmitter {
     this.emit("change", this.value);
   }
 
-  setCountTo(value) {
+  setCountTo(value: number) {
     this.value = value;
     this.emit("change", this.value);
   }

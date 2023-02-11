@@ -1,11 +1,12 @@
 import EventEmitter from "events";
 
 class Metronome extends EventEmitter {
+  frequency: number;
+  interval?: NodeJS.Timeout;
+
   constructor(frequency = 1000) {
     super();
     this.frequency = frequency;
-
-    this.interval = undefined;
   }
 
   start() {
@@ -32,7 +33,7 @@ class Metronome extends EventEmitter {
     this.emit("stop");
   }
 
-  setFrequency(frequency) {
+  setFrequency(frequency: number) {
     if (this.frequency !== frequency) {
       this.frequency = frequency;
 
