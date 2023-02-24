@@ -36,7 +36,6 @@ class Joystick extends EventEmitter {
 
     this.previousX;
 
-    // @ts-ignore — There is an issue with the types for the johnny-five library
     this.j5Object.on("change", (v: { x: number; y: number }) => {
       this.emit("change", this.transformValue(v));
     });
@@ -65,11 +64,7 @@ class Joystick extends EventEmitter {
   };
 
   cleanUp() {
-    // @ts-ignore — There is an issue with the types for the johnny-five library
-    if (this.j5Object && this.j5Object._events) {
-      // @ts-ignore — There is an issue with the types for the johnny-five library
-      this.j5Object.removeAllListeners();
-    }
+    this.j5Object.removeAllListeners?.();
   }
 }
 

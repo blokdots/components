@@ -141,9 +141,11 @@ declare class HapticLabs {
 declare class InvertableSensor extends EventEmitter$1 {
     j5Object: five.Sensor;
     invert: boolean;
-    constructor({ invert, pin, ...componentProps }: {
+    constructor({ invert, pin, board, threshold, ...componentProps }: {
         invert?: boolean;
+        threshold?: number;
         pin: string | number;
+        board: five.Board;
     });
     transformValue: (value: number) => number;
     cleanUp(): void;

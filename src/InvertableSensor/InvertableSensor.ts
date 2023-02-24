@@ -8,14 +8,23 @@ class InvertableSensor extends EventEmitter {
   constructor({
     invert = false,
     pin,
+    board,
+    threshold,
     ...componentProps
   }: {
     invert?: boolean;
+    threshold?: number;
     pin: string | number;
+    board: five.Board;
   }) {
     super();
 
-    this.j5Object = new five.Sensor({ pin, ...componentProps });
+    this.j5Object = new five.Sensor({
+      pin,
+      board,
+      threshold,
+      ...componentProps,
+    });
 
     this.invert = invert;
 
@@ -33,9 +42,7 @@ class InvertableSensor extends EventEmitter {
   };
 
   cleanUp() {
-    // if (this.j5Object && this.j5Object._events) {
-    //   this.j5Object.removeAllListeners();
-    // }
+    this.j5Object.removeAllListeners?.();
   }
 }
 
