@@ -5,9 +5,9 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "esbuild ./src/index.js --platform=node --loader:.ico=dataurl --loader:.html=dataurl --loader:.svg=dataurl --loader:.css=dataurl --loader:.min.js=dataurl --bundle --outfile=dist/index.js",
+    "build": "esbuild ./src/index.js --platform=node --loader:.ico=dataurl --loader:.html=dataurl --loader:.svg=dataurl --loader:.css=dataurl --loader:.min.js=dataurl --bundle --outfile=dist/index.js --external:johnny-five --external:socket.io --external:ws",
     "build:types": "tsc --emitDeclarationOnly && rollup -c",
-    "dev": "esbuild ./src/index.js --platform=node --loader:.ico=dataurl --loader:.html=dataurl --loader:.svg=dataurl --loader:.css=dataurl --loader:.min.js=dataurl --bundle --watch --outfile=dist/index.js",
+    "dev": "esbuild ./src/index.js --platform=node --loader:.ico=dataurl --loader:.html=dataurl --loader:.svg=dataurl --loader:.css=dataurl --loader:.min.js=dataurl --bundle --watch --outfile=dist/index.js --external:johnny-five --external:socket.io --external:ws",
     "prettier": "prettier --write 'src/**/*.{t,j}s'"
   },
   "repository": {
@@ -29,16 +29,21 @@
     "@types/qr-image": "^3.2.5",
     "@types/ws": "^8.5.4",
     "esbuild": "^0.12.15",
+    "johnny-five": "git://github.com/blokdots/johnny-five.git#serialport10",
     "prettier": "^2.3.2",
     "rollup": "^3.12.0",
     "rollup-plugin-dts": "^5.1.1",
-    "typescript": "^4.9.5"
+    "socket.io": "^4.4.1",
+    "typescript": "^4.9.5",
+    "ws": "^7.5.3"
   },
   "dependencies": {
-    "johnny-five": "git://github.com/blokdots/johnny-five.git#serialport10",
     "oled-font-5x7": "^1.0.3",
     "oled-js": "git://github.com/blokdots/oled-js#blokdots",
-    "qr-image": "^3.2.0",
+    "qr-image": "^3.2.0"
+  },
+  "peerDependencies": {
+    "johnny-five": "git://github.com/blokdots/johnny-five.git#serialport10",
     "socket.io": "^4.4.1",
     "ws": "^7.5.3"
   }
