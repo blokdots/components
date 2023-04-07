@@ -9,6 +9,7 @@ export { default as FigmaIntegration } from "./FigmaIntegration";
 export { default as HapticLabs } from "./HapticLabs";
 export { default as InvertableSensor } from "./InvertableSensor";
 export { default as Joystick } from "./Joystick";
+export { default as LEDStrip } from "./LEDStrip";
 export { default as Metronome } from "./Metronome";
 export {
   default as Oled,
