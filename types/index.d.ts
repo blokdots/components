@@ -2,9 +2,11 @@ export { default as getBlokdotsSocketIOServer, getBlokdotsSocketIOServerAddress,
 export { default as Counter } from "./Counter";
 export { default as Encoder } from "./Encoder";
 export { default as FigmaIntegration } from "./FigmaIntegration";
+export type { ReactionMessage as FigmaReactionMessage } from "./FigmaIntegration";
 export { default as HapticLabs } from "./HapticLabs";
 export { default as InvertableSensor } from "./InvertableSensor";
 export { default as Joystick } from "./Joystick";
+export { default as LEDStrip } from "./LEDStrip";
 export { default as Metronome } from "./Metronome";
 export { default as Oled, OLED_WIDTH, OLED_HEIGHT, addTextToBuffer, } from "./OLED";
 export { default as SignalTower } from "./SignalTower";

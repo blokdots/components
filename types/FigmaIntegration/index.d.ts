@@ -1,1 +1,1 @@
-export { default } from "./FigmaIntegration.js";
+export { default, ReactionMessage } from "./FigmaIntegration.js";

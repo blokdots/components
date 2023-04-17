@@ -4,6 +4,20 @@ const EventEmitter = require("events");
 
 const INTEGRATION_NAME = "figma";
 
+export type ReactionMessage = {
+  target: string;
+  reaction:
+    | "rotate"
+    | "setText"
+    | "setPosition"
+    | "setRotation"
+    | "setSize"
+    | "setOpacity"
+    | "setColor";
+  parameters: any;
+  timestamp: number;
+};
+
 class FigmaIntegration extends EventEmitter {
   constructor() {
     super();
@@ -19,22 +33,7 @@ class FigmaIntegration extends EventEmitter {
     });
   }
 
-  sendReaction(
-    message: {
-      target: string;
-      reaction:
-        | "rotate"
-        | "setText"
-        | "setPosition"
-        | "setRotation"
-        | "setSize"
-        | "setOpacity"
-        | "setColor";
-      parameters: any;
-      timestamp: number;
-    },
-    shouldUpdateState = true
-  ) {
+  sendReaction(message: ReactionMessage, shouldUpdateState = true) {
     this.emit("reaction", message);
 
     this.integration.ioNamespace.emit("reaction", message);

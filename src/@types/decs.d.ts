@@ -4,3 +4,5 @@ declare module "*.html";
 declare module "*.ico";
 declare module "*.css";
 declare module "*/socket-io.min.js";
+
+declare module "node-pixel";
