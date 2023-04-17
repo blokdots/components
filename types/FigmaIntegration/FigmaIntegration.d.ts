@@ -1,12 +1,13 @@
 declare const EventEmitter: any;
+export type ReactionMessage = {
+    target: string;
+    reaction: "rotate" | "setText" | "setPosition" | "setRotation" | "setSize" | "setOpacity" | "setColor";
+    parameters: any;
+    timestamp: number;
+};
 declare class FigmaIntegration extends EventEmitter {
     constructor();
-    sendReaction(message: {
-        target: string;
-        reaction: "rotate" | "setText" | "setPosition" | "setRotation" | "setSize" | "setOpacity" | "setColor";
-        parameters: any;
-        timestamp: number;
-    }, shouldUpdateState?: boolean): void;
+    sendReaction(message: ReactionMessage, shouldUpdateState?: boolean): void;
     cleanUp(): void;
     rotate(parameters: {
         layer: string;

@@ -3,6 +3,7 @@ import * as socket_io_dist_typed_events from 'socket.io/dist/typed-events';
 import { Namespace, Server, Socket, DisconnectReason } from 'socket.io';
 import EventEmitter$1 from 'events';
 import five, { Board } from 'johnny-five';
+import pixel from 'node-pixel';
 import Oled, { Color, Pixel } from 'oled-js';
 
 declare const BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT = 8777;
@@ -87,14 +88,15 @@ declare class Encoder extends EventEmitter$1 {
 }
 
 declare const EventEmitter: any;
+type ReactionMessage = {
+    target: string;
+    reaction: "rotate" | "setText" | "setPosition" | "setRotation" | "setSize" | "setOpacity" | "setColor";
+    parameters: any;
+    timestamp: number;
+};
 declare class FigmaIntegration extends EventEmitter {
     constructor();
-    sendReaction(message: {
-        target: string;
-        reaction: "rotate" | "setText" | "setPosition" | "setRotation" | "setSize" | "setOpacity" | "setColor";
-        parameters: any;
-        timestamp: number;
-    }, shouldUpdateState?: boolean): void;
+    sendReaction(message: ReactionMessage, shouldUpdateState?: boolean): void;
     cleanUp(): void;
     rotate(parameters: {
         layer: string;
@@ -172,6 +174,14 @@ declare class Joystick extends EventEmitter$1 {
         y: number;
     }) => JoystickValue;
     cleanUp(): void;
+}
+
+declare class LEDStrip extends pixel.Strip {
+    constructor({ pin, board, ledCount, }: {
+        pin: number;
+        board: any;
+        ledCount?: number;
+    });
 }
 
 declare class Metronome extends EventEmitter$1 {
@@ -253,4 +263,4 @@ declare const utils: {
     rgbToHex: (r: number, g: number, b: number) => string;
 };
 
-export { BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT, Counter, Encoder, FigmaIntegration, HapticLabs, InvertableSensor, Joystick, Metronome, OLED_HEIGHT, OLED_WIDTH, OLED as Oled, SignalTower, SocketIOIntegration, Timer, addTextToBuffer, getBlokdotsSocketIOServer, getBlokdotsSocketIOServerAddress, utils };
+export { BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT, Counter, Encoder, FigmaIntegration, ReactionMessage as FigmaReactionMessage, HapticLabs, InvertableSensor, Joystick, LEDStrip, Metronome, OLED_HEIGHT, OLED_WIDTH, OLED as Oled, SignalTower, SocketIOIntegration, Timer, addTextToBuffer, getBlokdotsSocketIOServer, getBlokdotsSocketIOServerAddress, utils };
