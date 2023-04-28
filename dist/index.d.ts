@@ -261,6 +261,7 @@ declare class Timer extends EventEmitter$1 {
 
 declare const utils: {
     rgbToHex: (r: number, g: number, b: number) => string;
+    hexToRgb: (hex: string) => [number, number, number] | null;
 };
 
 export { BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT, Counter, Encoder, FigmaIntegration, ReactionMessage as FigmaReactionMessage, HapticLabs, InvertableSensor, Joystick, LEDStrip, Metronome, OLED_HEIGHT, OLED_WIDTH, OLED as Oled, SignalTower, SocketIOIntegration, Timer, addTextToBuffer, getBlokdotsSocketIOServer, getBlokdotsSocketIOServerAddress, utils };
