@@ -96,7 +96,7 @@ type ReactionMessage = {
 };
 declare class FigmaIntegration extends EventEmitter {
     constructor();
-    sendReaction(message: ReactionMessage, shouldUpdateState?: boolean): void;
+    sendReaction(message: ReactionMessage, shouldEmitSentReaction?: boolean): void;
     cleanUp(): void;
     rotate(parameters: {
         layer: string;
