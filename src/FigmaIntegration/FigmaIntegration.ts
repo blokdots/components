@@ -33,13 +33,13 @@ class FigmaIntegration extends EventEmitter {
     });
   }
 
-  sendReaction(message: ReactionMessage, shouldUpdateState = true) {
+  sendReaction(message: ReactionMessage, shouldEmitSentReaction = true) {
     this.emit("reaction", message);
 
     this.integration.ioNamespace.emit("reaction", message);
 
-    if (shouldUpdateState) {
-      this.emit("updateState", message);
+    if (shouldEmitSentReaction) {
+      this.emit("sentReaction", message);
     }
   }
 
