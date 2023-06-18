@@ -45,7 +45,7 @@
   },
   "peerDependencies": {
     "johnny-five": "git://github.com/blokdots/johnny-five.git#serialport10",
-    "socket.io": "^4.4.1",
-    "ws": "^7.5.3"
+    "socket.io": "^4.6.1",
+    "ws": "^8.13.0"
   }
 }
