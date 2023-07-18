@@ -3654,7 +3654,6 @@ module.exports = __toCommonJS(src_exports);
 
 // src/BlokdotsSocketIOServer/BlokdotsSocketIOServer.ts
 var import_socket = require("socket.io");
-var import_ws = __toESM(require("ws"));
 var import_os = require("os");
 
 // src/BlokdotsSocketIOServer/setupHttpServer.ts
@@ -3760,7 +3759,7 @@ var BlokdotsSocketIOServer = class {
   start() {
     const httpServer = setupHttpServer_default();
     this.io = new import_socket.Server(httpServer, {
-      wsEngine: import_ws.default.Server,
+      // wsEngine: WebSocket.Server,
       pingInterval: 5e3,
       pingTimeout: 5e3,
       allowEIO3: true,

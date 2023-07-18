@@ -33,7 +33,7 @@
     "prettier": "^2.8.8",
     "rollup": "^3.21.2",
     "rollup-plugin-dts": "^5.3.0",
-    "socket.io": "^4.6.1",
+    "socket.io": "^4.7.1",
     "typescript": "^5.0.4",
     "ws": "^8.13.0"
   },
@@ -45,7 +45,7 @@
   },
   "peerDependencies": {
     "johnny-five": "git://github.com/blokdots/johnny-five.git#serialport10",
-    "socket.io": "^4.6.1",
+    "socket.io": "^4.7.1",
     "ws": "^8.13.0"
   }
 }
