@@ -20465,32 +20465,6 @@ var require_websocket4 = __commonJS({
         opts.socketPath = parts[0];
         opts.path = parts[1];
       }
-      if (opts.followRedirects) {
-        if (websocket._redirects === 0) {
-          websocket._originalUnixSocket = isUnixSocket;
-          websocket._originalSecure = isSecure;
-          websocket._originalHostOrSocketPath = isUnixSocket ? opts.socketPath : parsedUrl.host;
-          const headers = options && options.headers;
-          options = { ...options, headers: {} };
-          if (headers) {
-            for (const [key2, value] of Object.entries(headers)) {
-              options.headers[key2.toLowerCase()] = value;
-            }
-          }
-        } else {
-          const isSameHost = isUnixSocket ? websocket._originalUnixSocket ? opts.socketPath === websocket._originalHostOrSocketPath : false : websocket._originalUnixSocket ? false : parsedUrl.host === websocket._originalHostOrSocketPath;
-          if (!isSameHost || websocket._originalSecure && !isSecure) {
-            delete opts.headers.authorization;
-            delete opts.headers.cookie;
-            if (!isSameHost)
-              delete opts.headers.host;
-            opts.auth = void 0;
-          }
-        }
-        if (opts.auth && !options.headers.authorization) {
-          options.headers.authorization = "Basic " + Buffer.from(opts.auth).toString("base64");
-        }
-      }
       let req = websocket._req = get(opts);
       if (opts.timeout) {
         req.on("timeout", () => {
@@ -20529,10 +20503,6 @@ var require_websocket4 = __commonJS({
         if (websocket.readyState !== WebSocket2.CONNECTING)
           return;
         req = websocket._req = null;
-        if (res.headers.upgrade.toLowerCase() !== "websocket") {
-          abortHandshake(websocket, socket, "Invalid Upgrade header");
-          return;
-        }
         const digest = createHash("sha1").update(key + GUID).digest("base64");
         if (res.headers["sec-websocket-accept"] !== digest) {
           abortHandshake(websocket, socket, "Invalid Sec-WebSocket-Accept header");
@@ -24240,646 +24210,6 @@ var require_browser_serialport = __commonJS({
   }
 });
 
-// node_modules/@serialport/parser-byte-length/dist/index.js
-var require_dist4 = __commonJS({
-  "node_modules/@serialport/parser-byte-length/dist/index.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.ByteLengthParser = void 0;
-    var stream_1 = require("stream");
-    var ByteLengthParser = class extends stream_1.Transform {
-      constructor(options) {
-        super(options);
-        if (typeof options.length !== "number") {
-          throw new TypeError('"length" is not a number');
-        }
-        if (options.length < 1) {
-          throw new TypeError('"length" is not greater than 0');
-        }
-        this.length = options.length;
-        this.position = 0;
-        this.buffer = Buffer.alloc(this.length);
-      }
-      _transform(chunk, _encoding, cb) {
-        let cursor = 0;
-        while (cursor < chunk.length) {
-          this.buffer[this.position] = chunk[cursor];
-          cursor++;
-          this.position++;
-          if (this.position === this.length) {
-            this.push(this.buffer);
-            this.buffer = Buffer.alloc(this.length);
-            this.position = 0;
-          }
-        }
-        cb();
-      }
-      _flush(cb) {
-        this.push(this.buffer.slice(0, this.position));
-        this.buffer = Buffer.alloc(this.length);
-        cb();
-      }
-    };
-    exports.ByteLengthParser = ByteLengthParser;
-  }
-});
-
-// node_modules/@serialport/parser-cctalk/dist/index.js
-var require_dist5 = __commonJS({
-  "node_modules/@serialport/parser-cctalk/dist/index.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.CCTalkParser = void 0;
-    var stream_1 = require("stream");
-    var CCTalkParser = class extends stream_1.Transform {
-      constructor(maxDelayBetweenBytesMs = 50) {
-        super();
-        this.array = [];
-        this.cursor = 0;
-        this.lastByteFetchTime = 0;
-        this.maxDelayBetweenBytesMs = maxDelayBetweenBytesMs;
-      }
-      _transform(buffer, encoding, cb) {
-        if (this.maxDelayBetweenBytesMs > 0) {
-          const now = Date.now();
-          if (now - this.lastByteFetchTime > this.maxDelayBetweenBytesMs) {
-            this.array = [];
-            this.cursor = 0;
-          }
-          this.lastByteFetchTime = now;
-        }
-        this.cursor += buffer.length;
-        Array.from(buffer).map((byte) => this.array.push(byte));
-        while (this.cursor > 1 && this.cursor >= this.array[1] + 5) {
-          const FullMsgLength = this.array[1] + 5;
-          const frame = Buffer.from(this.array.slice(0, FullMsgLength));
-          this.array = this.array.slice(frame.length, this.array.length);
-          this.cursor -= FullMsgLength;
-          this.push(frame);
-        }
-        cb();
-      }
-    };
-    exports.CCTalkParser = CCTalkParser;
-  }
-});
-
-// node_modules/@serialport/parser-delimiter/dist/index.js
-var require_dist6 = __commonJS({
-  "node_modules/@serialport/parser-delimiter/dist/index.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.DelimiterParser = void 0;
-    var stream_1 = require("stream");
-    var DelimiterParser = class extends stream_1.Transform {
-      constructor({ delimiter, includeDelimiter = false, ...options }) {
-        super(options);
-        if (delimiter === void 0) {
-          throw new TypeError('"delimiter" is not a bufferable object');
-        }
-        if (delimiter.length === 0) {
-          throw new TypeError('"delimiter" has a 0 or undefined length');
-        }
-        this.includeDelimiter = includeDelimiter;
-        this.delimiter = Buffer.from(delimiter);
-        this.buffer = Buffer.alloc(0);
-      }
-      _transform(chunk, encoding, cb) {
-        let data = Buffer.concat([this.buffer, chunk]);
-        let position;
-        while ((position = data.indexOf(this.delimiter)) !== -1) {
-          this.push(data.slice(0, position + (this.includeDelimiter ? this.delimiter.length : 0)));
-          data = data.slice(position + this.delimiter.length);
-        }
-        this.buffer = data;
-        cb();
-      }
-      _flush(cb) {
-        this.push(this.buffer);
-        this.buffer = Buffer.alloc(0);
-        cb();
-      }
-    };
-    exports.DelimiterParser = DelimiterParser;
-  }
-});
-
-// node_modules/@serialport/parser-inter-byte-timeout/dist/index.js
-var require_dist7 = __commonJS({
-  "node_modules/@serialport/parser-inter-byte-timeout/dist/index.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.InterByteTimeoutParser = void 0;
-    var stream_1 = require("stream");
-    var InterByteTimeoutParser = class extends stream_1.Transform {
-      constructor({ maxBufferSize = 65536, interval, ...transformOptions }) {
-        super(transformOptions);
-        if (!interval) {
-          throw new TypeError('"interval" is required');
-        }
-        if (typeof interval !== "number" || Number.isNaN(interval)) {
-          throw new TypeError('"interval" is not a number');
-        }
-        if (interval < 1) {
-          throw new TypeError('"interval" is not greater than 0');
-        }
-        if (typeof maxBufferSize !== "number" || Number.isNaN(maxBufferSize)) {
-          throw new TypeError('"maxBufferSize" is not a number');
-        }
-        if (maxBufferSize < 1) {
-          throw new TypeError('"maxBufferSize" is not greater than 0');
-        }
-        this.maxBufferSize = maxBufferSize;
-        this.currentPacket = [];
-        this.interval = interval;
-      }
-      _transform(chunk, encoding, cb) {
-        if (this.intervalID) {
-          clearTimeout(this.intervalID);
-        }
-        for (let offset = 0; offset < chunk.length; offset++) {
-          this.currentPacket.push(chunk[offset]);
-          if (this.currentPacket.length >= this.maxBufferSize) {
-            this.emitPacket();
-          }
-        }
-        this.intervalID = setTimeout(this.emitPacket.bind(this), this.interval);
-        cb();
-      }
-      emitPacket() {
-        if (this.intervalID) {
-          clearTimeout(this.intervalID);
-        }
-        if (this.currentPacket.length > 0) {
-          this.push(Buffer.from(this.currentPacket));
-        }
-        this.currentPacket = [];
-      }
-      _flush(cb) {
-        this.emitPacket();
-        cb();
-      }
-    };
-    exports.InterByteTimeoutParser = InterByteTimeoutParser;
-  }
-});
-
-// node_modules/@serialport/parser-packet-length/dist/index.js
-var require_dist8 = __commonJS({
-  "node_modules/@serialport/parser-packet-length/dist/index.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.PacketLengthParser = void 0;
-    var stream_1 = require("stream");
-    var PacketLengthParser = class extends stream_1.Transform {
-      constructor(options = {}) {
-        super(options);
-        const { delimiter = 170, packetOverhead = 2, lengthBytes = 1, lengthOffset = 1, maxLen = 255 } = options;
-        this.opts = {
-          delimiter,
-          packetOverhead,
-          lengthBytes,
-          lengthOffset,
-          maxLen
-        };
-        this.buffer = Buffer.alloc(0);
-        this.start = false;
-      }
-      _transform(chunk, encoding, cb) {
-        for (let ndx = 0; ndx < chunk.length; ndx++) {
-          const byte = chunk[ndx];
-          if (byte === this.opts.delimiter) {
-            this.start = true;
-          }
-          if (this.start === true) {
-            this.buffer = Buffer.concat([this.buffer, Buffer.from([byte])]);
-            if (this.buffer.length >= this.opts.lengthOffset + this.opts.lengthBytes) {
-              const len = this.buffer.readUIntLE(this.opts.lengthOffset, this.opts.lengthBytes);
-              if (this.buffer.length == len + this.opts.packetOverhead || len > this.opts.maxLen) {
-                this.push(this.buffer);
-                this.buffer = Buffer.alloc(0);
-                this.start = false;
-              }
-            }
-          }
-        }
-        cb();
-      }
-      _flush(cb) {
-        this.push(this.buffer);
-        this.buffer = Buffer.alloc(0);
-        cb();
-      }
-    };
-    exports.PacketLengthParser = PacketLengthParser;
-  }
-});
-
-// node_modules/@serialport/parser-readline/dist/index.js
-var require_dist9 = __commonJS({
-  "node_modules/@serialport/parser-readline/dist/index.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.ReadlineParser = void 0;
-    var parser_delimiter_1 = require_dist6();
-    var ReadlineParser = class extends parser_delimiter_1.DelimiterParser {
-      constructor(options) {
-        const opts = {
-          delimiter: Buffer.from("\n", "utf8"),
-          encoding: "utf8",
-          ...options
-        };
-        if (typeof opts.delimiter === "string") {
-          opts.delimiter = Buffer.from(opts.delimiter, opts.encoding);
-        }
-        super(opts);
-      }
-    };
-    exports.ReadlineParser = ReadlineParser;
-  }
-});
-
-// node_modules/@serialport/parser-ready/dist/index.js
-var require_dist10 = __commonJS({
-  "node_modules/@serialport/parser-ready/dist/index.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.ReadyParser = void 0;
-    var stream_1 = require("stream");
-    var ReadyParser = class extends stream_1.Transform {
-      constructor({ delimiter, ...options }) {
-        if (delimiter === void 0) {
-          throw new TypeError('"delimiter" is not a bufferable object');
-        }
-        if (delimiter.length === 0) {
-          throw new TypeError('"delimiter" has a 0 or undefined length');
-        }
-        super(options);
-        this.delimiter = Buffer.from(delimiter);
-        this.readOffset = 0;
-        this.ready = false;
-      }
-      _transform(chunk, encoding, cb) {
-        if (this.ready) {
-          this.push(chunk);
-          return cb();
-        }
-        const delimiter = this.delimiter;
-        let chunkOffset = 0;
-        while (this.readOffset < delimiter.length && chunkOffset < chunk.length) {
-          if (delimiter[this.readOffset] === chunk[chunkOffset]) {
-            this.readOffset++;
-          } else {
-            this.readOffset = 0;
-          }
-          chunkOffset++;
-        }
-        if (this.readOffset === delimiter.length) {
-          this.ready = true;
-          this.emit("ready");
-          const chunkRest = chunk.slice(chunkOffset);
-          if (chunkRest.length > 0) {
-            this.push(chunkRest);
-          }
-        }
-        cb();
-      }
-    };
-    exports.ReadyParser = ReadyParser;
-  }
-});
-
-// node_modules/@serialport/parser-regex/dist/index.js
-var require_dist11 = __commonJS({
-  "node_modules/@serialport/parser-regex/dist/index.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.RegexParser = void 0;
-    var stream_1 = require("stream");
-    var RegexParser = class extends stream_1.Transform {
-      constructor({ regex, ...options }) {
-        const opts = {
-          encoding: "utf8",
-          ...options
-        };
-        if (regex === void 0) {
-          throw new TypeError('"options.regex" must be a regular expression pattern or object');
-        }
-        if (!(regex instanceof RegExp)) {
-          regex = new RegExp(regex.toString());
-        }
-        super(opts);
-        this.regex = regex;
-        this.data = "";
-      }
-      _transform(chunk, encoding, cb) {
-        const data = this.data + chunk;
-        const parts = data.split(this.regex);
-        this.data = parts.pop() || "";
-        parts.forEach((part) => {
-          this.push(part);
-        });
-        cb();
-      }
-      _flush(cb) {
-        this.push(this.data);
-        this.data = "";
-        cb();
-      }
-    };
-    exports.RegexParser = RegexParser;
-  }
-});
-
-// node_modules/@serialport/parser-slip-encoder/dist/decoder.js
-var require_decoder = __commonJS({
-  "node_modules/@serialport/parser-slip-encoder/dist/decoder.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.SlipDecoder = void 0;
-    var stream_1 = require("stream");
-    var SlipDecoder = class extends stream_1.Transform {
-      constructor(options = {}) {
-        super(options);
-        const { START, ESC = 219, END = 192, ESC_START, ESC_END = 220, ESC_ESC = 221 } = options;
-        this.opts = {
-          START,
-          ESC,
-          END,
-          ESC_START,
-          ESC_END,
-          ESC_ESC
-        };
-        this.buffer = Buffer.alloc(0);
-        this.escape = false;
-        this.start = false;
-      }
-      _transform(chunk, encoding, cb) {
-        for (let ndx = 0; ndx < chunk.length; ndx++) {
-          let byte = chunk[ndx];
-          if (byte === this.opts.START) {
-            this.start = true;
-            continue;
-          } else if (this.opts.START == void 0) {
-            this.start = true;
-          }
-          if (this.escape) {
-            if (byte === this.opts.ESC_START && this.opts.START) {
-              byte = this.opts.START;
-            } else if (byte === this.opts.ESC_ESC) {
-              byte = this.opts.ESC;
-            } else if (byte === this.opts.ESC_END) {
-              byte = this.opts.END;
-            } else {
-              this.escape = false;
-              this.push(this.buffer);
-              this.buffer = Buffer.alloc(0);
-            }
-          } else {
-            if (byte === this.opts.ESC) {
-              this.escape = true;
-              continue;
-            }
-            if (byte === this.opts.END) {
-              this.push(this.buffer);
-              this.buffer = Buffer.alloc(0);
-              this.escape = false;
-              this.start = false;
-              continue;
-            }
-          }
-          this.escape = false;
-          if (this.start) {
-            this.buffer = Buffer.concat([this.buffer, Buffer.from([byte])]);
-          }
-        }
-        cb();
-      }
-      _flush(cb) {
-        this.push(this.buffer);
-        this.buffer = Buffer.alloc(0);
-        cb();
-      }
-    };
-    exports.SlipDecoder = SlipDecoder;
-  }
-});
-
-// node_modules/@serialport/parser-slip-encoder/dist/encoder.js
-var require_encoder = __commonJS({
-  "node_modules/@serialport/parser-slip-encoder/dist/encoder.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.SlipEncoder = void 0;
-    var stream_1 = require("stream");
-    var SlipEncoder = class extends stream_1.Transform {
-      constructor(options = {}) {
-        super(options);
-        const { START, ESC = 219, END = 192, ESC_START, ESC_END = 220, ESC_ESC = 221, bluetoothQuirk = false } = options;
-        this.opts = {
-          START,
-          ESC,
-          END,
-          ESC_START,
-          ESC_END,
-          ESC_ESC,
-          bluetoothQuirk
-        };
-      }
-      _transform(chunk, encoding, cb) {
-        const chunkLength = chunk.length;
-        if (this.opts.bluetoothQuirk && chunkLength === 0) {
-          return cb();
-        }
-        const encoded = Buffer.alloc(chunkLength * 2 + 2);
-        let j = 0;
-        if (this.opts.bluetoothQuirk == true) {
-          encoded[j++] = this.opts.END;
-        }
-        if (this.opts.START !== void 0) {
-          encoded[j++] = this.opts.START;
-        }
-        for (let i = 0; i < chunkLength; i++) {
-          let byte = chunk[i];
-          if (byte === this.opts.START && this.opts.ESC_START) {
-            encoded[j++] = this.opts.ESC;
-            byte = this.opts.ESC_START;
-          } else if (byte === this.opts.END) {
-            encoded[j++] = this.opts.ESC;
-            byte = this.opts.ESC_END;
-          } else if (byte === this.opts.ESC) {
-            encoded[j++] = this.opts.ESC;
-            byte = this.opts.ESC_ESC;
-          }
-          encoded[j++] = byte;
-        }
-        encoded[j++] = this.opts.END;
-        cb(null, encoded.slice(0, j));
-      }
-    };
-    exports.SlipEncoder = SlipEncoder;
-  }
-});
-
-// node_modules/@serialport/parser-slip-encoder/dist/index.js
-var require_dist12 = __commonJS({
-  "node_modules/@serialport/parser-slip-encoder/dist/index.js"(exports) {
-    "use strict";
-    var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
-    } : function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      o[k2] = m[k];
-    });
-    var __exportStar = exports && exports.__exportStar || function(m, exports2) {
-      for (var p in m)
-        if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports2, p))
-          __createBinding(exports2, m, p);
-    };
-    Object.defineProperty(exports, "__esModule", { value: true });
-    __exportStar(require_decoder(), exports);
-    __exportStar(require_encoder(), exports);
-  }
-});
-
-// node_modules/@serialport/parser-spacepacket/dist/utils.js
-var require_utils = __commonJS({
-  "node_modules/@serialport/parser-spacepacket/dist/utils.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.convertHeaderBufferToObj = exports.HEADER_LENGTH = void 0;
-    exports.HEADER_LENGTH = 6;
-    var toOctetStr = (num) => {
-      let str = Number(num).toString(2);
-      while (str.length < 8) {
-        str = `0${str}`;
-      }
-      return str;
-    };
-    var convertHeaderBufferToObj = (buf) => {
-      const headerStr = Array.from(buf.slice(0, exports.HEADER_LENGTH)).reduce((accum, curr) => `${accum}${toOctetStr(curr)}`, "");
-      const isVersion1 = headerStr.slice(0, 3) === "000";
-      const versionNumber = isVersion1 ? 1 : "UNKNOWN_VERSION";
-      const type = Number(headerStr[3]);
-      const secondaryHeader = Number(headerStr[4]);
-      const apid = parseInt(headerStr.slice(5, 16), 2);
-      const sequenceFlags = parseInt(headerStr.slice(16, 18), 2);
-      const packetName = parseInt(headerStr.slice(18, 32), 2);
-      const dataLength = parseInt(headerStr.slice(-16), 2) + 1;
-      return {
-        versionNumber,
-        identification: {
-          apid,
-          secondaryHeader,
-          type
-        },
-        sequenceControl: {
-          packetName,
-          sequenceFlags
-        },
-        dataLength
-      };
-    };
-    exports.convertHeaderBufferToObj = convertHeaderBufferToObj;
-  }
-});
-
-// node_modules/@serialport/parser-spacepacket/dist/index.js
-var require_dist13 = __commonJS({
-  "node_modules/@serialport/parser-spacepacket/dist/index.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.SpacePacketParser = void 0;
-    var stream_1 = require("stream");
-    var utils_1 = require_utils();
-    var SpacePacketParser = class extends stream_1.Transform {
-      constructor(options = {}) {
-        super({ ...options, objectMode: true });
-        this.timeCodeFieldLength = options.timeCodeFieldLength || 0;
-        this.ancillaryDataFieldLength = options.ancillaryDataFieldLength || 0;
-        this.dataSlice = this.timeCodeFieldLength + this.ancillaryDataFieldLength;
-        this.dataBuffer = Buffer.alloc(0);
-        this.headerBuffer = Buffer.alloc(0);
-        this.dataLength = 0;
-        this.expectingHeader = true;
-      }
-      pushCompletedPacket() {
-        if (!this.header) {
-          throw new Error("Missing header");
-        }
-        const timeCode = Buffer.from(this.dataBuffer.slice(0, this.timeCodeFieldLength));
-        const ancillaryData = Buffer.from(this.dataBuffer.slice(this.timeCodeFieldLength, this.timeCodeFieldLength + this.ancillaryDataFieldLength));
-        const data = Buffer.from(this.dataBuffer.slice(this.dataSlice, this.dataLength));
-        const completedPacket = {
-          header: { ...this.header },
-          data: data.toString()
-        };
-        if (timeCode.length > 0 || ancillaryData.length > 0) {
-          completedPacket.secondaryHeader = {};
-          if (timeCode.length) {
-            completedPacket.secondaryHeader.timeCode = timeCode.toString();
-          }
-          if (ancillaryData.length) {
-            completedPacket.secondaryHeader.ancillaryData = ancillaryData.toString();
-          }
-        }
-        this.push(completedPacket);
-        const nextChunk = Buffer.from(this.dataBuffer.slice(this.dataLength));
-        if (nextChunk.length >= utils_1.HEADER_LENGTH) {
-          this.extractHeader(nextChunk);
-        } else {
-          this.headerBuffer = nextChunk;
-          this.dataBuffer = Buffer.alloc(0);
-          this.expectingHeader = true;
-          this.dataLength = 0;
-          this.header = void 0;
-        }
-      }
-      extractHeader(chunk) {
-        const headerAsBuffer = Buffer.concat([this.headerBuffer, chunk]);
-        const startOfDataBuffer = headerAsBuffer.slice(utils_1.HEADER_LENGTH);
-        if (headerAsBuffer.length >= utils_1.HEADER_LENGTH) {
-          this.header = (0, utils_1.convertHeaderBufferToObj)(headerAsBuffer);
-          this.dataLength = this.header.dataLength;
-          this.headerBuffer = Buffer.alloc(0);
-          this.expectingHeader = false;
-        } else {
-          this.headerBuffer = headerAsBuffer;
-        }
-        if (startOfDataBuffer.length > 0) {
-          this.dataBuffer = Buffer.from(startOfDataBuffer);
-          if (this.dataBuffer.length >= this.dataLength) {
-            this.pushCompletedPacket();
-          }
-        }
-      }
-      _transform(chunk, encoding, cb) {
-        if (this.expectingHeader) {
-          this.extractHeader(chunk);
-        } else {
-          this.dataBuffer = Buffer.concat([this.dataBuffer, chunk]);
-          if (this.dataBuffer.length >= this.dataLength) {
-            this.pushCompletedPacket();
-          }
-        }
-        cb();
-      }
-      _flush(cb) {
-        const remaining = Buffer.concat([this.headerBuffer, this.dataBuffer]);
-        const remainingArray = Array.from(remaining);
-        this.push(remainingArray);
-        cb();
-      }
-    };
-    exports.SpacePacketParser = SpacePacketParser;
-  }
-});
-
 // node_modules/debug/src/common.js
 var require_common4 = __commonJS({
   "node_modules/debug/src/common.js"(exports, module2) {
@@ -24992,7 +24322,7 @@ var require_common4 = __commonJS({
           }
           namespaces = split[i].replace(/\*/g, ".*?");
           if (namespaces[0] === "-") {
-            createDebug.skips.push(new RegExp("^" + namespaces.slice(1) + "$"));
+            createDebug.skips.push(new RegExp("^" + namespaces.substr(1) + "$"));
           } else {
             createDebug.names.push(new RegExp("^" + namespaces + "$"));
           }
@@ -25390,495 +24720,572 @@ var require_src4 = __commonJS({
   }
 });
 
-// node_modules/@serialport/stream/dist/index.js
-var require_dist14 = __commonJS({
-  "node_modules/@serialport/stream/dist/index.js"(exports) {
-    "use strict";
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
-    };
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.SerialPortStream = exports.DisconnectedError = void 0;
-    var stream_1 = require("stream");
-    var debug_1 = __importDefault(require_src4());
-    var debug = (0, debug_1.default)("serialport/stream");
-    var DisconnectedError = class extends Error {
-      constructor(message) {
-        super(message);
-        this.disconnected = true;
-      }
-    };
-    exports.DisconnectedError = DisconnectedError;
-    var defaultSetFlags = {
+// node_modules/@serialport/stream/lib/index.js
+var require_lib2 = __commonJS({
+  "node_modules/@serialport/stream/lib/index.js"(exports, module2) {
+    var stream = require("stream");
+    var util = require("util");
+    var debug = require_src4()("serialport/stream");
+    var DATABITS = Object.freeze([5, 6, 7, 8]);
+    var STOPBITS = Object.freeze([1, 1.5, 2]);
+    var PARITY = Object.freeze(["none", "even", "mark", "odd", "space"]);
+    var FLOWCONTROLS = Object.freeze(["xon", "xoff", "xany", "rtscts"]);
+    var defaultSettings = Object.freeze({
+      autoOpen: true,
+      endOnClose: false,
+      baudRate: 9600,
+      dataBits: 8,
+      hupcl: true,
+      lock: true,
+      parity: "none",
+      rtscts: false,
+      stopBits: 1,
+      xany: false,
+      xoff: false,
+      xon: false,
+      highWaterMark: 64 * 1024
+    });
+    var defaultSetFlags = Object.freeze({
       brk: false,
       cts: false,
       dtr: true,
+      dts: false,
       rts: true
-    };
+    });
     function allocNewReadPool(poolSize) {
       const pool = Buffer.allocUnsafe(poolSize);
       pool.used = 0;
       return pool;
     }
-    var SerialPortStream = class extends stream_1.Duplex {
-      constructor(options, openCallback) {
-        const settings = {
-          autoOpen: true,
-          endOnClose: false,
-          highWaterMark: 64 * 1024,
-          ...options
-        };
-        super({
-          highWaterMark: settings.highWaterMark
-        });
-        if (!settings.binding) {
-          throw new TypeError('"Bindings" is invalid pass it as `options.binding`');
+    function SerialPort(path, options, openCallback) {
+      if (!(this instanceof SerialPort)) {
+        return new SerialPort(path, options, openCallback);
+      }
+      if (options instanceof Function) {
+        openCallback = options;
+        options = {};
+      }
+      const settings = { ...defaultSettings, ...options };
+      stream.Duplex.call(this, {
+        highWaterMark: settings.highWaterMark
+      });
+      const Binding = settings.binding || SerialPort.Binding;
+      if (!Binding) {
+        throw new TypeError('"Bindings" is invalid pass it as `options.binding` or set it on `SerialPort.Binding`');
+      }
+      if (!path) {
+        throw new TypeError(`"path" is not defined: ${path}`);
+      }
+      if (settings.baudrate) {
+        throw new TypeError(`"baudrate" is an unknown option, did you mean "baudRate"?`);
+      }
+      if (typeof settings.baudRate !== "number") {
+        throw new TypeError(`"baudRate" must be a number: ${settings.baudRate}`);
+      }
+      if (DATABITS.indexOf(settings.dataBits) === -1) {
+        throw new TypeError(`"databits" is invalid: ${settings.dataBits}`);
+      }
+      if (STOPBITS.indexOf(settings.stopBits) === -1) {
+        throw new TypeError(`"stopbits" is invalid: ${settings.stopbits}`);
+      }
+      if (PARITY.indexOf(settings.parity) === -1) {
+        throw new TypeError(`"parity" is invalid: ${settings.parity}`);
+      }
+      FLOWCONTROLS.forEach((control) => {
+        if (typeof settings[control] !== "boolean") {
+          throw new TypeError(`"${control}" is not boolean: ${settings[control]}`);
         }
-        if (!settings.path) {
-          throw new TypeError(`"path" is not defined: ${settings.path}`);
+      });
+      const binding = new Binding({
+        bindingOptions: settings.bindingOptions
+      });
+      Object.defineProperties(this, {
+        binding: {
+          enumerable: true,
+          value: binding
+        },
+        path: {
+          enumerable: true,
+          value: path
+        },
+        settings: {
+          enumerable: true,
+          value: settings
         }
-        if (typeof settings.baudRate !== "number") {
-          throw new TypeError(`"baudRate" must be a number: ${settings.baudRate}`);
+      });
+      this.opening = false;
+      this.closing = false;
+      this._pool = allocNewReadPool(this.settings.highWaterMark);
+      this._kMinPoolSpace = 128;
+      if (this.settings.autoOpen) {
+        this.open(openCallback);
+      }
+    }
+    util.inherits(SerialPort, stream.Duplex);
+    Object.defineProperties(SerialPort.prototype, {
+      isOpen: {
+        enumerable: true,
+        get() {
+          return this.binding.isOpen && !this.closing;
         }
-        this.settings = settings;
-        this.opening = false;
-        this.closing = false;
-        this._pool = allocNewReadPool(this.settings.highWaterMark);
-        this._kMinPoolSpace = 128;
-        if (this.settings.autoOpen) {
-          this.open(openCallback);
+      },
+      baudRate: {
+        enumerable: true,
+        get() {
+          return this.settings.baudRate;
         }
       }
-      get path() {
-        return this.settings.path;
-      }
-      get baudRate() {
-        return this.settings.baudRate;
-      }
-      get isOpen() {
-        var _a, _b;
-        return ((_b = (_a = this.port) === null || _a === void 0 ? void 0 : _a.isOpen) !== null && _b !== void 0 ? _b : false) && !this.closing;
-      }
-      _error(error, callback) {
-        if (callback) {
-          callback.call(this, error);
-        } else {
-          this.emit("error", error);
-        }
-      }
-      _asyncError(error, callback) {
-        process.nextTick(() => this._error(error, callback));
-      }
-      open(openCallback) {
-        if (this.isOpen) {
-          return this._asyncError(new Error("Port is already open"), openCallback);
-        }
-        if (this.opening) {
-          return this._asyncError(new Error("Port is opening"), openCallback);
-        }
-        const { highWaterMark, binding, autoOpen, endOnClose, ...openOptions } = this.settings;
-        this.opening = true;
-        debug("opening", `path: ${this.path}`);
-        this.settings.binding.open(openOptions).then((port) => {
-          debug("opened", `path: ${this.path}`);
-          this.port = port;
-          this.opening = false;
-          this.emit("open");
-          if (openCallback) {
-            openCallback.call(this, null);
-          }
-        }, (err) => {
-          this.opening = false;
-          debug("Binding #open had an error", err);
-          this._error(err, openCallback);
-        });
-      }
-      update(options, callback) {
-        if (!this.isOpen || !this.port) {
-          debug("update attempted, but port is not open");
-          return this._asyncError(new Error("Port is not open"), callback);
-        }
-        debug("update", `baudRate: ${options.baudRate}`);
-        this.port.update(options).then(() => {
-          debug("binding.update", "finished");
-          this.settings.baudRate = options.baudRate;
-          if (callback) {
-            callback.call(this, null);
-          }
-        }, (err) => {
-          debug("binding.update", "error", err);
-          return this._error(err, callback);
-        });
-      }
-      write(data, encoding, callback) {
-        if (Array.isArray(data)) {
-          data = Buffer.from(data);
-        }
-        if (typeof encoding === "function") {
-          return super.write(data, encoding);
-        }
-        return super.write(data, encoding, callback);
-      }
-      _write(data, encoding, callback) {
-        if (!this.isOpen || !this.port) {
-          this.once("open", () => {
-            this._write(data, encoding, callback);
-          });
-          return;
-        }
-        debug("_write", `${data.length} bytes of data`);
-        this.port.write(data).then(() => {
-          debug("binding.write", "write finished");
-          callback(null);
-        }, (err) => {
-          debug("binding.write", "error", err);
-          if (!err.canceled) {
-            this._disconnected(err);
-          }
-          callback(err);
-        });
-      }
-      _writev(data, callback) {
-        debug("_writev", `${data.length} chunks of data`);
-        const dataV = data.map((write) => write.chunk);
-        this._write(Buffer.concat(dataV), void 0, callback);
-      }
-      _read(bytesToRead) {
-        if (!this.isOpen || !this.port) {
-          debug("_read", "queueing _read for after open");
-          this.once("open", () => {
-            this._read(bytesToRead);
-          });
-          return;
-        }
-        if (!this._pool || this._pool.length - this._pool.used < this._kMinPoolSpace) {
-          debug("_read", "discarding the read buffer pool because it is below kMinPoolSpace");
-          this._pool = allocNewReadPool(this.settings.highWaterMark);
-        }
-        const pool = this._pool;
-        const toRead = Math.min(pool.length - pool.used, bytesToRead);
-        const start = pool.used;
-        debug("_read", `reading`, { start, toRead });
-        this.port.read(pool, start, toRead).then(({ bytesRead }) => {
-          debug("binding.read", `finished`, { bytesRead });
-          if (bytesRead === 0) {
-            debug("binding.read", "Zero bytes read closing readable stream");
-            this.push(null);
-            return;
-          }
-          pool.used += bytesRead;
-          this.push(pool.slice(start, start + bytesRead));
-        }, (err) => {
-          debug("binding.read", `error`, err);
-          if (!err.canceled) {
-            this._disconnected(err);
-          }
-          this._read(bytesToRead);
-        });
-      }
-      _disconnected(err) {
-        if (!this.isOpen) {
-          debug("disconnected aborted because already closed", err);
-          return;
-        }
-        debug("disconnected", err);
-        this.close(void 0, new DisconnectedError(err.message));
-      }
-      close(callback, disconnectError = null) {
-        if (!this.isOpen || !this.port) {
-          debug("close attempted, but port is not open");
-          return this._asyncError(new Error("Port is not open"), callback);
-        }
-        this.closing = true;
-        debug("#close");
-        this.port.close().then(() => {
-          this.closing = false;
-          debug("binding.close", "finished");
-          this.emit("close", disconnectError);
-          if (this.settings.endOnClose) {
-            this.emit("end");
-          }
-          if (callback) {
-            callback.call(this, disconnectError);
-          }
-        }, (err) => {
-          this.closing = false;
-          debug("binding.close", "had an error", err);
-          return this._error(err, callback);
-        });
-      }
-      set(options, callback) {
-        if (!this.isOpen || !this.port) {
-          debug("set attempted, but port is not open");
-          return this._asyncError(new Error("Port is not open"), callback);
-        }
-        const settings = { ...defaultSetFlags, ...options };
-        debug("#set", settings);
-        this.port.set(settings).then(() => {
-          debug("binding.set", "finished");
-          if (callback) {
-            callback.call(this, null);
-          }
-        }, (err) => {
-          debug("binding.set", "had an error", err);
-          return this._error(err, callback);
-        });
-      }
-      get(callback) {
-        if (!this.isOpen || !this.port) {
-          debug("get attempted, but port is not open");
-          return this._asyncError(new Error("Port is not open"), callback);
-        }
-        debug("#get");
-        this.port.get().then((status) => {
-          debug("binding.get", "finished");
-          callback.call(this, null, status);
-        }, (err) => {
-          debug("binding.get", "had an error", err);
-          return this._error(err, callback);
-        });
-      }
-      flush(callback) {
-        if (!this.isOpen || !this.port) {
-          debug("flush attempted, but port is not open");
-          return this._asyncError(new Error("Port is not open"), callback);
-        }
-        debug("#flush");
-        this.port.flush().then(() => {
-          debug("binding.flush", "finished");
-          if (callback) {
-            callback.call(this, null);
-          }
-        }, (err) => {
-          debug("binding.flush", "had an error", err);
-          return this._error(err, callback);
-        });
-      }
-      drain(callback) {
-        debug("drain");
-        if (!this.isOpen || !this.port) {
-          debug("drain queuing on port open");
-          this.once("open", () => {
-            this.drain(callback);
-          });
-          return;
-        }
-        this.port.drain().then(() => {
-          debug("binding.drain", "finished");
-          if (callback) {
-            callback.call(this, null);
-          }
-        }, (err) => {
-          debug("binding.drain", "had an error", err);
-          return this._error(err, callback);
-        });
+    });
+    SerialPort.prototype._error = function(error, callback) {
+      if (callback) {
+        callback.call(this, error);
+      } else {
+        this.emit("error", error);
       }
     };
-    exports.SerialPortStream = SerialPortStream;
+    SerialPort.prototype._asyncError = function(error, callback) {
+      process.nextTick(() => this._error(error, callback));
+    };
+    SerialPort.prototype.open = function(openCallback) {
+      if (this.isOpen) {
+        return this._asyncError(new Error("Port is already open"), openCallback);
+      }
+      if (this.opening) {
+        return this._asyncError(new Error("Port is opening"), openCallback);
+      }
+      this.opening = true;
+      debug("opening", `path: ${this.path}`);
+      this.binding.open(this.path, this.settings).then(() => {
+        debug("opened", `path: ${this.path}`);
+        this.opening = false;
+        this.emit("open");
+        if (openCallback) {
+          openCallback.call(this, null);
+        }
+      }, (err) => {
+        this.opening = false;
+        debug("Binding #open had an error", err);
+        this._error(err, openCallback);
+      });
+    };
+    SerialPort.prototype.update = function(options, callback) {
+      if (typeof options !== "object") {
+        throw TypeError('"options" is not an object');
+      }
+      if (!this.isOpen) {
+        debug("update attempted, but port is not open");
+        return this._asyncError(new Error("Port is not open"), callback);
+      }
+      const settings = { ...defaultSettings, ...options };
+      this.settings.baudRate = settings.baudRate;
+      debug("update", `baudRate: ${settings.baudRate}`);
+      this.binding.update(this.settings).then(() => {
+        debug("binding.update", "finished");
+        if (callback) {
+          callback.call(this, null);
+        }
+      }, (err) => {
+        debug("binding.update", "error", err);
+        return this._error(err, callback);
+      });
+    };
+    var superWrite = SerialPort.prototype.write;
+    SerialPort.prototype.write = function(data, encoding, callback) {
+      if (Array.isArray(data)) {
+        data = Buffer.from(data);
+      }
+      return superWrite.call(this, data, encoding, callback);
+    };
+    SerialPort.prototype._write = function(data, encoding, callback) {
+      if (!this.isOpen) {
+        return this.once("open", function afterOpenWrite() {
+          this._write(data, encoding, callback);
+        });
+      }
+      debug("_write", `${data.length} bytes of data`);
+      this.binding.write(data).then(() => {
+        debug("binding.write", "write finished");
+        callback(null);
+      }, (err) => {
+        debug("binding.write", "error", err);
+        if (!err.canceled) {
+          this._disconnected(err);
+        }
+        callback(err);
+      });
+    };
+    SerialPort.prototype._writev = function(data, callback) {
+      debug("_writev", `${data.length} chunks of data`);
+      const dataV = data.map((write) => write.chunk);
+      this._write(Buffer.concat(dataV), null, callback);
+    };
+    SerialPort.prototype._read = function(bytesToRead) {
+      if (!this.isOpen) {
+        debug("_read", "queueing _read for after open");
+        this.once("open", () => {
+          this._read(bytesToRead);
+        });
+        return;
+      }
+      if (!this._pool || this._pool.length - this._pool.used < this._kMinPoolSpace) {
+        debug("_read", "discarding the read buffer pool because it is below kMinPoolSpace");
+        this._pool = allocNewReadPool(this.settings.highWaterMark);
+      }
+      const pool = this._pool;
+      const toRead = Math.min(pool.length - pool.used, bytesToRead);
+      const start = pool.used;
+      debug("_read", `reading`, { start, toRead });
+      this.binding.read(pool, start, toRead).then(({ bytesRead }) => {
+        debug("binding.read", `finished`, { bytesRead });
+        if (bytesRead === 0) {
+          debug("binding.read", "Zero bytes read closing readable stream");
+          this.push(null);
+          return;
+        }
+        pool.used += bytesRead;
+        this.push(pool.slice(start, start + bytesRead));
+      }, (err) => {
+        debug("binding.read", `error`, err);
+        if (!err.canceled) {
+          this._disconnected(err);
+        }
+        this._read(bytesToRead);
+      });
+    };
+    SerialPort.prototype._disconnected = function(err) {
+      if (!this.isOpen) {
+        debug("disconnected aborted because already closed", err);
+        return;
+      }
+      debug("disconnected", err);
+      err.disconnected = true;
+      this.close(null, err);
+    };
+    SerialPort.prototype.close = function(callback, disconnectError) {
+      disconnectError = disconnectError || null;
+      if (!this.isOpen) {
+        debug("close attempted, but port is not open");
+        return this._asyncError(new Error("Port is not open"), callback);
+      }
+      this.closing = true;
+      debug("#close");
+      this.binding.close().then(() => {
+        this.closing = false;
+        debug("binding.close", "finished");
+        this.emit("close", disconnectError);
+        if (this.settings.endOnClose) {
+          this.emit("end");
+        }
+        if (callback) {
+          callback.call(this, disconnectError);
+        }
+      }, (err) => {
+        this.closing = false;
+        debug("binding.close", "had an error", err);
+        return this._error(err, callback);
+      });
+    };
+    SerialPort.prototype.set = function(options, callback) {
+      if (typeof options !== "object") {
+        throw TypeError('"options" is not an object');
+      }
+      if (!this.isOpen) {
+        debug("set attempted, but port is not open");
+        return this._asyncError(new Error("Port is not open"), callback);
+      }
+      const settings = { ...defaultSetFlags, ...options };
+      debug("#set", settings);
+      this.binding.set(settings).then(() => {
+        debug("binding.set", "finished");
+        if (callback) {
+          callback.call(this, null);
+        }
+      }, (err) => {
+        debug("binding.set", "had an error", err);
+        return this._error(err, callback);
+      });
+    };
+    SerialPort.prototype.get = function(callback) {
+      if (!this.isOpen) {
+        debug("get attempted, but port is not open");
+        return this._asyncError(new Error("Port is not open"), callback);
+      }
+      debug("#get");
+      this.binding.get().then((status) => {
+        debug("binding.get", "finished");
+        if (callback) {
+          callback.call(this, null, status);
+        }
+      }, (err) => {
+        debug("binding.get", "had an error", err);
+        return this._error(err, callback);
+      });
+    };
+    SerialPort.prototype.flush = function(callback) {
+      if (!this.isOpen) {
+        debug("flush attempted, but port is not open");
+        return this._asyncError(new Error("Port is not open"), callback);
+      }
+      debug("#flush");
+      this.binding.flush().then(() => {
+        debug("binding.flush", "finished");
+        if (callback) {
+          callback.call(this, null);
+        }
+      }, (err) => {
+        debug("binding.flush", "had an error", err);
+        return this._error(err, callback);
+      });
+    };
+    SerialPort.prototype.drain = function(callback) {
+      debug("drain");
+      if (!this.isOpen) {
+        debug("drain queuing on port open");
+        return this.once("open", () => {
+          this.drain(callback);
+        });
+      }
+      this.binding.drain().then(() => {
+        debug("binding.drain", "finished");
+        if (callback) {
+          callback.call(this, null);
+        }
+      }, (err) => {
+        debug("binding.drain", "had an error", err);
+        return this._error(err, callback);
+      });
+    };
+    SerialPort.list = async function(callback) {
+      debug(".list");
+      if (!SerialPort.Binding) {
+        throw new TypeError("No Binding set on `SerialPort.Binding`");
+      }
+      if (callback) {
+        throw new TypeError("SerialPort.list no longer takes a callback and only returns a promise");
+      }
+      return SerialPort.Binding.list();
+    };
+    module2.exports = SerialPort;
   }
 });
 
-// node_modules/@serialport/binding-mock/dist/index.js
-var require_dist15 = __commonJS({
-  "node_modules/@serialport/binding-mock/dist/index.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    var debugFactory = require_src4();
-    function _interopDefaultLegacy(e) {
-      return e && typeof e === "object" && "default" in e ? e : { "default": e };
+// node_modules/file-uri-to-path/index.js
+var require_file_uri_to_path = __commonJS({
+  "node_modules/file-uri-to-path/index.js"(exports, module2) {
+    var sep = require("path").sep || "/";
+    module2.exports = fileUriToPath;
+    function fileUriToPath(uri) {
+      if (typeof uri != "string" || uri.length <= 7 || uri.substring(0, 7) != "file://") {
+        throw new TypeError("must pass in a file:// URI to convert to a file path");
+      }
+      var rest = decodeURI(uri.substring(7));
+      var firstSlash = rest.indexOf("/");
+      var host = rest.substring(0, firstSlash);
+      var path = rest.substring(firstSlash + 1);
+      if (host == "localhost")
+        host = "";
+      if (host) {
+        host = sep + sep + host;
+      }
+      path = path.replace(/^(.+)\|/, "$1:");
+      if (sep == "\\") {
+        path = path.replace(/\//g, "\\");
+      }
+      if (/^.+\:/.test(path)) {
+      } else {
+        path = sep + path;
+      }
+      return host + path;
     }
-    var debugFactory__default = /* @__PURE__ */ _interopDefaultLegacy(debugFactory);
-    var debug = debugFactory__default["default"]("serialport/binding-mock");
-    var ports = {};
-    var serialNumber = 0;
-    function resolveNextTick() {
-      return new Promise((resolve) => process.nextTick(() => resolve()));
+  }
+});
+
+// node_modules/bindings/bindings.js
+var require_bindings = __commonJS({
+  "node_modules/bindings/bindings.js"(exports, module2) {
+    var fs = require("fs");
+    var path = require("path");
+    var fileURLToPath = require_file_uri_to_path();
+    var join = path.join;
+    var dirname = path.dirname;
+    var exists = fs.accessSync && function(path2) {
+      try {
+        fs.accessSync(path2);
+      } catch (e) {
+        return false;
+      }
+      return true;
+    } || fs.existsSync || path.existsSync;
+    var defaults = {
+      arrow: process.env.NODE_BINDINGS_ARROW || " \u2192 ",
+      compiled: process.env.NODE_BINDINGS_COMPILED_DIR || "compiled",
+      platform: process.platform,
+      arch: process.arch,
+      nodePreGyp: "node-v" + process.versions.modules + "-" + process.platform + "-" + process.arch,
+      version: process.versions.node,
+      bindings: "bindings.node",
+      try: [
+        ["module_root", "build", "bindings"],
+        ["module_root", "build", "Debug", "bindings"],
+        ["module_root", "build", "Release", "bindings"],
+        ["module_root", "out", "Debug", "bindings"],
+        ["module_root", "Debug", "bindings"],
+        ["module_root", "out", "Release", "bindings"],
+        ["module_root", "Release", "bindings"],
+        ["module_root", "build", "default", "bindings"],
+        ["module_root", "compiled", "version", "platform", "arch", "bindings"],
+        ["module_root", "addon-build", "release", "install-root", "bindings"],
+        ["module_root", "addon-build", "debug", "install-root", "bindings"],
+        ["module_root", "addon-build", "default", "install-root", "bindings"],
+        ["module_root", "lib", "binding", "nodePreGyp", "bindings"]
+      ]
+    };
+    function bindings(opts) {
+      if (typeof opts == "string") {
+        opts = { bindings: opts };
+      } else if (!opts) {
+        opts = {};
+      }
+      Object.keys(defaults).map(function(i2) {
+        if (!(i2 in opts))
+          opts[i2] = defaults[i2];
+      });
+      if (!opts.module_root) {
+        opts.module_root = exports.getRoot(exports.getFileName());
+      }
+      if (path.extname(opts.bindings) != ".node") {
+        opts.bindings += ".node";
+      }
+      var requireFunc = typeof __webpack_require__ === "function" ? __non_webpack_require__ : require;
+      var tries = [], i = 0, l = opts.try.length, n, b, err;
+      for (; i < l; i++) {
+        n = join.apply(null, opts.try[i].map(function(p) {
+          return opts[p] || p;
+        }));
+        tries.push(n);
+        try {
+          b = opts.path ? requireFunc.resolve(n) : requireFunc(n);
+          if (!opts.path) {
+            b.path = n;
+          }
+          return b;
+        } catch (e) {
+          if (e.code !== "MODULE_NOT_FOUND" && e.code !== "QUALIFIED_PATH_RESOLUTION_FAILED" && !/not find/i.test(e.message)) {
+            throw e;
+          }
+        }
+      }
+      err = new Error("Could not locate the bindings file. Tried:\n" + tries.map(function(a) {
+        return opts.arrow + a;
+      }).join("\n"));
+      err.tries = tries;
+      throw err;
     }
-    var CanceledError = class extends Error {
-      constructor(message) {
-        super(message);
-        this.canceled = true;
+    module2.exports = exports = bindings;
+    exports.getFileName = function getFileName(calling_file) {
+      var origPST = Error.prepareStackTrace, origSTL = Error.stackTraceLimit, dummy = {}, fileName;
+      Error.stackTraceLimit = 10;
+      Error.prepareStackTrace = function(e, st) {
+        for (var i = 0, l = st.length; i < l; i++) {
+          fileName = st[i].getFileName();
+          if (fileName !== __filename) {
+            if (calling_file) {
+              if (fileName !== calling_file) {
+                return;
+              }
+            } else {
+              return;
+            }
+          }
+        }
+      };
+      Error.captureStackTrace(dummy);
+      dummy.stack;
+      Error.prepareStackTrace = origPST;
+      Error.stackTraceLimit = origSTL;
+      var fileSchema = "file://";
+      if (fileName.indexOf(fileSchema) === 0) {
+        fileName = fileURLToPath(fileName);
+      }
+      return fileName;
+    };
+    exports.getRoot = function getRoot(file) {
+      var dir = dirname(file), prev;
+      while (true) {
+        if (dir === ".") {
+          dir = process.cwd();
+        }
+        if (exists(join(dir, "package.json")) || exists(join(dir, "node_modules"))) {
+          return dir;
+        }
+        if (prev === dir) {
+          throw new Error('Could not find module root given file: "' + file + '". Do you have a `package.json` file? ');
+        }
+        prev = dir;
+        dir = join(dir, "..");
       }
     };
-    var MockBinding = {
-      reset() {
-        ports = {};
-        serialNumber = 0;
-      },
-      createPort(path, options = {}) {
-        serialNumber++;
-        const optWithDefaults = Object.assign({ echo: false, record: false, manufacturer: "The J5 Robotics Company", vendorId: void 0, productId: void 0, maxReadSize: 1024 }, options);
-        ports[path] = {
-          data: Buffer.alloc(0),
-          echo: optWithDefaults.echo,
-          record: optWithDefaults.record,
-          readyData: optWithDefaults.readyData,
-          maxReadSize: optWithDefaults.maxReadSize,
-          info: {
-            path,
-            manufacturer: optWithDefaults.manufacturer,
-            serialNumber: `${serialNumber}`,
-            pnpId: void 0,
-            locationId: void 0,
-            vendorId: optWithDefaults.vendorId,
-            productId: optWithDefaults.productId
-          }
-        };
-        debug(serialNumber, "created port", JSON.stringify({ path, opt: options }));
-      },
-      async list() {
-        debug(null, "list");
-        return Object.values(ports).map((port) => port.info);
-      },
-      async open(options) {
-        var _a;
-        if (!options || typeof options !== "object" || Array.isArray(options)) {
+  }
+});
+
+// node_modules/@serialport/binding-abstract/lib/index.js
+var require_lib3 = __commonJS({
+  "node_modules/@serialport/binding-abstract/lib/index.js"(exports, module2) {
+    var debug = require_src4()("serialport/binding-abstract");
+    var AbstractBinding = class {
+      static async list() {
+        debug("list");
+      }
+      constructor(opt = {}) {
+        if (typeof opt !== "object") {
           throw new TypeError('"options" is not an object');
         }
-        if (!options.path) {
+      }
+      async open(path, options) {
+        if (!path) {
           throw new TypeError('"path" is not a valid port');
         }
-        if (!options.baudRate) {
-          throw new TypeError('"baudRate" is not a valid baudRate');
+        if (typeof options !== "object") {
+          throw new TypeError('"options" is not an object');
         }
-        const openOptions = Object.assign({ dataBits: 8, lock: true, stopBits: 1, parity: "none", rtscts: false, xon: false, xoff: false, xany: false, hupcl: true }, options);
-        const { path } = openOptions;
-        debug(null, `open: opening path ${path}`);
-        const port = ports[path];
-        await resolveNextTick();
-        if (!port) {
-          throw new Error(`Port does not exist - please call MockBinding.createPort('${path}') first`);
-        }
-        const serialNumber2 = port.info.serialNumber;
-        if ((_a = port.openOpt) === null || _a === void 0 ? void 0 : _a.lock) {
-          debug(serialNumber2, "open: Port is locked cannot open");
-          throw new Error("Port is locked cannot open");
-        }
-        debug(serialNumber2, `open: opened path ${path}`);
-        port.openOpt = Object.assign({}, openOptions);
-        return new MockPortBinding(port, openOptions);
-      }
-    };
-    var MockPortBinding = class {
-      constructor(port, openOptions) {
-        this.port = port;
-        this.openOptions = openOptions;
-        this.pendingRead = null;
-        this.isOpen = true;
-        this.lastWrite = null;
-        this.recording = Buffer.alloc(0);
-        this.writeOperation = null;
-        this.serialNumber = port.info.serialNumber;
-        if (port.readyData) {
-          const data = port.readyData;
-          process.nextTick(() => {
-            if (this.isOpen) {
-              debug(this.serialNumber, "emitting ready data");
-              this.emitData(data);
-            }
-          });
-        }
-      }
-      emitData(data) {
-        if (!this.isOpen || !this.port) {
-          throw new Error("Port must be open to pretend to receive data");
-        }
-        const bufferData = Buffer.isBuffer(data) ? data : Buffer.from(data);
-        debug(this.serialNumber, "emitting data - pending read:", Boolean(this.pendingRead));
-        this.port.data = Buffer.concat([this.port.data, bufferData]);
-        if (this.pendingRead) {
-          process.nextTick(this.pendingRead);
-          this.pendingRead = null;
+        debug("open");
+        if (this.isOpen) {
+          throw new Error("Already open");
         }
       }
       async close() {
-        debug(this.serialNumber, "close");
+        debug("close");
         if (!this.isOpen) {
           throw new Error("Port is not open");
-        }
-        const port = this.port;
-        if (!port) {
-          throw new Error("already closed");
-        }
-        port.openOpt = void 0;
-        port.data = Buffer.alloc(0);
-        debug(this.serialNumber, "port is closed");
-        this.serialNumber = void 0;
-        this.isOpen = false;
-        if (this.pendingRead) {
-          this.pendingRead(new CanceledError("port is closed"));
         }
       }
       async read(buffer, offset, length) {
         if (!Buffer.isBuffer(buffer)) {
           throw new TypeError('"buffer" is not a Buffer');
         }
-        if (typeof offset !== "number" || isNaN(offset)) {
-          throw new TypeError(`"offset" is not an integer got "${isNaN(offset) ? "NaN" : typeof offset}"`);
+        if (typeof offset !== "number" || isNaN(length)) {
+          throw new TypeError(`"offset" is not an integer got "${isNaN(length) ? "NaN" : typeof offset}"`);
         }
         if (typeof length !== "number" || isNaN(length)) {
           throw new TypeError(`"length" is not an integer got "${isNaN(length) ? "NaN" : typeof length}"`);
         }
+        debug("read");
         if (buffer.length < offset + length) {
           throw new Error("buffer is too small");
         }
         if (!this.isOpen) {
           throw new Error("Port is not open");
         }
-        debug(this.serialNumber, "read", length, "bytes");
-        await resolveNextTick();
-        if (!this.isOpen || !this.port) {
-          throw new CanceledError("Read canceled");
-        }
-        if (this.port.data.length <= 0) {
-          return new Promise((resolve, reject) => {
-            this.pendingRead = (err) => {
-              if (err) {
-                return reject(err);
-              }
-              this.read(buffer, offset, length).then(resolve, reject);
-            };
-          });
-        }
-        const lengthToRead = this.port.maxReadSize > length ? length : this.port.maxReadSize;
-        const data = this.port.data.slice(0, lengthToRead);
-        const bytesRead = data.copy(buffer, offset);
-        this.port.data = this.port.data.slice(lengthToRead);
-        debug(this.serialNumber, "read", bytesRead, "bytes");
-        return { bytesRead, buffer };
       }
       async write(buffer) {
         if (!Buffer.isBuffer(buffer)) {
           throw new TypeError('"buffer" is not a Buffer');
         }
-        if (!this.isOpen || !this.port) {
+        debug("write", buffer.length, "bytes");
+        if (!this.isOpen) {
           debug("write", "error port is not open");
           throw new Error("Port is not open");
         }
-        debug(this.serialNumber, "write", buffer.length, "bytes");
-        if (this.writeOperation) {
-          throw new Error("Overlapping writes are not supported and should be queued by the serialport object");
-        }
-        this.writeOperation = (async () => {
-          await resolveNextTick();
-          if (!this.isOpen || !this.port) {
-            throw new Error("Write canceled");
-          }
-          const data = this.lastWrite = Buffer.from(buffer);
-          if (this.port.record) {
-            this.recording = Buffer.concat([this.recording, data]);
-          }
-          if (this.port.echo) {
-            process.nextTick(() => {
-              if (this.isOpen) {
-                this.emitData(data);
-              }
-            });
-          }
-          this.writeOperation = null;
-          debug(this.serialNumber, "writing finished");
-        })();
-        return this.writeOperation;
       }
       async update(options) {
         if (typeof options !== "object") {
@@ -25887,380 +25294,212 @@ var require_dist15 = __commonJS({
         if (typeof options.baudRate !== "number") {
           throw new TypeError('"options.baudRate" is not a number');
         }
-        debug(this.serialNumber, "update");
-        if (!this.isOpen || !this.port) {
+        debug("update");
+        if (!this.isOpen) {
           throw new Error("Port is not open");
-        }
-        await resolveNextTick();
-        if (this.port.openOpt) {
-          this.port.openOpt.baudRate = options.baudRate;
         }
       }
       async set(options) {
         if (typeof options !== "object") {
           throw new TypeError('"options" is not an object');
         }
-        debug(this.serialNumber, "set");
+        debug("set");
         if (!this.isOpen) {
           throw new Error("Port is not open");
         }
-        await resolveNextTick();
       }
       async get() {
-        debug(this.serialNumber, "get");
+        debug("get");
         if (!this.isOpen) {
           throw new Error("Port is not open");
         }
-        await resolveNextTick();
-        return {
-          cts: true,
-          dsr: false,
-          dcd: false
-        };
       }
       async getBaudRate() {
-        var _a;
-        debug(this.serialNumber, "getBaudRate");
-        if (!this.isOpen || !this.port) {
-          throw new Error("Port is not open");
-        }
-        await resolveNextTick();
-        if (!((_a = this.port.openOpt) === null || _a === void 0 ? void 0 : _a.baudRate)) {
-          throw new Error("Internal Error");
-        }
-        return {
-          baudRate: this.port.openOpt.baudRate
-        };
-      }
-      async flush() {
-        debug(this.serialNumber, "flush");
-        if (!this.isOpen || !this.port) {
-          throw new Error("Port is not open");
-        }
-        await resolveNextTick();
-        this.port.data = Buffer.alloc(0);
-      }
-      async drain() {
-        debug(this.serialNumber, "drain");
+        debug("getbaudRate");
         if (!this.isOpen) {
           throw new Error("Port is not open");
         }
+      }
+      async flush() {
+        debug("flush");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+      }
+      async drain() {
+        debug("drain");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+      }
+    };
+    module2.exports = AbstractBinding;
+  }
+});
+
+// node_modules/@serialport/bindings/lib/win32-sn-parser.js
+var require_win32_sn_parser = __commonJS({
+  "node_modules/@serialport/bindings/lib/win32-sn-parser.js"(exports, module2) {
+    var PARSERS = [/USB\\(?:.+)\\(.+)/, /FTDIBUS\\(?:.+)\+(.+?)A?\\.+/];
+    module2.exports = function(pnpId) {
+      if (!pnpId) {
+        return null;
+      }
+      for (const parser of PARSERS) {
+        const sn = pnpId.match(parser);
+        if (sn) {
+          return sn[1];
+        }
+      }
+      return null;
+    };
+  }
+});
+
+// node_modules/@serialport/bindings/lib/legacy.js
+var require_legacy = __commonJS({
+  "node_modules/@serialport/bindings/lib/legacy.js"(exports, module2) {
+    var warningSent = false;
+    var wrapWithHiddenComName = async (portsPromise) => {
+      const ports = await portsPromise;
+      return ports.map((port) => {
+        const newPort = { ...port };
+        return Object.defineProperties(newPort, {
+          comName: {
+            get() {
+              if (!warningSent) {
+                warningSent = true;
+                console.warn(`"PortInfo.comName" has been deprecated. You should now use "PortInfo.path". The property will be removed in the next major release.`);
+              }
+              return newPort.path;
+            },
+            enumerable: false
+          }
+        });
+      });
+    };
+    module2.exports = {
+      wrapWithHiddenComName
+    };
+  }
+});
+
+// node_modules/@serialport/bindings/lib/win32.js
+var require_win32 = __commonJS({
+  "node_modules/@serialport/bindings/lib/win32.js"(exports, module2) {
+    var binding = require_bindings()("bindings.node");
+    var AbstractBinding = require_lib3();
+    var { promisify } = require("util");
+    var serialNumParser = require_win32_sn_parser();
+    var asyncList = promisify(binding.list);
+    var asyncOpen = promisify(binding.open);
+    var asyncClose = promisify(binding.close);
+    var asyncRead = promisify(binding.read);
+    var asyncWrite = promisify(binding.write);
+    var asyncUpdate = promisify(binding.update);
+    var asyncSet = promisify(binding.set);
+    var asyncGet = promisify(binding.get);
+    var asyncGetBaudRate = promisify(binding.getBaudRate);
+    var asyncDrain = promisify(binding.drain);
+    var asyncFlush = promisify(binding.flush);
+    var { wrapWithHiddenComName } = require_legacy();
+    var WindowsBinding = class extends AbstractBinding {
+      static async list() {
+        const ports = await asyncList();
+        return wrapWithHiddenComName(ports.map((port) => {
+          if (port.pnpId && !port.serialNumber) {
+            const serialNumber = serialNumParser(port.pnpId);
+            if (serialNumber) {
+              return {
+                ...port,
+                serialNumber
+              };
+            }
+          }
+          return port;
+        }));
+      }
+      constructor(opt = {}) {
+        super(opt);
+        this.bindingOptions = { ...opt.bindingOptions };
+        this.fd = null;
+        this.writeOperation = null;
+      }
+      get isOpen() {
+        return this.fd !== null;
+      }
+      async open(path, options) {
+        await super.open(path, options);
+        this.openOptions = { ...this.bindingOptions, ...options };
+        const fd = await asyncOpen(path, this.openOptions);
+        this.fd = fd;
+      }
+      async close() {
+        await super.close();
+        const fd = this.fd;
+        this.fd = null;
+        return asyncClose(fd);
+      }
+      async read(buffer, offset, length) {
+        await super.read(buffer, offset, length);
+        try {
+          const bytesRead = await asyncRead(this.fd, buffer, offset, length);
+          return { bytesRead, buffer };
+        } catch (err) {
+          if (!this.isOpen) {
+            err.canceled = true;
+          }
+          throw err;
+        }
+      }
+      async write(buffer) {
+        this.writeOperation = super.write(buffer).then(async () => {
+          if (buffer.length === 0) {
+            return;
+          }
+          await asyncWrite(this.fd, buffer);
+          this.writeOperation = null;
+        });
+        return this.writeOperation;
+      }
+      async update(options) {
+        await super.update(options);
+        return asyncUpdate(this.fd, options);
+      }
+      async set(options) {
+        await super.set(options);
+        return asyncSet(this.fd, options);
+      }
+      async get() {
+        await super.get();
+        return asyncGet(this.fd);
+      }
+      async getBaudRate() {
+        await super.get();
+        return asyncGetBaudRate(this.fd);
+      }
+      async drain() {
+        await super.drain();
         await this.writeOperation;
-        await resolveNextTick();
+        return asyncDrain(this.fd);
+      }
+      async flush() {
+        await super.flush();
+        return asyncFlush(this.fd);
       }
     };
-    exports.CanceledError = CanceledError;
-    exports.MockBinding = MockBinding;
-    exports.MockPortBinding = MockPortBinding;
+    module2.exports = WindowsBinding;
   }
 });
 
-// node_modules/serialport/dist/serialport-mock.js
-var require_serialport_mock = __commonJS({
-  "node_modules/serialport/dist/serialport-mock.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.SerialPortMock = void 0;
-    var stream_1 = require_dist14();
-    var binding_mock_1 = require_dist15();
-    var SerialPortMock = class extends stream_1.SerialPortStream {
-      constructor(options, openCallback) {
-        const opts = {
-          binding: binding_mock_1.MockBinding,
-          ...options
-        };
-        super(opts, openCallback);
-      }
-    };
-    exports.SerialPortMock = SerialPortMock;
-    SerialPortMock.list = binding_mock_1.MockBinding.list;
-    SerialPortMock.binding = binding_mock_1.MockBinding;
-  }
-});
-
-// node_modules/node-gyp-build/node-gyp-build.js
-var require_node_gyp_build = __commonJS({
-  "node_modules/node-gyp-build/node-gyp-build.js"(exports, module2) {
-    var fs = require("fs");
-    var path = require("path");
-    var os = require("os");
-    var runtimeRequire = typeof __webpack_require__ === "function" ? __non_webpack_require__ : require;
-    var vars = process.config && process.config.variables || {};
-    var prebuildsOnly = !!process.env.PREBUILDS_ONLY;
-    var abi = process.versions.modules;
-    var runtime = isElectron() ? "electron" : isNwjs() ? "node-webkit" : "node";
-    var arch = process.env.npm_config_arch || os.arch();
-    var platform = process.env.npm_config_platform || os.platform();
-    var libc = process.env.LIBC || (isAlpine(platform) ? "musl" : "glibc");
-    var armv = process.env.ARM_VERSION || (arch === "arm64" ? "8" : vars.arm_version) || "";
-    var uv = (process.versions.uv || "").split(".")[0];
-    module2.exports = load;
-    function load(dir) {
-      return runtimeRequire(load.resolve(dir));
-    }
-    load.resolve = load.path = function(dir) {
-      dir = path.resolve(dir || ".");
-      try {
-        var name = runtimeRequire(path.join(dir, "package.json")).name.toUpperCase().replace(/-/g, "_");
-        if (process.env[name + "_PREBUILD"])
-          dir = process.env[name + "_PREBUILD"];
-      } catch (err) {
-      }
-      if (!prebuildsOnly) {
-        var release = getFirst(path.join(dir, "build/Release"), matchBuild);
-        if (release)
-          return release;
-        var debug = getFirst(path.join(dir, "build/Debug"), matchBuild);
-        if (debug)
-          return debug;
-      }
-      var prebuild = resolve(dir);
-      if (prebuild)
-        return prebuild;
-      var nearby = resolve(path.dirname(process.execPath));
-      if (nearby)
-        return nearby;
-      var target = [
-        "platform=" + platform,
-        "arch=" + arch,
-        "runtime=" + runtime,
-        "abi=" + abi,
-        "uv=" + uv,
-        armv ? "armv=" + armv : "",
-        "libc=" + libc,
-        "node=" + process.versions.node,
-        process.versions.electron ? "electron=" + process.versions.electron : "",
-        typeof __webpack_require__ === "function" ? "webpack=true" : ""
-      ].filter(Boolean).join(" ");
-      throw new Error("No native build was found for " + target + "\n    loaded from: " + dir + "\n");
-      function resolve(dir2) {
-        var tuples = readdirSync(path.join(dir2, "prebuilds")).map(parseTuple);
-        var tuple = tuples.filter(matchTuple(platform, arch)).sort(compareTuples)[0];
-        if (!tuple)
-          return;
-        var prebuilds = path.join(dir2, "prebuilds", tuple.name);
-        var parsed = readdirSync(prebuilds).map(parseTags);
-        var candidates = parsed.filter(matchTags(runtime, abi));
-        var winner = candidates.sort(compareTags(runtime))[0];
-        if (winner)
-          return path.join(prebuilds, winner.file);
-      }
-    };
-    function readdirSync(dir) {
-      try {
-        return fs.readdirSync(dir);
-      } catch (err) {
-        return [];
-      }
-    }
-    function getFirst(dir, filter) {
-      var files = readdirSync(dir).filter(filter);
-      return files[0] && path.join(dir, files[0]);
-    }
-    function matchBuild(name) {
-      return /\.node$/.test(name);
-    }
-    function parseTuple(name) {
-      var arr = name.split("-");
-      if (arr.length !== 2)
-        return;
-      var platform2 = arr[0];
-      var architectures = arr[1].split("+");
-      if (!platform2)
-        return;
-      if (!architectures.length)
-        return;
-      if (!architectures.every(Boolean))
-        return;
-      return { name, platform: platform2, architectures };
-    }
-    function matchTuple(platform2, arch2) {
-      return function(tuple) {
-        if (tuple == null)
-          return false;
-        if (tuple.platform !== platform2)
-          return false;
-        return tuple.architectures.includes(arch2);
-      };
-    }
-    function compareTuples(a, b) {
-      return a.architectures.length - b.architectures.length;
-    }
-    function parseTags(file) {
-      var arr = file.split(".");
-      var extension = arr.pop();
-      var tags = { file, specificity: 0 };
-      if (extension !== "node")
-        return;
-      for (var i = 0; i < arr.length; i++) {
-        var tag = arr[i];
-        if (tag === "node" || tag === "electron" || tag === "node-webkit") {
-          tags.runtime = tag;
-        } else if (tag === "napi") {
-          tags.napi = true;
-        } else if (tag.slice(0, 3) === "abi") {
-          tags.abi = tag.slice(3);
-        } else if (tag.slice(0, 2) === "uv") {
-          tags.uv = tag.slice(2);
-        } else if (tag.slice(0, 4) === "armv") {
-          tags.armv = tag.slice(4);
-        } else if (tag === "glibc" || tag === "musl") {
-          tags.libc = tag;
-        } else {
-          continue;
-        }
-        tags.specificity++;
-      }
-      return tags;
-    }
-    function matchTags(runtime2, abi2) {
-      return function(tags) {
-        if (tags == null)
-          return false;
-        if (tags.runtime !== runtime2 && !runtimeAgnostic(tags))
-          return false;
-        if (tags.abi !== abi2 && !tags.napi)
-          return false;
-        if (tags.uv && tags.uv !== uv)
-          return false;
-        if (tags.armv && tags.armv !== armv)
-          return false;
-        if (tags.libc && tags.libc !== libc)
-          return false;
-        return true;
-      };
-    }
-    function runtimeAgnostic(tags) {
-      return tags.runtime === "node" && tags.napi;
-    }
-    function compareTags(runtime2) {
-      return function(a, b) {
-        if (a.runtime !== b.runtime) {
-          return a.runtime === runtime2 ? -1 : 1;
-        } else if (a.abi !== b.abi) {
-          return a.abi ? -1 : 1;
-        } else if (a.specificity !== b.specificity) {
-          return a.specificity > b.specificity ? -1 : 1;
-        } else {
-          return 0;
-        }
-      };
-    }
-    function isNwjs() {
-      return !!(process.versions && process.versions.nw);
-    }
-    function isElectron() {
-      if (process.versions && process.versions.electron)
-        return true;
-      if (process.env.ELECTRON_RUN_AS_NODE)
-        return true;
-      return typeof window !== "undefined" && window.process && window.process.type === "renderer";
-    }
-    function isAlpine(platform2) {
-      return platform2 === "linux" && fs.existsSync("/etc/alpine-release");
-    }
-    load.parseTags = parseTags;
-    load.matchTags = matchTags;
-    load.compareTags = compareTags;
-    load.parseTuple = parseTuple;
-    load.matchTuple = matchTuple;
-    load.compareTuples = compareTuples;
-  }
-});
-
-// node_modules/node-gyp-build/index.js
-var require_node_gyp_build2 = __commonJS({
-  "node_modules/node-gyp-build/index.js"(exports, module2) {
-    if (typeof process.addon === "function") {
-      module2.exports = process.addon.bind(process);
-    } else {
-      module2.exports = require_node_gyp_build();
-    }
-  }
-});
-
-// node_modules/@serialport/bindings-cpp/dist/load-bindings.js
-var require_load_bindings = __commonJS({
-  "node_modules/@serialport/bindings-cpp/dist/load-bindings.js"(exports) {
-    "use strict";
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
-    };
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.asyncWrite = exports.asyncRead = exports.asyncUpdate = exports.asyncSet = exports.asyncOpen = exports.asyncList = exports.asyncGetBaudRate = exports.asyncGet = exports.asyncFlush = exports.asyncDrain = exports.asyncClose = void 0;
-    var node_gyp_build_1 = __importDefault(require_node_gyp_build2());
-    var util_1 = require("util");
-    var path_1 = require("path");
-    var binding = (0, node_gyp_build_1.default)((0, path_1.join)(__dirname, "../"));
-    exports.asyncClose = binding.close ? (0, util_1.promisify)(binding.close) : async () => {
-      throw new Error('"binding.close" Method not implemented');
-    };
-    exports.asyncDrain = binding.drain ? (0, util_1.promisify)(binding.drain) : async () => {
-      throw new Error('"binding.drain" Method not implemented');
-    };
-    exports.asyncFlush = binding.flush ? (0, util_1.promisify)(binding.flush) : async () => {
-      throw new Error('"binding.flush" Method not implemented');
-    };
-    exports.asyncGet = binding.get ? (0, util_1.promisify)(binding.get) : async () => {
-      throw new Error('"binding.get" Method not implemented');
-    };
-    exports.asyncGetBaudRate = binding.getBaudRate ? (0, util_1.promisify)(binding.getBaudRate) : async () => {
-      throw new Error('"binding.getBaudRate" Method not implemented');
-    };
-    exports.asyncList = binding.list ? (0, util_1.promisify)(binding.list) : async () => {
-      throw new Error('"binding.list" Method not implemented');
-    };
-    exports.asyncOpen = binding.open ? (0, util_1.promisify)(binding.open) : async () => {
-      throw new Error('"binding.open" Method not implemented');
-    };
-    exports.asyncSet = binding.set ? (0, util_1.promisify)(binding.set) : async () => {
-      throw new Error('"binding.set" Method not implemented');
-    };
-    exports.asyncUpdate = binding.update ? (0, util_1.promisify)(binding.update) : async () => {
-      throw new Error('"binding.update" Method not implemented');
-    };
-    exports.asyncRead = binding.read ? (0, util_1.promisify)(binding.read) : async () => {
-      throw new Error('"binding.read" Method not implemented');
-    };
-    exports.asyncWrite = binding.read ? (0, util_1.promisify)(binding.write) : async () => {
-      throw new Error('"binding.write" Method not implemented');
-    };
-  }
-});
-
-// node_modules/@serialport/bindings-cpp/dist/errors.js
-var require_errors = __commonJS({
-  "node_modules/@serialport/bindings-cpp/dist/errors.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.BindingsError = void 0;
-    var BindingsError = class extends Error {
-      constructor(message, { canceled = false } = {}) {
-        super(message);
-        this.canceled = canceled;
-      }
-    };
-    exports.BindingsError = BindingsError;
-  }
-});
-
-// node_modules/@serialport/bindings-cpp/dist/poller.js
+// node_modules/@serialport/bindings/lib/poller.js
 var require_poller = __commonJS({
-  "node_modules/@serialport/bindings-cpp/dist/poller.js"(exports) {
-    "use strict";
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
-    };
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.Poller = exports.EVENTS = void 0;
-    var debug_1 = __importDefault(require_src4());
-    var events_1 = require("events");
-    var path_1 = require("path");
-    var node_gyp_build_1 = __importDefault(require_node_gyp_build2());
-    var errors_1 = require_errors();
-    var { Poller: PollerBindings } = (0, node_gyp_build_1.default)((0, path_1.join)(__dirname, "../"));
-    var logger = (0, debug_1.default)("serialport/bindings-cpp/poller");
-    exports.EVENTS = {
+  "node_modules/@serialport/bindings/lib/poller.js"(exports, module2) {
+    var debug = require_src4();
+    var logger = debug("serialport/bindings/poller");
+    var EventEmitter10 = require("events");
+    var PollerBindings = require_bindings()("bindings.node").Poller;
+    var EVENTS = {
       UV_READABLE: 1,
       UV_WRITABLE: 2,
       UV_DISCONNECT: 4
@@ -26273,20 +25512,20 @@ var require_poller = __commonJS({
         this.emit("disconnect", error);
         return;
       }
-      if (eventFlag & exports.EVENTS.UV_READABLE) {
+      if (eventFlag & EVENTS.UV_READABLE) {
         logger('received "readable"');
         this.emit("readable", null);
       }
-      if (eventFlag & exports.EVENTS.UV_WRITABLE) {
+      if (eventFlag & EVENTS.UV_WRITABLE) {
         logger('received "writable"');
         this.emit("writable", null);
       }
-      if (eventFlag & exports.EVENTS.UV_DISCONNECT) {
+      if (eventFlag & EVENTS.UV_DISCONNECT) {
         logger('received "disconnect"');
         this.emit("disconnect", null);
       }
     }
-    var Poller = class extends events_1.EventEmitter {
+    var Poller = class extends EventEmitter10 {
       constructor(fd, FDPoller = PollerBindings) {
         logger("Creating poller");
         super();
@@ -26295,25 +25534,26 @@ var require_poller = __commonJS({
       once(event, callback) {
         switch (event) {
           case "readable":
-            this.poll(exports.EVENTS.UV_READABLE);
+            this.poll(EVENTS.UV_READABLE);
             break;
           case "writable":
-            this.poll(exports.EVENTS.UV_WRITABLE);
+            this.poll(EVENTS.UV_WRITABLE);
             break;
           case "disconnect":
-            this.poll(exports.EVENTS.UV_DISCONNECT);
+            this.poll(EVENTS.UV_DISCONNECT);
             break;
         }
         return super.once(event, callback);
       }
-      poll(eventFlag = 0) {
-        if (eventFlag & exports.EVENTS.UV_READABLE) {
+      poll(eventFlag) {
+        eventFlag = eventFlag || 0;
+        if (eventFlag & EVENTS.UV_READABLE) {
           logger('Polling for "readable"');
         }
-        if (eventFlag & exports.EVENTS.UV_WRITABLE) {
+        if (eventFlag & EVENTS.UV_WRITABLE) {
           logger('Polling for "writable"');
         }
-        if (eventFlag & exports.EVENTS.UV_DISCONNECT) {
+        if (eventFlag & EVENTS.UV_DISCONNECT) {
           logger('Polling for "disconnect"');
         }
         this.poller.poll(eventFlag);
@@ -26329,48 +25569,42 @@ var require_poller = __commonJS({
         this.emitCanceled();
       }
       emitCanceled() {
-        const err = new errors_1.BindingsError("Canceled", { canceled: true });
+        const err = new Error("Canceled");
+        err.canceled = true;
         this.emit("readable", err);
         this.emit("writable", err);
         this.emit("disconnect", err);
       }
     };
-    exports.Poller = Poller;
+    Poller.EVENTS = EVENTS;
+    module2.exports = Poller;
   }
 });
 
-// node_modules/@serialport/bindings-cpp/dist/unix-read.js
+// node_modules/@serialport/bindings/lib/unix-read.js
 var require_unix_read = __commonJS({
-  "node_modules/@serialport/bindings-cpp/dist/unix-read.js"(exports) {
-    "use strict";
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
-    };
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.unixRead = void 0;
-    var util_1 = require("util");
-    var fs_1 = require("fs");
-    var errors_1 = require_errors();
-    var debug_1 = __importDefault(require_src4());
-    var logger = (0, debug_1.default)("serialport/bindings-cpp/unixRead");
-    var readAsync = (0, util_1.promisify)(fs_1.read);
+  "node_modules/@serialport/bindings/lib/unix-read.js"(exports, module2) {
+    var fs = require("fs");
+    var debug = require_src4();
+    var logger = debug("serialport/bindings/unixRead");
+    var { promisify } = require("util");
+    var readAsync = promisify(fs.read);
     var readable = (binding) => {
       return new Promise((resolve, reject) => {
-        if (!binding.poller) {
-          throw new Error("No poller on bindings");
-        }
         binding.poller.once("readable", (err) => err ? reject(err) : resolve());
       });
     };
     var unixRead = async ({ binding, buffer, offset, length, fsReadAsync = readAsync }) => {
       logger("Starting read");
-      if (!binding.isOpen || !binding.fd) {
-        throw new errors_1.BindingsError("Port is not open", { canceled: true });
+      if (!binding.isOpen) {
+        const err = new Error("Port is not open");
+        err.canceled = true;
+        throw err;
       }
       try {
         const { bytesRead } = await fsReadAsync(binding.fd, buffer, offset, length, null);
         if (bytesRead === 0) {
-          return (0, exports.unixRead)({ binding, buffer, offset, length, fsReadAsync });
+          return unixRead({ binding, buffer, offset, length, fsReadAsync });
         }
         logger("Finished read", bytesRead, "bytes");
         return { bytesRead, buffer };
@@ -26378,38 +25612,34 @@ var require_unix_read = __commonJS({
         logger("read error", err);
         if (err.code === "EAGAIN" || err.code === "EWOULDBLOCK" || err.code === "EINTR") {
           if (!binding.isOpen) {
-            throw new errors_1.BindingsError("Port is not open", { canceled: true });
+            const err2 = new Error("Port is not open");
+            err2.canceled = true;
+            throw err2;
           }
           logger("waiting for readable because of code:", err.code);
           await readable(binding);
-          return (0, exports.unixRead)({ binding, buffer, offset, length, fsReadAsync });
+          return unixRead({ binding, buffer, offset, length, fsReadAsync });
         }
         const disconnectError = err.code === "EBADF" || err.code === "ENXIO" || err.code === "UNKNOWN" || err.errno === -1;
         if (disconnectError) {
-          err.disconnect = true;
+          err.canceled = true;
           logger("disconnecting", err);
         }
         throw err;
       }
     };
-    exports.unixRead = unixRead;
+    module2.exports = unixRead;
   }
 });
 
-// node_modules/@serialport/bindings-cpp/dist/unix-write.js
+// node_modules/@serialport/bindings/lib/unix-write.js
 var require_unix_write = __commonJS({
-  "node_modules/@serialport/bindings-cpp/dist/unix-write.js"(exports) {
-    "use strict";
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
-    };
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.unixWrite = void 0;
-    var fs_1 = require("fs");
-    var debug_1 = __importDefault(require_src4());
-    var util_1 = require("util");
-    var logger = (0, debug_1.default)("serialport/bindings-cpp/unixWrite");
-    var writeAsync = (0, util_1.promisify)(fs_1.write);
+  "node_modules/@serialport/bindings/lib/unix-write.js"(exports, module2) {
+    var fs = require("fs");
+    var debug = require_src4();
+    var logger = debug("serialport/bindings/unixWrite");
+    var { promisify } = require("util");
+    var writeAsync = promisify(fs.write);
     var writable = (binding) => {
       return new Promise((resolve, reject) => {
         binding.poller.once("writable", (err) => err ? reject(err) : resolve());
@@ -26418,7 +25648,7 @@ var require_unix_write = __commonJS({
     var unixWrite = async ({ binding, buffer, offset = 0, fsWriteAsync = writeAsync }) => {
       const bytesToWrite = buffer.length - offset;
       logger("Starting write", buffer.length, "bytes offset", offset, "bytesToWrite", bytesToWrite);
-      if (!binding.isOpen || !binding.fd) {
+      if (!binding.isOpen) {
         throw new Error("Port is not open");
       }
       try {
@@ -26428,7 +25658,7 @@ var require_unix_write = __commonJS({
           if (!binding.isOpen) {
             throw new Error("Port is not open");
           }
-          return (0, exports.unixWrite)({ binding, buffer, offset: bytesWritten + offset, fsWriteAsync });
+          return unixWrite({ binding, buffer, offset: bytesWritten + offset, fsWriteAsync });
         }
         logger("Finished writing", bytesWritten + offset, "bytes");
       } catch (err) {
@@ -26439,7 +25669,7 @@ var require_unix_write = __commonJS({
           }
           logger("waiting for writable because of code:", err.code);
           await writable(binding);
-          return (0, exports.unixWrite)({ binding, buffer, offset, fsWriteAsync });
+          return unixWrite({ binding, buffer, offset, fsWriteAsync });
         }
         const disconnectError = err.code === "EBADF" || err.code === "ENXIO" || err.code === "UNKNOWN" || err.errno === -1;
         if (disconnectError) {
@@ -26450,169 +25680,170 @@ var require_unix_write = __commonJS({
         throw err;
       }
     };
-    exports.unixWrite = unixWrite;
+    module2.exports = unixWrite;
   }
 });
 
-// node_modules/@serialport/bindings-cpp/dist/darwin.js
+// node_modules/@serialport/bindings/lib/darwin.js
 var require_darwin = __commonJS({
-  "node_modules/@serialport/bindings-cpp/dist/darwin.js"(exports) {
-    "use strict";
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
-    };
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.DarwinPortBinding = exports.DarwinBinding = void 0;
-    var debug_1 = __importDefault(require_src4());
-    var load_bindings_1 = require_load_bindings();
-    var poller_1 = require_poller();
-    var unix_read_1 = require_unix_read();
-    var unix_write_1 = require_unix_write();
-    var debug = (0, debug_1.default)("serialport/bindings-cpp");
-    exports.DarwinBinding = {
-      list() {
-        debug("list");
-        return (0, load_bindings_1.asyncList)();
-      },
-      async open(options) {
-        if (!options || typeof options !== "object" || Array.isArray(options)) {
-          throw new TypeError('"options" is not an object');
-        }
-        if (!options.path) {
-          throw new TypeError('"path" is not a valid port');
-        }
-        if (!options.baudRate) {
-          throw new TypeError('"baudRate" is not a valid baudRate');
-        }
-        debug("open");
-        const openOptions = Object.assign({ vmin: 1, vtime: 0, dataBits: 8, lock: true, stopBits: 1, parity: "none", rtscts: false, xon: false, xoff: false, xany: false, hupcl: true }, options);
-        const fd = await (0, load_bindings_1.asyncOpen)(openOptions.path, openOptions);
-        return new DarwinPortBinding(fd, openOptions);
+  "node_modules/@serialport/bindings/lib/darwin.js"(exports, module2) {
+    var { promisify } = require("util");
+    var binding = require_bindings()("bindings.node");
+    var AbstractBinding = require_lib3();
+    var Poller = require_poller();
+    var unixRead = require_unix_read();
+    var unixWrite = require_unix_write();
+    var { wrapWithHiddenComName } = require_legacy();
+    var defaultBindingOptions = Object.freeze({
+      vmin: 1,
+      vtime: 0
+    });
+    var asyncList = promisify(binding.list);
+    var asyncOpen = promisify(binding.open);
+    var asyncClose = promisify(binding.close);
+    var asyncUpdate = promisify(binding.update);
+    var asyncSet = promisify(binding.set);
+    var asyncGet = promisify(binding.get);
+    var asyncGetBaudRate = promisify(binding.getBaudRate);
+    var asyncDrain = promisify(binding.drain);
+    var asyncFlush = promisify(binding.flush);
+    var DarwinBinding = class extends AbstractBinding {
+      static list() {
+        return wrapWithHiddenComName(asyncList());
       }
-    };
-    var DarwinPortBinding = class {
-      constructor(fd, options) {
-        this.fd = fd;
-        this.openOptions = options;
-        this.poller = new poller_1.Poller(fd);
+      constructor(opt = {}) {
+        super(opt);
+        this.bindingOptions = { ...defaultBindingOptions, ...opt.bindingOptions };
+        this.fd = null;
         this.writeOperation = null;
       }
       get isOpen() {
         return this.fd !== null;
       }
+      async open(path, options) {
+        await super.open(path, options);
+        this.openOptions = { ...this.bindingOptions, ...options };
+        const fd = await asyncOpen(path, this.openOptions);
+        this.fd = fd;
+        this.poller = new Poller(fd);
+      }
       async close() {
-        debug("close");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
+        await super.close();
         const fd = this.fd;
         this.poller.stop();
         this.poller.destroy();
+        this.poller = null;
+        this.openOptions = null;
         this.fd = null;
-        await (0, load_bindings_1.asyncClose)(fd);
+        return asyncClose(fd);
       }
       async read(buffer, offset, length) {
-        if (!Buffer.isBuffer(buffer)) {
-          throw new TypeError('"buffer" is not a Buffer');
-        }
-        if (typeof offset !== "number" || isNaN(offset)) {
-          throw new TypeError(`"offset" is not an integer got "${isNaN(offset) ? "NaN" : typeof offset}"`);
-        }
-        if (typeof length !== "number" || isNaN(length)) {
-          throw new TypeError(`"length" is not an integer got "${isNaN(length) ? "NaN" : typeof length}"`);
-        }
-        debug("read");
-        if (buffer.length < offset + length) {
-          throw new Error("buffer is too small");
-        }
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-        return (0, unix_read_1.unixRead)({ binding: this, buffer, offset, length });
+        await super.read(buffer, offset, length);
+        return unixRead({ binding: this, buffer, offset, length });
       }
       async write(buffer) {
-        if (!Buffer.isBuffer(buffer)) {
-          throw new TypeError('"buffer" is not a Buffer');
-        }
-        debug("write", buffer.length, "bytes");
-        if (!this.isOpen) {
-          debug("write", "error port is not open");
-          throw new Error("Port is not open");
-        }
-        this.writeOperation = (async () => {
+        this.writeOperation = super.write(buffer).then(async () => {
           if (buffer.length === 0) {
             return;
           }
-          await (0, unix_write_1.unixWrite)({ binding: this, buffer });
+          await unixWrite({ binding: this, buffer });
           this.writeOperation = null;
-        })();
+        });
         return this.writeOperation;
       }
       async update(options) {
-        if (!options || typeof options !== "object" || Array.isArray(options)) {
-          throw TypeError('"options" is not an object');
-        }
-        if (typeof options.baudRate !== "number") {
-          throw new TypeError('"options.baudRate" is not a number');
-        }
-        debug("update");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-        await (0, load_bindings_1.asyncUpdate)(this.fd, options);
+        await super.update(options);
+        return asyncUpdate(this.fd, options);
       }
       async set(options) {
-        if (!options || typeof options !== "object" || Array.isArray(options)) {
-          throw new TypeError('"options" is not an object');
-        }
-        debug("set", options);
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-        await (0, load_bindings_1.asyncSet)(this.fd, options);
+        await super.set(options);
+        return asyncSet(this.fd, options);
       }
       async get() {
-        debug("get");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-        return (0, load_bindings_1.asyncGet)(this.fd);
+        await super.get();
+        return asyncGet(this.fd);
       }
       async getBaudRate() {
-        debug("getBaudRate");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-        throw new Error("getBaudRate is not implemented on darwin");
-      }
-      async flush() {
-        debug("flush");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-        await (0, load_bindings_1.asyncFlush)(this.fd);
+        await super.get();
+        return asyncGetBaudRate(this.fd);
       }
       async drain() {
-        debug("drain");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
+        await super.drain();
         await this.writeOperation;
-        await (0, load_bindings_1.asyncDrain)(this.fd);
+        return asyncDrain(this.fd);
+      }
+      async flush() {
+        await super.flush();
+        return asyncFlush(this.fd);
       }
     };
-    exports.DarwinPortBinding = DarwinPortBinding;
+    module2.exports = DarwinBinding;
   }
 });
 
-// node_modules/@serialport/bindings-cpp/dist/linux-list.js
+// node_modules/@serialport/parser-delimiter/lib/index.js
+var require_lib4 = __commonJS({
+  "node_modules/@serialport/parser-delimiter/lib/index.js"(exports, module2) {
+    var { Transform } = require("stream");
+    var DelimiterParser = class extends Transform {
+      constructor(options = {}) {
+        super(options);
+        if (options.delimiter === void 0) {
+          throw new TypeError('"delimiter" is not a bufferable object');
+        }
+        if (options.delimiter.length === 0) {
+          throw new TypeError('"delimiter" has a 0 or undefined length');
+        }
+        this.includeDelimiter = options.includeDelimiter !== void 0 ? options.includeDelimiter : false;
+        this.delimiter = Buffer.from(options.delimiter);
+        this.buffer = Buffer.alloc(0);
+      }
+      _transform(chunk, encoding, cb) {
+        let data = Buffer.concat([this.buffer, chunk]);
+        let position;
+        while ((position = data.indexOf(this.delimiter)) !== -1) {
+          this.push(data.slice(0, position + (this.includeDelimiter ? this.delimiter.length : 0)));
+          data = data.slice(position + this.delimiter.length);
+        }
+        this.buffer = data;
+        cb();
+      }
+      _flush(cb) {
+        this.push(this.buffer);
+        this.buffer = Buffer.alloc(0);
+        cb();
+      }
+    };
+    module2.exports = DelimiterParser;
+  }
+});
+
+// node_modules/@serialport/parser-readline/lib/index.js
+var require_lib5 = __commonJS({
+  "node_modules/@serialport/parser-readline/lib/index.js"(exports, module2) {
+    var DelimiterParser = require_lib4();
+    var ReadLineParser = class extends DelimiterParser {
+      constructor(options) {
+        const opts = {
+          delimiter: Buffer.from("\n", "utf8"),
+          encoding: "utf8",
+          ...options
+        };
+        if (typeof opts.delimiter === "string") {
+          opts.delimiter = Buffer.from(opts.delimiter, opts.encoding);
+        }
+        super(opts);
+      }
+    };
+    module2.exports = ReadLineParser;
+  }
+});
+
+// node_modules/@serialport/bindings/lib/linux-list.js
 var require_linux_list = __commonJS({
-  "node_modules/@serialport/bindings-cpp/dist/linux-list.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.linuxList = void 0;
-    var child_process_1 = require("child_process");
-    var parser_readline_1 = require_dist9();
+  "node_modules/@serialport/bindings/lib/linux-list.js"(exports, module2) {
+    var childProcess = require("child_process");
+    var Readline = require_lib5();
     function checkPathOfDevice(path) {
       return /(tty(S|WCH|ACM|USB|AMA|MFD|O|XRUSB)|rfcomm)/.test(path) && path;
     }
@@ -26634,7 +25865,7 @@ var require_linux_list = __commonJS({
     function propVal(name, val) {
       if (name === "pnpId") {
         const match = val.match(/\/by-id\/([^\s]+)/);
-        return (match === null || match === void 0 ? void 0 : match[1]) || void 0;
+        return match && match[1] || void 0;
       }
       if (name === "manufacturer") {
         return decodeHexEscape(val);
@@ -26644,539 +25875,371 @@ var require_linux_list = __commonJS({
       }
       return val;
     }
-    function linuxList(spawnCmd = child_process_1.spawn) {
-      const ports = [];
-      const udevadm = spawnCmd("udevadm", ["info", "-e"]);
-      const lines = udevadm.stdout.pipe(new parser_readline_1.ReadlineParser());
-      let skipPort = false;
-      let port = {
-        path: "",
-        manufacturer: void 0,
-        serialNumber: void 0,
-        pnpId: void 0,
-        locationId: void 0,
-        vendorId: void 0,
-        productId: void 0
-      };
-      lines.on("data", (line) => {
-        const lineType = line.slice(0, 1);
-        const data = line.slice(3);
-        if (lineType === "P") {
-          port = {
-            path: "",
-            manufacturer: void 0,
-            serialNumber: void 0,
-            pnpId: void 0,
-            locationId: void 0,
-            vendorId: void 0,
-            productId: void 0
-          };
-          skipPort = false;
-          return;
-        }
-        if (skipPort) {
-          return;
-        }
-        if (lineType === "N") {
-          if (checkPathOfDevice(data)) {
-            ports.push(port);
-          } else {
-            skipPort = true;
-          }
-          return;
-        }
-        if (lineType === "E") {
-          const keyValue = data.match(/^(.+)=(.*)/);
-          if (!keyValue) {
-            return;
-          }
-          const key = propName(keyValue[1]);
-          if (!key) {
-            return;
-          }
-          port[key] = propVal(key, keyValue[2]);
-        }
-      });
+    function listLinux() {
       return new Promise((resolve, reject) => {
-        udevadm.on("close", (code) => {
-          if (code) {
-            reject(new Error(`Error listing ports udevadm exited with error code: ${code}`));
+        const ports = [];
+        const ude = childProcess.spawn("udevadm", ["info", "-e"]);
+        const lines = ude.stdout.pipe(new Readline());
+        ude.on("close", (code) => code && reject(new Error(`Error listing ports udevadm exited with error code: ${code}`)));
+        ude.on("error", reject);
+        lines.on("error", reject);
+        let port = {};
+        let skipPort = false;
+        lines.on("data", (line) => {
+          const lineType = line.slice(0, 1);
+          const data = line.slice(3);
+          if (lineType === "P") {
+            port = {
+              manufacturer: void 0,
+              serialNumber: void 0,
+              pnpId: void 0,
+              locationId: void 0,
+              vendorId: void 0,
+              productId: void 0
+            };
+            skipPort = false;
+            return;
+          }
+          if (skipPort) {
+            return;
+          }
+          if (lineType === "N") {
+            if (checkPathOfDevice(data)) {
+              ports.push(port);
+            } else {
+              skipPort = true;
+            }
+            return;
+          }
+          if (lineType === "E") {
+            const keyValue = data.match(/^(.+)=(.*)/);
+            if (!keyValue) {
+              return;
+            }
+            const key = propName(keyValue[1]);
+            if (!key) {
+              return;
+            }
+            port[key] = propVal(key, keyValue[2]);
           }
         });
-        udevadm.on("error", reject);
-        lines.on("error", reject);
         lines.on("finish", () => resolve(ports));
       });
     }
-    exports.linuxList = linuxList;
+    module2.exports = listLinux;
   }
 });
 
-// node_modules/@serialport/bindings-cpp/dist/linux.js
+// node_modules/@serialport/bindings/lib/linux.js
 var require_linux = __commonJS({
-  "node_modules/@serialport/bindings-cpp/dist/linux.js"(exports) {
-    "use strict";
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
-    };
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.LinuxPortBinding = exports.LinuxBinding = void 0;
-    var debug_1 = __importDefault(require_src4());
-    var linux_list_1 = require_linux_list();
-    var poller_1 = require_poller();
-    var unix_read_1 = require_unix_read();
-    var unix_write_1 = require_unix_write();
-    var load_bindings_1 = require_load_bindings();
-    var debug = (0, debug_1.default)("serialport/bindings-cpp");
-    exports.LinuxBinding = {
-      list() {
-        debug("list");
-        return (0, linux_list_1.linuxList)();
-      },
-      async open(options) {
-        if (!options || typeof options !== "object" || Array.isArray(options)) {
-          throw new TypeError('"options" is not an object');
-        }
-        if (!options.path) {
-          throw new TypeError('"path" is not a valid port');
-        }
-        if (!options.baudRate) {
-          throw new TypeError('"baudRate" is not a valid baudRate');
-        }
-        debug("open");
-        const openOptions = Object.assign({ vmin: 1, vtime: 0, dataBits: 8, lock: true, stopBits: 1, parity: "none", rtscts: false, xon: false, xoff: false, xany: false, hupcl: true }, options);
-        const fd = await (0, load_bindings_1.asyncOpen)(openOptions.path, openOptions);
-        this.fd = fd;
-        return new LinuxPortBinding(fd, openOptions);
+  "node_modules/@serialport/bindings/lib/linux.js"(exports, module2) {
+    var { promisify } = require("util");
+    var binding = require_bindings()("bindings.node");
+    var AbstractBinding = require_lib3();
+    var linuxList = require_linux_list();
+    var Poller = require_poller();
+    var unixRead = require_unix_read();
+    var unixWrite = require_unix_write();
+    var { wrapWithHiddenComName } = require_legacy();
+    var defaultBindingOptions = Object.freeze({
+      vmin: 1,
+      vtime: 0
+    });
+    var asyncOpen = promisify(binding.open);
+    var asyncClose = promisify(binding.close);
+    var asyncUpdate = promisify(binding.update);
+    var asyncSet = promisify(binding.set);
+    var asyncGet = promisify(binding.get);
+    var asyncGetBaudRate = promisify(binding.getBaudRate);
+    var asyncDrain = promisify(binding.drain);
+    var asyncFlush = promisify(binding.flush);
+    var LinuxBinding = class extends AbstractBinding {
+      static list() {
+        return wrapWithHiddenComName(linuxList());
       }
-    };
-    var LinuxPortBinding = class {
-      constructor(fd, openOptions) {
-        this.fd = fd;
-        this.openOptions = openOptions;
-        this.poller = new poller_1.Poller(fd);
+      constructor(opt = {}) {
+        super(opt);
+        this.bindingOptions = { ...defaultBindingOptions, ...opt.bindingOptions };
+        this.fd = null;
         this.writeOperation = null;
       }
       get isOpen() {
         return this.fd !== null;
       }
+      async open(path, options) {
+        await super.open(path, options);
+        this.openOptions = { ...this.bindingOptions, ...options };
+        const fd = await asyncOpen(path, this.openOptions);
+        this.fd = fd;
+        this.poller = new Poller(fd);
+      }
       async close() {
-        debug("close");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
+        await super.close();
         const fd = this.fd;
         this.poller.stop();
         this.poller.destroy();
+        this.poller = null;
+        this.openOptions = null;
         this.fd = null;
-        await (0, load_bindings_1.asyncClose)(fd);
+        return asyncClose(fd);
       }
       async read(buffer, offset, length) {
-        if (!Buffer.isBuffer(buffer)) {
-          throw new TypeError('"buffer" is not a Buffer');
-        }
-        if (typeof offset !== "number" || isNaN(offset)) {
-          throw new TypeError(`"offset" is not an integer got "${isNaN(offset) ? "NaN" : typeof offset}"`);
-        }
-        if (typeof length !== "number" || isNaN(length)) {
-          throw new TypeError(`"length" is not an integer got "${isNaN(length) ? "NaN" : typeof length}"`);
-        }
-        debug("read");
-        if (buffer.length < offset + length) {
-          throw new Error("buffer is too small");
-        }
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-        return (0, unix_read_1.unixRead)({ binding: this, buffer, offset, length });
+        await super.read(buffer, offset, length);
+        return unixRead({ binding: this, buffer, offset, length });
       }
       async write(buffer) {
-        if (!Buffer.isBuffer(buffer)) {
-          throw new TypeError('"buffer" is not a Buffer');
-        }
-        debug("write", buffer.length, "bytes");
-        if (!this.isOpen) {
-          debug("write", "error port is not open");
-          throw new Error("Port is not open");
-        }
-        this.writeOperation = (async () => {
+        this.writeOperation = super.write(buffer).then(async () => {
           if (buffer.length === 0) {
             return;
           }
-          await (0, unix_write_1.unixWrite)({ binding: this, buffer });
+          await unixWrite({ binding: this, buffer });
           this.writeOperation = null;
-        })();
-        return this.writeOperation;
-      }
-      async update(options) {
-        if (!options || typeof options !== "object" || Array.isArray(options)) {
-          throw TypeError('"options" is not an object');
-        }
-        if (typeof options.baudRate !== "number") {
-          throw new TypeError('"options.baudRate" is not a number');
-        }
-        debug("update");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-        await (0, load_bindings_1.asyncUpdate)(this.fd, options);
-      }
-      async set(options) {
-        if (!options || typeof options !== "object" || Array.isArray(options)) {
-          throw new TypeError('"options" is not an object');
-        }
-        debug("set");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-        await (0, load_bindings_1.asyncSet)(this.fd, options);
-      }
-      async get() {
-        debug("get");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-        return (0, load_bindings_1.asyncGet)(this.fd);
-      }
-      async getBaudRate() {
-        debug("getBaudRate");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-        return (0, load_bindings_1.asyncGetBaudRate)(this.fd);
-      }
-      async flush() {
-        debug("flush");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-        await (0, load_bindings_1.asyncFlush)(this.fd);
-      }
-      async drain() {
-        debug("drain");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-        await this.writeOperation;
-        await (0, load_bindings_1.asyncDrain)(this.fd);
-      }
-    };
-    exports.LinuxPortBinding = LinuxPortBinding;
-  }
-});
-
-// node_modules/@serialport/bindings-cpp/dist/win32-sn-parser.js
-var require_win32_sn_parser = __commonJS({
-  "node_modules/@serialport/bindings-cpp/dist/win32-sn-parser.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.serialNumParser = void 0;
-    var PARSERS = [/USB\\(?:.+)\\(.+)/, /FTDIBUS\\(?:.+)\+(.+?)A?\\.+/];
-    var serialNumParser = (pnpId) => {
-      if (!pnpId) {
-        return null;
-      }
-      for (const parser of PARSERS) {
-        const sn = pnpId.match(parser);
-        if (sn) {
-          return sn[1];
-        }
-      }
-      return null;
-    };
-    exports.serialNumParser = serialNumParser;
-  }
-});
-
-// node_modules/@serialport/bindings-cpp/dist/win32.js
-var require_win32 = __commonJS({
-  "node_modules/@serialport/bindings-cpp/dist/win32.js"(exports) {
-    "use strict";
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
-    };
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.WindowsPortBinding = exports.WindowsBinding = void 0;
-    var debug_1 = __importDefault(require_src4());
-    var _1 = require_dist17();
-    var load_bindings_1 = require_load_bindings();
-    var win32_sn_parser_1 = require_win32_sn_parser();
-    var debug = (0, debug_1.default)("serialport/bindings-cpp");
-    exports.WindowsBinding = {
-      async list() {
-        const ports = await (0, load_bindings_1.asyncList)();
-        return ports.map((port) => {
-          if (port.pnpId && !port.serialNumber) {
-            const serialNumber = (0, win32_sn_parser_1.serialNumParser)(port.pnpId);
-            if (serialNumber) {
-              return Object.assign(Object.assign({}, port), { serialNumber });
-            }
-          }
-          return port;
         });
-      },
-      async open(options) {
-        if (!options || typeof options !== "object" || Array.isArray(options)) {
-          throw new TypeError('"options" is not an object');
-        }
-        if (!options.path) {
-          throw new TypeError('"path" is not a valid port');
-        }
-        if (!options.baudRate) {
-          throw new TypeError('"baudRate" is not a valid baudRate');
-        }
-        debug("open");
-        const openOptions = Object.assign({ dataBits: 8, lock: true, stopBits: 1, parity: "none", rtscts: false, rtsMode: "handshake", xon: false, xoff: false, xany: false, hupcl: true }, options);
-        const fd = await (0, load_bindings_1.asyncOpen)(openOptions.path, openOptions);
-        return new WindowsPortBinding(fd, openOptions);
-      }
-    };
-    var WindowsPortBinding = class {
-      constructor(fd, options) {
-        this.fd = fd;
-        this.openOptions = options;
-        this.writeOperation = null;
-      }
-      get isOpen() {
-        return this.fd !== null;
-      }
-      async close() {
-        debug("close");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-        const fd = this.fd;
-        this.fd = null;
-        await (0, load_bindings_1.asyncClose)(fd);
-      }
-      async read(buffer, offset, length) {
-        if (!Buffer.isBuffer(buffer)) {
-          throw new TypeError('"buffer" is not a Buffer');
-        }
-        if (typeof offset !== "number" || isNaN(offset)) {
-          throw new TypeError(`"offset" is not an integer got "${isNaN(offset) ? "NaN" : typeof offset}"`);
-        }
-        if (typeof length !== "number" || isNaN(length)) {
-          throw new TypeError(`"length" is not an integer got "${isNaN(length) ? "NaN" : typeof length}"`);
-        }
-        debug("read");
-        if (buffer.length < offset + length) {
-          throw new Error("buffer is too small");
-        }
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-        try {
-          const bytesRead = await (0, load_bindings_1.asyncRead)(this.fd, buffer, offset, length);
-          return { bytesRead, buffer };
-        } catch (err) {
-          if (!this.isOpen) {
-            throw new _1.BindingsError(err.message, { canceled: true });
-          }
-          throw err;
-        }
-      }
-      async write(buffer) {
-        if (!Buffer.isBuffer(buffer)) {
-          throw new TypeError('"buffer" is not a Buffer');
-        }
-        debug("write", buffer.length, "bytes");
-        if (!this.isOpen) {
-          debug("write", "error port is not open");
-          throw new Error("Port is not open");
-        }
-        this.writeOperation = (async () => {
-          if (buffer.length === 0) {
-            return;
-          }
-          await (0, load_bindings_1.asyncWrite)(this.fd, buffer);
-          this.writeOperation = null;
-        })();
         return this.writeOperation;
       }
       async update(options) {
-        if (!options || typeof options !== "object" || Array.isArray(options)) {
-          throw TypeError('"options" is not an object');
-        }
-        if (typeof options.baudRate !== "number") {
-          throw new TypeError('"options.baudRate" is not a number');
-        }
-        debug("update");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-        await (0, load_bindings_1.asyncUpdate)(this.fd, options);
+        await super.update(options);
+        return asyncUpdate(this.fd, options);
       }
       async set(options) {
-        if (!options || typeof options !== "object" || Array.isArray(options)) {
-          throw new TypeError('"options" is not an object');
-        }
-        debug("set", options);
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-        await (0, load_bindings_1.asyncSet)(this.fd, options);
+        await super.set(options);
+        return asyncSet(this.fd, options);
       }
       async get() {
-        debug("get");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-        return (0, load_bindings_1.asyncGet)(this.fd);
+        await super.get();
+        return asyncGet(this.fd);
       }
       async getBaudRate() {
-        debug("getBaudRate");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-        return (0, load_bindings_1.asyncGetBaudRate)(this.fd);
-      }
-      async flush() {
-        debug("flush");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-        await (0, load_bindings_1.asyncFlush)(this.fd);
+        await super.get();
+        return asyncGetBaudRate(this.fd);
       }
       async drain() {
-        debug("drain");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
+        await super.drain();
         await this.writeOperation;
-        await (0, load_bindings_1.asyncDrain)(this.fd);
+        return asyncDrain(this.fd);
+      }
+      async flush() {
+        await super.flush();
+        return asyncFlush(this.fd);
       }
     };
-    exports.WindowsPortBinding = WindowsPortBinding;
+    module2.exports = LinuxBinding;
   }
 });
 
-// node_modules/@serialport/bindings-interface/dist/index.js
-var require_dist16 = __commonJS({
-  "node_modules/@serialport/bindings-interface/dist/index.js"() {
-    "use strict";
-  }
-});
-
-// node_modules/@serialport/bindings-cpp/dist/index.js
-var require_dist17 = __commonJS({
-  "node_modules/@serialport/bindings-cpp/dist/index.js"(exports) {
-    "use strict";
-    var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      var desc = Object.getOwnPropertyDescriptor(m, k);
-      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-        desc = { enumerable: true, get: function() {
-          return m[k];
-        } };
-      }
-      Object.defineProperty(o, k2, desc);
-    } : function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      o[k2] = m[k];
-    });
-    var __exportStar = exports && exports.__exportStar || function(m, exports2) {
-      for (var p in m)
-        if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports2, p))
-          __createBinding(exports2, m, p);
-    };
-    var __importDefault = exports && exports.__importDefault || function(mod) {
-      return mod && mod.__esModule ? mod : { "default": mod };
-    };
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.autoDetect = void 0;
-    var debug_1 = __importDefault(require_src4());
-    var darwin_1 = require_darwin();
-    var linux_1 = require_linux();
-    var win32_1 = require_win32();
-    var debug = (0, debug_1.default)("serialport/bindings-cpp");
-    __exportStar(require_dist16(), exports);
-    __exportStar(require_darwin(), exports);
-    __exportStar(require_linux(), exports);
-    __exportStar(require_win32(), exports);
-    __exportStar(require_errors(), exports);
-    function autoDetect() {
-      switch (process.platform) {
-        case "win32":
-          debug("loading WindowsBinding");
-          return win32_1.WindowsBinding;
-        case "darwin":
-          debug("loading DarwinBinding");
-          return darwin_1.DarwinBinding;
-        default:
-          debug("loading LinuxBinding");
-          return linux_1.LinuxBinding;
-      }
+// node_modules/@serialport/bindings/lib/index.js
+var require_lib6 = __commonJS({
+  "node_modules/@serialport/bindings/lib/index.js"(exports, module2) {
+    var debug = require_src4()("serialport/bindings");
+    switch (process.platform) {
+      case "win32":
+        debug("loading WindowsBinding");
+        module2.exports = require_win32();
+        break;
+      case "darwin":
+        debug("loading DarwinBinding");
+        module2.exports = require_darwin();
+        break;
+      default:
+        debug("loading LinuxBinding");
+        module2.exports = require_linux();
     }
-    exports.autoDetect = autoDetect;
   }
 });
 
-// node_modules/serialport/dist/serialport.js
-var require_serialport = __commonJS({
-  "node_modules/serialport/dist/serialport.js"(exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.SerialPort = void 0;
-    var stream_1 = require_dist14();
-    var bindings_cpp_1 = require_dist17();
-    var DetectedBinding = (0, bindings_cpp_1.autoDetect)();
-    var SerialPort = class extends stream_1.SerialPortStream {
-      constructor(options, openCallback) {
+// node_modules/@serialport/parser-byte-length/lib/index.js
+var require_lib7 = __commonJS({
+  "node_modules/@serialport/parser-byte-length/lib/index.js"(exports, module2) {
+    var { Transform } = require("stream");
+    var ByteLengthParser = class extends Transform {
+      constructor(options = {}) {
+        super(options);
+        if (typeof options.length !== "number") {
+          throw new TypeError('"length" is not a number');
+        }
+        if (options.length < 1) {
+          throw new TypeError('"length" is not greater than 0');
+        }
+        this.length = options.length;
+        this.position = 0;
+        this.buffer = Buffer.alloc(this.length);
+      }
+      _transform(chunk, encoding, cb) {
+        let cursor = 0;
+        while (cursor < chunk.length) {
+          this.buffer[this.position] = chunk[cursor];
+          cursor++;
+          this.position++;
+          if (this.position === this.length) {
+            this.push(this.buffer);
+            this.buffer = Buffer.alloc(this.length);
+            this.position = 0;
+          }
+        }
+        cb();
+      }
+      _flush(cb) {
+        this.push(this.buffer.slice(0, this.position));
+        this.buffer = Buffer.alloc(this.length);
+        cb();
+      }
+    };
+    module2.exports = ByteLengthParser;
+  }
+});
+
+// node_modules/@serialport/parser-cctalk/lib/index.js
+var require_lib8 = __commonJS({
+  "node_modules/@serialport/parser-cctalk/lib/index.js"(exports, module2) {
+    var { Transform } = require("stream");
+    var CCTalkParser = class extends Transform {
+      constructor(maxDelayBetweenBytesMs = 50) {
+        super();
+        this.array = [];
+        this.cursor = 0;
+        this.lastByteFetchTime = 0;
+        this.maxDelayBetweenBytesMs = maxDelayBetweenBytesMs;
+      }
+      _transform(buffer, _, cb) {
+        if (this.maxDelayBetweenBytesMs > 0) {
+          const now = Date.now();
+          if (now - this.lastByteFetchTime > this.maxDelayBetweenBytesMs) {
+            this.array = [];
+            this.cursor = 0;
+          }
+          this.lastByteFetchTime = now;
+        }
+        this.cursor += buffer.length;
+        Array.from(buffer).map((byte) => this.array.push(byte));
+        while (this.cursor > 1 && this.cursor >= this.array[1] + 5) {
+          const FullMsgLength = this.array[1] + 5;
+          const frame = Buffer.from(this.array.slice(0, FullMsgLength));
+          this.array = this.array.slice(frame.length, this.array.length);
+          this.cursor -= FullMsgLength;
+          this.push(frame);
+        }
+        cb();
+      }
+    };
+    module2.exports = CCTalkParser;
+  }
+});
+
+// node_modules/@serialport/parser-ready/lib/index.js
+var require_lib9 = __commonJS({
+  "node_modules/@serialport/parser-ready/lib/index.js"(exports, module2) {
+    var { Transform } = require("stream");
+    var ReadyParser = class extends Transform {
+      constructor(options = {}) {
+        if (options.delimiter === void 0) {
+          throw new TypeError('"delimiter" is not a bufferable object');
+        }
+        if (options.delimiter.length === 0) {
+          throw new TypeError('"delimiter" has a 0 or undefined length');
+        }
+        super(options);
+        this.delimiter = Buffer.from(options.delimiter);
+        this.readOffset = 0;
+        this.ready = false;
+      }
+      _transform(chunk, encoding, cb) {
+        if (this.ready) {
+          this.push(chunk);
+          return cb();
+        }
+        const delimiter = this.delimiter;
+        let chunkOffset = 0;
+        while (this.readOffset < delimiter.length && chunkOffset < chunk.length) {
+          if (delimiter[this.readOffset] === chunk[chunkOffset]) {
+            this.readOffset++;
+          } else {
+            this.readOffset = 0;
+          }
+          chunkOffset++;
+        }
+        if (this.readOffset === delimiter.length) {
+          this.ready = true;
+          this.emit("ready");
+          const chunkRest = chunk.slice(chunkOffset);
+          if (chunkRest.length > 0) {
+            this.push(chunkRest);
+          }
+        }
+        cb();
+      }
+    };
+    module2.exports = ReadyParser;
+  }
+});
+
+// node_modules/@serialport/parser-regex/lib/index.js
+var require_lib10 = __commonJS({
+  "node_modules/@serialport/parser-regex/lib/index.js"(exports, module2) {
+    var { Transform } = require("stream");
+    var RegexParser = class extends Transform {
+      constructor(options) {
         const opts = {
-          binding: DetectedBinding,
+          encoding: "utf8",
           ...options
         };
-        super(opts, openCallback);
+        if (opts.regex === void 0) {
+          throw new TypeError('"options.regex" must be a regular expression pattern or object');
+        }
+        if (!(opts.regex instanceof RegExp)) {
+          opts.regex = new RegExp(opts.regex);
+        }
+        super(opts);
+        this.regex = opts.regex;
+        this.data = "";
+      }
+      _transform(chunk, encoding, cb) {
+        const data = this.data + chunk;
+        const parts = data.split(this.regex);
+        this.data = parts.pop();
+        parts.forEach((part) => {
+          this.push(part);
+        });
+        cb();
+      }
+      _flush(cb) {
+        this.push(this.data);
+        this.data = "";
+        cb();
       }
     };
-    exports.SerialPort = SerialPort;
-    SerialPort.list = DetectedBinding.list;
-    SerialPort.binding = DetectedBinding;
+    module2.exports = RegexParser;
   }
 });
 
-// node_modules/serialport/dist/index.js
-var require_dist18 = __commonJS({
-  "node_modules/serialport/dist/index.js"(exports) {
-    "use strict";
-    var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
-    } : function(o, m, k, k2) {
-      if (k2 === void 0)
-        k2 = k;
-      o[k2] = m[k];
-    });
-    var __exportStar = exports && exports.__exportStar || function(m, exports2) {
-      for (var p in m)
-        if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports2, p))
-          __createBinding(exports2, m, p);
+// node_modules/serialport/lib/parsers.js
+var require_parsers = __commonJS({
+  "node_modules/serialport/lib/parsers.js"(exports, module2) {
+    module2.exports = {
+      ByteLength: require_lib7(),
+      CCTalk: require_lib8(),
+      Delimiter: require_lib4(),
+      Readline: require_lib5(),
+      Ready: require_lib9(),
+      Regex: require_lib10()
     };
-    Object.defineProperty(exports, "__esModule", { value: true });
-    __exportStar(require_dist4(), exports);
-    __exportStar(require_dist5(), exports);
-    __exportStar(require_dist6(), exports);
-    __exportStar(require_dist7(), exports);
-    __exportStar(require_dist8(), exports);
-    __exportStar(require_dist9(), exports);
-    __exportStar(require_dist10(), exports);
-    __exportStar(require_dist11(), exports);
-    __exportStar(require_dist12(), exports);
-    __exportStar(require_dist13(), exports);
-    __exportStar(require_serialport_mock(), exports);
-    __exportStar(require_serialport(), exports);
   }
 });
 
-// node_modules/firmata/lib/encoder7bit.js
+// node_modules/serialport/lib/index.js
+var require_lib11 = __commonJS({
+  "node_modules/serialport/lib/index.js"(exports, module2) {
+    var SerialPort = require_lib2();
+    var Binding = require_lib6();
+    var parsers = require_parsers();
+    SerialPort.Binding = Binding;
+    SerialPort.parsers = parsers;
+    module2.exports = SerialPort;
+  }
+});
+
+// node_modules/firmata-io/lib/encoder7bit.js
 var require_encoder7bit = __commonJS({
-  "node_modules/firmata/lib/encoder7bit.js"(exports, module2) {
+  "node_modules/firmata-io/lib/encoder7bit.js"(exports, module2) {
     "use strict";
     module2.exports = {
       to7BitArray(data) {
@@ -27219,9 +26282,9 @@ var require_encoder7bit = __commonJS({
   }
 });
 
-// node_modules/firmata/lib/onewireutils.js
+// node_modules/firmata-io/lib/onewireutils.js
 var require_onewireutils = __commonJS({
-  "node_modules/firmata/lib/onewireutils.js"(exports, module2) {
+  "node_modules/firmata-io/lib/onewireutils.js"(exports, module2) {
     "use strict";
     var Encoder7Bit = require_encoder7bit();
     var OneWireUtils = {
@@ -27260,9 +26323,9 @@ var require_onewireutils = __commonJS({
   }
 });
 
-// node_modules/firmata/lib/firmata-io.js
-var require_firmata_io = __commonJS({
-  "node_modules/firmata/lib/firmata-io.js"(exports, module2) {
+// node_modules/firmata-io/lib/firmata.js
+var require_firmata = __commonJS({
+  "node_modules/firmata-io/lib/firmata.js"(exports, module2) {
     "use strict";
     var Emitter = require("events");
     var Encoder7Bit = require_encoder7bit();
@@ -27534,8 +26597,7 @@ var require_firmata_io = __commonJS({
           samplingInterval: 19,
           serialport: {
             baudRate: 57600,
-            highWaterMark: 256,
-            path: port
+            highWaterMark: 256
           }
         };
         const settings = Object.assign({}, defaults, options);
@@ -27633,10 +26695,10 @@ var require_firmata_io = __commonJS({
           if (!Transport) {
             throw new Error("Missing Default Transport");
           }
-          this.transport = new Transport(settings.serialport);
+          this.transport = new Transport(port, settings.serialport);
         }
         this.transport.on("close", (event) => {
-          if (event && event.disconnected) {
+          if (event && event.disconnect && event.disconnected) {
             this.emit("disconnect");
             return;
           }
@@ -27749,7 +26811,11 @@ var require_firmata_io = __commonJS({
       }
       queryFirmware(callback) {
         this.once("queryfirmware", callback);
-        writeToTransport(this, [START_SYSEX, QUERY_FIRMWARE, END_SYSEX]);
+        writeToTransport(this, [
+          START_SYSEX,
+          QUERY_FIRMWARE,
+          END_SYSEX
+        ]);
       }
       analogRead(pin, callback) {
         this.reportAnalogPin(pin, 1);
@@ -27777,7 +26843,11 @@ var require_firmata_io = __commonJS({
           }
           data[data.length] = END_SYSEX;
         } else {
-          data = [ANALOG_MESSAGE | pin, value & 127, value >> 7 & 127];
+          data = [
+            ANALOG_MESSAGE | pin,
+            value & 127,
+            value >> 7 & 127
+          ];
         }
         writeToTransport(this, data);
       }
@@ -27817,7 +26887,11 @@ var require_firmata_io = __commonJS({
           this.pins[this.analogPins[pin]].mode = mode;
         } else {
           this.pins[pin].mode = mode;
-          writeToTransport(this, [PIN_MODE, pin, mode]);
+          writeToTransport(this, [
+            PIN_MODE,
+            pin,
+            mode
+          ]);
         }
       }
       digitalWrite(pin, value, enqueue) {
@@ -27860,15 +26934,28 @@ var require_firmata_io = __commonJS({
       }
       queryCapabilities(callback) {
         this.once("capability-query", callback);
-        writeToTransport(this, [START_SYSEX, CAPABILITY_QUERY, END_SYSEX]);
+        writeToTransport(this, [
+          START_SYSEX,
+          CAPABILITY_QUERY,
+          END_SYSEX
+        ]);
       }
       queryAnalogMapping(callback) {
         this.once("analog-mapping-query", callback);
-        writeToTransport(this, [START_SYSEX, ANALOG_MAPPING_QUERY, END_SYSEX]);
+        writeToTransport(this, [
+          START_SYSEX,
+          ANALOG_MAPPING_QUERY,
+          END_SYSEX
+        ]);
       }
       queryPinState(pin, callback) {
         this.once(`pin-state-${pin}`, callback);
-        writeToTransport(this, [START_SYSEX, PIN_STATE_QUERY, pin, END_SYSEX]);
+        writeToTransport(this, [
+          START_SYSEX,
+          PIN_STATE_QUERY,
+          pin,
+          END_SYSEX
+        ]);
       }
       sendString(string) {
         const bytes = Buffer.from(`${string}\0`, "utf8");
@@ -27928,7 +27015,12 @@ var require_firmata_io = __commonJS({
         i2cRequest(this, data);
       }
       i2cWrite(address, registerOrData, inBytes) {
-        const data = [START_SYSEX, I2C_REQUEST, address, this.I2C_MODES.WRITE << 3];
+        const data = [
+          START_SYSEX,
+          I2C_REQUEST,
+          address,
+          this.I2C_MODES.WRITE << 3
+        ];
         if (arguments.length === 3 && !Array.isArray(registerOrData) && !Array.isArray(inBytes)) {
           return this.i2cWriteReg(address, registerOrData, inBytes);
         }
@@ -28026,7 +27118,12 @@ var require_firmata_io = __commonJS({
           bytesToRead = register;
           register = null;
         }
-        const data = [START_SYSEX, I2C_REQUEST, address, this.I2C_MODES.READ << 3];
+        const data = [
+          START_SYSEX,
+          I2C_REQUEST,
+          address,
+          this.I2C_MODES.READ << 3
+        ];
         let event = `I2C-reply-${address}-`;
         if (register !== null) {
           data.push(register & 127, register >> 7 & 127);
@@ -28056,7 +27153,13 @@ var require_firmata_io = __commonJS({
         this[SYM_sendOneWireSearch](ONEWIRE_SEARCH_ALARMS_REQUEST, `1-wire-search-alarms-reply-${pin}`, pin, callback);
       }
       [SYM_sendOneWireSearch](type, event, pin, callback) {
-        writeToTransport(this, [START_SYSEX, ONEWIRE_DATA, type, pin, END_SYSEX]);
+        writeToTransport(this, [
+          START_SYSEX,
+          ONEWIRE_DATA,
+          type,
+          pin,
+          END_SYSEX
+        ]);
         const timeout = setTimeout(() => {
           callback(new Error("1-Wire device search timeout - are you running ConfigurableFirmata?"));
         }, 5e3);
@@ -28149,21 +27252,32 @@ var require_firmata_io = __commonJS({
       reportAnalogPin(pin, value) {
         if (value === 0 || value === 1) {
           this.pins[this.analogPins[pin]].report = value;
-          writeToTransport(this, [REPORT_ANALOG | pin, value]);
+          writeToTransport(this, [
+            REPORT_ANALOG | pin,
+            value
+          ]);
         }
       }
       reportDigitalPin(pin, value) {
         const port = pin >> 3;
         if (value === 0 || value === 1) {
           this.pins[pin].report = value;
-          writeToTransport(this, [REPORT_DIGITAL | port, value]);
+          writeToTransport(this, [
+            REPORT_DIGITAL | port,
+            value
+          ]);
         }
       }
       pingRead(options, callback) {
         if (!this.pins[options.pin].supportedModes.includes(PING_READ)) {
           throw new Error("Please upload PingFirmata to the board");
         }
-        const { pin, value, pulseOut = 0, timeout = 1e6 } = options;
+        const {
+          pin,
+          value,
+          pulseOut = 0,
+          timeout = 1e6
+        } = options;
         writeToTransport(this, [
           START_SYSEX,
           PING_READ,
@@ -28437,7 +27551,11 @@ var require_firmata_io = __commonJS({
         writeToTransport(this, data);
       }
       serialWrite(portId, bytes) {
-        const data = [START_SYSEX, SERIAL_MESSAGE, SERIAL_WRITE | portId];
+        const data = [
+          START_SYSEX,
+          SERIAL_MESSAGE,
+          SERIAL_WRITE | portId
+        ];
         for (let i = 0, len = bytes.length; i < len; i++) {
           data.push(bytes[i] & 127, bytes[i] >> 7 & 127);
         }
@@ -28515,7 +27633,11 @@ var require_firmata_io = __commonJS({
         if (!message || !message.length) {
           throw new Error("Sysex Command cannot be empty");
         }
-        writeToTransport(this, [START_SYSEX, ...message.slice(), END_SYSEX]);
+        writeToTransport(this, [
+          START_SYSEX,
+          ...message.slice(),
+          END_SYSEX
+        ]);
         return this;
       }
       reset() {
@@ -28716,7 +27838,7 @@ var require_com = __commonJS({
       if (process.env.IS_TEST_MODE) {
         com = TransportStub;
       } else {
-        SerialPort = require_dist18().SerialPort;
+        SerialPort = require_lib11();
         com = SerialPort;
       }
     } catch (err) {
@@ -28738,10 +27860,10 @@ var require_com = __commonJS({
 });
 
 // node_modules/firmata/lib/firmata.js
-var require_firmata = __commonJS({
+var require_firmata2 = __commonJS({
   "node_modules/firmata/lib/firmata.js"(exports, module2) {
     "use strict";
-    module2.exports = require_firmata_io()(require_com());
+    module2.exports = require_firmata()(require_com());
   }
 });
 
@@ -30326,10 +29448,11 @@ var require_board = __commonJS({
       detect(callback) {
         const maxAttempts = 10;
         const retryDelay = 400;
+        let serialport;
         if (parseFloat(process.versions.nw) >= 0.13) {
           serialport = require_browser_serialport();
         } else {
-          serialport = require_dist18().SerialPort;
+          serialport = require_lib11();
         }
         serialport.list().then((results) => {
           const portPaths = results.reduce((accum, result) => {
@@ -30368,7 +29491,7 @@ var require_board = __commonJS({
         });
       },
       connect(portOrPath, callback) {
-        const IO = require_firmata().Board;
+        const IO = require_firmata2().Board;
         let caught = null;
         let io2;
         let isConnected;
@@ -30652,7 +29775,12 @@ var require_board = __commonJS({
       }
     };
     var logging = {
-      specials: ["error", "fail", "warn", "info"],
+      specials: [
+        "error",
+        "fail",
+        "warn",
+        "info"
+      ],
       colors: {
         log: "white",
         error: "red",
@@ -47085,9 +46213,9 @@ var require_oled_font_5x7 = __commonJS({
   }
 });
 
-// ../oled-js/node_modules/qr-image/lib/encode.js
+// node_modules/qr-image/lib/encode.js
 var require_encode = __commonJS({
-  "../oled-js/node_modules/qr-image/lib/encode.js"(exports, module2) {
+  "node_modules/qr-image/lib/encode.js"(exports, module2) {
     "use strict";
     function pushBits(arr, n, value) {
       for (var bit = 1 << n - 1; bit; bit = bit >>> 1) {
@@ -47224,9 +46352,9 @@ var require_encode = __commonJS({
   }
 });
 
-// ../oled-js/node_modules/qr-image/lib/errorcode.js
+// node_modules/qr-image/lib/errorcode.js
 var require_errorcode = __commonJS({
-  "../oled-js/node_modules/qr-image/lib/errorcode.js"(exports, module2) {
+  "node_modules/qr-image/lib/errorcode.js"(exports, module2) {
     "use strict";
     var GF256_BASE = 285;
     var EXP_TABLE = [1];
@@ -47293,9 +46421,9 @@ var require_errorcode = __commonJS({
   }
 });
 
-// ../oled-js/node_modules/qr-image/lib/matrix.js
+// node_modules/qr-image/lib/matrix.js
 var require_matrix2 = __commonJS({
-  "../oled-js/node_modules/qr-image/lib/matrix.js"(exports, module2) {
+  "node_modules/qr-image/lib/matrix.js"(exports, module2) {
     "use strict";
     function init(version) {
       var N = version * 4 + 17;
@@ -47642,9 +46770,9 @@ var require_matrix2 = __commonJS({
   }
 });
 
-// ../oled-js/node_modules/qr-image/lib/qr-base.js
+// node_modules/qr-image/lib/qr-base.js
 var require_qr_base = __commonJS({
-  "../oled-js/node_modules/qr-image/lib/qr-base.js"(exports, module2) {
+  "node_modules/qr-image/lib/qr-base.js"(exports, module2) {
     "use strict";
     var encode = require_encode();
     var calculateEC = require_errorcode();
@@ -47801,9 +46929,9 @@ var require_qr_base = __commonJS({
   }
 });
 
-// ../oled-js/node_modules/qr-image/lib/crc32buffer.js
+// node_modules/qr-image/lib/crc32buffer.js
 var require_crc32buffer = __commonJS({
-  "../oled-js/node_modules/qr-image/lib/crc32buffer.js"(exports, module2) {
+  "node_modules/qr-image/lib/crc32buffer.js"(exports, module2) {
     "use strict";
     var crc_table = [];
     for (var n = 0; n < 256; n++) {
@@ -47853,9 +46981,9 @@ var require_crc32buffer = __commonJS({
   }
 });
 
-// ../oled-js/node_modules/qr-image/lib/crc32.js
+// node_modules/qr-image/lib/crc32.js
 var require_crc32 = __commonJS({
-  "../oled-js/node_modules/qr-image/lib/crc32.js"(exports, module2) {
+  "node_modules/qr-image/lib/crc32.js"(exports, module2) {
     "use strict";
     (function() {
       if (process.arch === "arm") {
@@ -47897,9 +47025,9 @@ var require_crc32 = __commonJS({
   }
 });
 
-// ../oled-js/node_modules/qr-image/lib/png.js
+// node_modules/qr-image/lib/png.js
 var require_png = __commonJS({
-  "../oled-js/node_modules/qr-image/lib/png.js"(exports, module2) {
+  "node_modules/qr-image/lib/png.js"(exports, module2) {
     "use strict";
     var zlib = require("zlib");
     var crc32 = require_crc32();
@@ -47956,9 +47084,9 @@ var require_png = __commonJS({
   }
 });
 
-// ../oled-js/node_modules/qr-image/lib/vector.js
+// node_modules/qr-image/lib/vector.js
 var require_vector = __commonJS({
-  "../oled-js/node_modules/qr-image/lib/vector.js"(exports, module2) {
+  "node_modules/qr-image/lib/vector.js"(exports, module2) {
     "use strict";
     function matrix2path(matrix) {
       var N = matrix.length;
@@ -48201,9 +47329,9 @@ var require_vector = __commonJS({
   }
 });
 
-// ../oled-js/node_modules/qr-image/lib/qr.js
+// node_modules/qr-image/lib/qr.js
 var require_qr = __commonJS({
-  "../oled-js/node_modules/qr-image/lib/qr.js"(exports, module2) {
+  "node_modules/qr-image/lib/qr.js"(exports, module2) {
     "use strict";
     var Readable2 = require("stream").Readable;
     var QR = require_qr_base().QR;
@@ -48308,9 +47436,9 @@ var require_qr = __commonJS({
   }
 });
 
-// ../oled-js/build/oled.js
+// node_modules/oled-js/build/oled.js
 var require_oled = __commonJS({
-  "../oled-js/build/oled.js"(exports) {
+  "node_modules/oled-js/build/oled.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var qr2 = null;
@@ -48913,1229 +48041,6 @@ var require_oled = __commonJS({
   }
 });
 
-// node_modules/qr-image/lib/encode.js
-var require_encode2 = __commonJS({
-  "node_modules/qr-image/lib/encode.js"(exports, module2) {
-    "use strict";
-    function pushBits(arr, n, value) {
-      for (var bit = 1 << n - 1; bit; bit = bit >>> 1) {
-        arr.push(bit & value ? 1 : 0);
-      }
-    }
-    function encode_8bit(data) {
-      var len = data.length;
-      var bits = [];
-      for (var i = 0; i < len; i++) {
-        pushBits(bits, 8, data[i]);
-      }
-      var res = {};
-      var d = [0, 1, 0, 0];
-      pushBits(d, 16, len);
-      res.data10 = res.data27 = d.concat(bits);
-      if (len < 256) {
-        var d = [0, 1, 0, 0];
-        pushBits(d, 8, len);
-        res.data1 = d.concat(bits);
-      }
-      return res;
-    }
-    var ALPHANUM = function(s) {
-      var res = {};
-      for (var i = 0; i < s.length; i++) {
-        res[s[i]] = i;
-      }
-      return res;
-    }("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:");
-    function encode_alphanum(str) {
-      var len = str.length;
-      var bits = [];
-      for (var i = 0; i < len; i += 2) {
-        var b = 6;
-        var n = ALPHANUM[str[i]];
-        if (str[i + 1]) {
-          b = 11;
-          n = n * 45 + ALPHANUM[str[i + 1]];
-        }
-        pushBits(bits, b, n);
-      }
-      var res = {};
-      var d = [0, 0, 1, 0];
-      pushBits(d, 13, len);
-      res.data27 = d.concat(bits);
-      if (len < 2048) {
-        var d = [0, 0, 1, 0];
-        pushBits(d, 11, len);
-        res.data10 = d.concat(bits);
-      }
-      if (len < 512) {
-        var d = [0, 0, 1, 0];
-        pushBits(d, 9, len);
-        res.data1 = d.concat(bits);
-      }
-      return res;
-    }
-    function encode_numeric(str) {
-      var len = str.length;
-      var bits = [];
-      for (var i = 0; i < len; i += 3) {
-        var s = str.substr(i, 3);
-        var b = Math.ceil(s.length * 10 / 3);
-        pushBits(bits, b, parseInt(s, 10));
-      }
-      var res = {};
-      var d = [0, 0, 0, 1];
-      pushBits(d, 14, len);
-      res.data27 = d.concat(bits);
-      if (len < 4096) {
-        var d = [0, 0, 0, 1];
-        pushBits(d, 12, len);
-        res.data10 = d.concat(bits);
-      }
-      if (len < 1024) {
-        var d = [0, 0, 0, 1];
-        pushBits(d, 10, len);
-        res.data1 = d.concat(bits);
-      }
-      return res;
-    }
-    function encode_url(str) {
-      var slash = str.indexOf("/", 8) + 1 || str.length;
-      var res = encode(str.slice(0, slash).toUpperCase(), false);
-      if (slash >= str.length) {
-        return res;
-      }
-      var path_res = encode(str.slice(slash), false);
-      res.data27 = res.data27.concat(path_res.data27);
-      if (res.data10 && path_res.data10) {
-        res.data10 = res.data10.concat(path_res.data10);
-      }
-      if (res.data1 && path_res.data1) {
-        res.data1 = res.data1.concat(path_res.data1);
-      }
-      return res;
-    }
-    function encode(data, parse_url) {
-      var str;
-      var t = typeof data;
-      if (t == "string" || t == "number") {
-        str = "" + data;
-        data = new Buffer(str);
-      } else if (Buffer.isBuffer(data)) {
-        str = data.toString();
-      } else if (Array.isArray(data)) {
-        data = new Buffer(data);
-        str = data.toString();
-      } else {
-        throw new Error("Bad data");
-      }
-      if (/^[0-9]+$/.test(str)) {
-        if (data.length > 7089) {
-          throw new Error("Too much data");
-        }
-        return encode_numeric(str);
-      }
-      if (/^[0-9A-Z \$%\*\+\.\/\:\-]+$/.test(str)) {
-        if (data.length > 4296) {
-          throw new Error("Too much data");
-        }
-        return encode_alphanum(str);
-      }
-      if (parse_url && /^https?:/i.test(str)) {
-        return encode_url(str);
-      }
-      if (data.length > 2953) {
-        throw new Error("Too much data");
-      }
-      return encode_8bit(data);
-    }
-    module2.exports = encode;
-  }
-});
-
-// node_modules/qr-image/lib/errorcode.js
-var require_errorcode2 = __commonJS({
-  "node_modules/qr-image/lib/errorcode.js"(exports, module2) {
-    "use strict";
-    var GF256_BASE = 285;
-    var EXP_TABLE = [1];
-    var LOG_TABLE = [];
-    for (var i = 1; i < 256; i++) {
-      n = EXP_TABLE[i - 1] << 1;
-      if (n > 255)
-        n = n ^ GF256_BASE;
-      EXP_TABLE[i] = n;
-    }
-    var n;
-    for (var i = 0; i < 255; i++) {
-      LOG_TABLE[EXP_TABLE[i]] = i;
-    }
-    function exp(k) {
-      while (k < 0)
-        k += 255;
-      while (k > 255)
-        k -= 255;
-      return EXP_TABLE[k];
-    }
-    function log(k) {
-      if (k < 1 || k > 255) {
-        throw Error("Bad log(" + k + ")");
-      }
-      return LOG_TABLE[k];
-    }
-    var POLYNOMIALS = [
-      [0],
-      [0, 0],
-      [0, 25, 1]
-    ];
-    function generatorPolynomial(num) {
-      if (POLYNOMIALS[num]) {
-        return POLYNOMIALS[num];
-      }
-      var prev = generatorPolynomial(num - 1);
-      var res = [];
-      res[0] = prev[0];
-      for (var i2 = 1; i2 <= num; i2++) {
-        res[i2] = log(exp(prev[i2]) ^ exp(prev[i2 - 1] + num - 1));
-      }
-      POLYNOMIALS[num] = res;
-      return res;
-    }
-    module2.exports = function calculate_ec(msg, ec_len) {
-      msg = [].slice.call(msg);
-      var poly = generatorPolynomial(ec_len);
-      for (var i2 = 0; i2 < ec_len; i2++)
-        msg.push(0);
-      while (msg.length > ec_len) {
-        if (!msg[0]) {
-          msg.shift();
-          continue;
-        }
-        var log_k = log(msg[0]);
-        for (var i2 = 0; i2 <= ec_len; i2++) {
-          msg[i2] = msg[i2] ^ exp(poly[i2] + log_k);
-        }
-        msg.shift();
-      }
-      return new Buffer(msg);
-    };
-  }
-});
-
-// node_modules/qr-image/lib/matrix.js
-var require_matrix3 = __commonJS({
-  "node_modules/qr-image/lib/matrix.js"(exports, module2) {
-    "use strict";
-    function init(version) {
-      var N = version * 4 + 17;
-      var matrix = [];
-      var zeros = new Buffer(N);
-      zeros.fill(0);
-      zeros = [].slice.call(zeros);
-      for (var i = 0; i < N; i++) {
-        matrix[i] = zeros.slice();
-      }
-      return matrix;
-    }
-    function fillFinders(matrix) {
-      var N = matrix.length;
-      for (var i = -3; i <= 3; i++) {
-        for (var j = -3; j <= 3; j++) {
-          var max = Math.max(i, j);
-          var min = Math.min(i, j);
-          var pixel = max == 2 && min >= -2 || min == -2 && max <= 2 ? 128 : 129;
-          matrix[3 + i][3 + j] = pixel;
-          matrix[3 + i][N - 4 + j] = pixel;
-          matrix[N - 4 + i][3 + j] = pixel;
-        }
-      }
-      for (var i = 0; i < 8; i++) {
-        matrix[7][i] = matrix[i][7] = matrix[7][N - i - 1] = matrix[i][N - 8] = matrix[N - 8][i] = matrix[N - 1 - i][7] = 128;
-      }
-    }
-    function fillAlignAndTiming(matrix) {
-      var N = matrix.length;
-      if (N > 21) {
-        var len = N - 13;
-        var delta = Math.round(len / Math.ceil(len / 28));
-        if (delta % 2)
-          delta++;
-        var res = [];
-        for (var p = len + 6; p > 10; p -= delta) {
-          res.unshift(p);
-        }
-        res.unshift(6);
-        for (var i = 0; i < res.length; i++) {
-          for (var j = 0; j < res.length; j++) {
-            var x = res[i], y = res[j];
-            if (matrix[x][y])
-              continue;
-            for (var r = -2; r <= 2; r++) {
-              for (var c = -2; c <= 2; c++) {
-                var max = Math.max(r, c);
-                var min = Math.min(r, c);
-                var pixel = max == 1 && min >= -1 || min == -1 && max <= 1 ? 128 : 129;
-                matrix[x + r][y + c] = pixel;
-              }
-            }
-          }
-        }
-      }
-      for (var i = 8; i < N - 8; i++) {
-        matrix[6][i] = matrix[i][6] = i % 2 ? 128 : 129;
-      }
-    }
-    function fillStub(matrix) {
-      var N = matrix.length;
-      for (var i = 0; i < 8; i++) {
-        if (i != 6) {
-          matrix[8][i] = matrix[i][8] = 128;
-        }
-        matrix[8][N - 1 - i] = 128;
-        matrix[N - 1 - i][8] = 128;
-      }
-      matrix[8][8] = 128;
-      matrix[N - 8][8] = 129;
-      if (N < 45)
-        return;
-      for (var i = N - 11; i < N - 8; i++) {
-        for (var j = 0; j < 6; j++) {
-          matrix[i][j] = matrix[j][i] = 128;
-        }
-      }
-    }
-    var fillReserved = function() {
-      var FORMATS = Array(32);
-      var VERSIONS = Array(40);
-      var gf15 = 1335;
-      var gf18 = 7973;
-      var formats_mask = 21522;
-      for (var format = 0; format < 32; format++) {
-        var res = format << 10;
-        for (var i = 5; i > 0; i--) {
-          if (res >>> 9 + i) {
-            res = res ^ gf15 << i - 1;
-          }
-        }
-        FORMATS[format] = (res | format << 10) ^ formats_mask;
-      }
-      for (var version = 7; version <= 40; version++) {
-        var res = version << 12;
-        for (var i = 6; i > 0; i--) {
-          if (res >>> 11 + i) {
-            res = res ^ gf18 << i - 1;
-          }
-        }
-        VERSIONS[version] = res | version << 12;
-      }
-      var EC_LEVELS = { L: 1, M: 0, Q: 3, H: 2 };
-      return function fillReserved2(matrix, ec_level, mask) {
-        var N = matrix.length;
-        var format2 = FORMATS[EC_LEVELS[ec_level] << 3 | mask];
-        function F(k) {
-          return format2 >> k & 1 ? 129 : 128;
-        }
-        ;
-        for (var i2 = 0; i2 < 8; i2++) {
-          matrix[8][N - 1 - i2] = F(i2);
-          if (i2 < 6)
-            matrix[i2][8] = F(i2);
-        }
-        for (var i2 = 8; i2 < 15; i2++) {
-          matrix[N - 15 + i2][8] = F(i2);
-          if (i2 > 8)
-            matrix[8][14 - i2] = F(i2);
-        }
-        matrix[7][8] = F(6);
-        matrix[8][8] = F(7);
-        matrix[8][7] = F(8);
-        var version2 = VERSIONS[(N - 17) / 4];
-        if (!version2)
-          return;
-        function V(k) {
-          return version2 >> k & 1 ? 129 : 128;
-        }
-        ;
-        for (var i2 = 0; i2 < 6; i2++) {
-          for (var j = 0; j < 3; j++) {
-            matrix[N - 11 + j][i2] = matrix[i2][N - 11 + j] = V(i2 * 3 + j);
-          }
-        }
-      };
-    }();
-    var fillData = function() {
-      var MASK_FUNCTIONS = [
-        function(i, j) {
-          return (i + j) % 2 == 0;
-        },
-        function(i, j) {
-          return i % 2 == 0;
-        },
-        function(i, j) {
-          return j % 3 == 0;
-        },
-        function(i, j) {
-          return (i + j) % 3 == 0;
-        },
-        function(i, j) {
-          return (Math.floor(i / 2) + Math.floor(j / 3)) % 2 == 0;
-        },
-        function(i, j) {
-          return i * j % 2 + i * j % 3 == 0;
-        },
-        function(i, j) {
-          return (i * j % 2 + i * j % 3) % 2 == 0;
-        },
-        function(i, j) {
-          return (i * j % 3 + (i + j) % 2) % 2 == 0;
-        }
-      ];
-      return function fillData2(matrix, data, mask) {
-        var N = matrix.length;
-        var row, col, dir = -1;
-        row = col = N - 1;
-        var mask_fn = MASK_FUNCTIONS[mask];
-        var len = data.blocks[data.blocks.length - 1].length;
-        for (var i = 0; i < len; i++) {
-          for (var b = 0; b < data.blocks.length; b++) {
-            if (data.blocks[b].length <= i)
-              continue;
-            put(data.blocks[b][i]);
-          }
-        }
-        len = data.ec_len;
-        for (var i = 0; i < len; i++) {
-          for (var b = 0; b < data.ec.length; b++) {
-            put(data.ec[b][i]);
-          }
-        }
-        if (col > -1) {
-          do {
-            matrix[row][col] = mask_fn(row, col) ? 1 : 0;
-          } while (next());
-        }
-        function put(byte) {
-          for (var mask2 = 128; mask2; mask2 = mask2 >> 1) {
-            var pixel = !!(mask2 & byte);
-            if (mask_fn(row, col))
-              pixel = !pixel;
-            matrix[row][col] = pixel ? 1 : 0;
-            next();
-          }
-        }
-        function next() {
-          do {
-            if (col % 2 ^ col < 6) {
-              if (dir < 0 && row == 0 || dir > 0 && row == N - 1) {
-                col--;
-                dir = -dir;
-              } else {
-                col++;
-                row += dir;
-              }
-            } else {
-              col--;
-            }
-            if (col == 6) {
-              col--;
-            }
-            if (col < 0) {
-              return false;
-            }
-          } while (matrix[row][col] & 240);
-          return true;
-        }
-      };
-    }();
-    function calculatePenalty(matrix) {
-      var N = matrix.length;
-      var penalty = 0;
-      for (var i = 0; i < N; i++) {
-        var pixel = matrix[i][0] & 1;
-        var len = 1;
-        for (var j = 1; j < N; j++) {
-          var p = matrix[i][j] & 1;
-          if (p == pixel) {
-            len++;
-            continue;
-          }
-          if (len >= 5) {
-            penalty += len - 2;
-          }
-          pixel = p;
-          len = 1;
-        }
-        if (len >= 5) {
-          penalty += len - 2;
-        }
-      }
-      for (var j = 0; j < N; j++) {
-        var pixel = matrix[0][j] & 1;
-        var len = 1;
-        for (var i = 1; i < N; i++) {
-          var p = matrix[i][j] & 1;
-          if (p == pixel) {
-            len++;
-            continue;
-          }
-          if (len >= 5) {
-            penalty += len - 2;
-          }
-          pixel = p;
-          len = 1;
-        }
-        if (len >= 5) {
-          penalty += len - 2;
-        }
-      }
-      for (var i = 0; i < N - 1; i++) {
-        for (var j = 0; j < N - 1; j++) {
-          var s = matrix[i][j] + matrix[i][j + 1] + matrix[i + 1][j] + matrix[i + 1][j + 1] & 7;
-          if (s == 0 || s == 4) {
-            penalty += 3;
-          }
-        }
-      }
-      function I(k) {
-        return matrix[i][j + k] & 1;
-      }
-      ;
-      function J(k) {
-        return matrix[i + k][j] & 1;
-      }
-      ;
-      for (var i = 0; i < N; i++) {
-        for (var j = 0; j < N; j++) {
-          if (j < N - 6 && I(0) && !I(1) && I(2) && I(3) && I(4) && !I(5) && I(6)) {
-            if (j >= 4 && !(I(-4) || I(-3) || I(-2) || I(-1))) {
-              penalty += 40;
-            }
-            if (j < N - 10 && !(I(7) || I(8) || I(9) || I(10))) {
-              penalty += 40;
-            }
-          }
-          if (i < N - 6 && J(0) && !J(1) && J(2) && J(3) && J(4) && !J(5) && J(6)) {
-            if (i >= 4 && !(J(-4) || J(-3) || J(-2) || J(-1))) {
-              penalty += 40;
-            }
-            if (i < N - 10 && !(J(7) || J(8) || J(9) || J(10))) {
-              penalty += 40;
-            }
-          }
-        }
-      }
-      var numDark = 0;
-      for (var i = 0; i < N; i++) {
-        for (var j = 0; j < N; j++) {
-          if (matrix[i][j] & 1)
-            numDark++;
-        }
-      }
-      penalty += 10 * Math.floor(Math.abs(10 - 20 * numDark / (N * N)));
-      return penalty;
-    }
-    function getMatrix(data) {
-      var matrix = init(data.version);
-      fillFinders(matrix);
-      fillAlignAndTiming(matrix);
-      fillStub(matrix);
-      var penalty = Infinity;
-      var bestMask = 0;
-      for (var mask = 0; mask < 8; mask++) {
-        fillData(matrix, data, mask);
-        fillReserved(matrix, data.ec_level, mask);
-        var p = calculatePenalty(matrix);
-        if (p < penalty) {
-          penalty = p;
-          bestMask = mask;
-        }
-      }
-      fillData(matrix, data, bestMask);
-      fillReserved(matrix, data.ec_level, bestMask);
-      return matrix.map(function(row) {
-        return row.map(function(cell) {
-          return cell & 1;
-        });
-      });
-    }
-    module2.exports = {
-      getMatrix,
-      init,
-      fillFinders,
-      fillAlignAndTiming,
-      fillStub,
-      fillReserved,
-      fillData,
-      calculatePenalty
-    };
-  }
-});
-
-// node_modules/qr-image/lib/qr-base.js
-var require_qr_base2 = __commonJS({
-  "node_modules/qr-image/lib/qr-base.js"(exports, module2) {
-    "use strict";
-    var encode = require_encode2();
-    var calculateEC = require_errorcode2();
-    var matrix = require_matrix3();
-    function _deepCopy(obj) {
-      return JSON.parse(JSON.stringify(obj));
-    }
-    var EC_LEVELS = ["L", "M", "Q", "H"];
-    var versions = [
-      [],
-      [26, 7, 1, 10, 1, 13, 1, 17, 1],
-      [44, 10, 1, 16, 1, 22, 1, 28, 1],
-      [70, 15, 1, 26, 1, 36, 2, 44, 2],
-      [100, 20, 1, 36, 2, 52, 2, 64, 4],
-      [134, 26, 1, 48, 2, 72, 4, 88, 4],
-      [172, 36, 2, 64, 4, 96, 4, 112, 4],
-      [196, 40, 2, 72, 4, 108, 6, 130, 5],
-      [242, 48, 2, 88, 4, 132, 6, 156, 6],
-      [292, 60, 2, 110, 5, 160, 8, 192, 8],
-      [346, 72, 4, 130, 5, 192, 8, 224, 8],
-      [404, 80, 4, 150, 5, 224, 8, 264, 11],
-      [466, 96, 4, 176, 8, 260, 10, 308, 11],
-      [532, 104, 4, 198, 9, 288, 12, 352, 16],
-      [581, 120, 4, 216, 9, 320, 16, 384, 16],
-      [655, 132, 6, 240, 10, 360, 12, 432, 18],
-      [733, 144, 6, 280, 10, 408, 17, 480, 16],
-      [815, 168, 6, 308, 11, 448, 16, 532, 19],
-      [901, 180, 6, 338, 13, 504, 18, 588, 21],
-      [991, 196, 7, 364, 14, 546, 21, 650, 25],
-      [1085, 224, 8, 416, 16, 600, 20, 700, 25],
-      [1156, 224, 8, 442, 17, 644, 23, 750, 25],
-      [1258, 252, 9, 476, 17, 690, 23, 816, 34],
-      [1364, 270, 9, 504, 18, 750, 25, 900, 30],
-      [1474, 300, 10, 560, 20, 810, 27, 960, 32],
-      [1588, 312, 12, 588, 21, 870, 29, 1050, 35],
-      [1706, 336, 12, 644, 23, 952, 34, 1110, 37],
-      [1828, 360, 12, 700, 25, 1020, 34, 1200, 40],
-      [1921, 390, 13, 728, 26, 1050, 35, 1260, 42],
-      [2051, 420, 14, 784, 28, 1140, 38, 1350, 45],
-      [2185, 450, 15, 812, 29, 1200, 40, 1440, 48],
-      [2323, 480, 16, 868, 31, 1290, 43, 1530, 51],
-      [2465, 510, 17, 924, 33, 1350, 45, 1620, 54],
-      [2611, 540, 18, 980, 35, 1440, 48, 1710, 57],
-      [2761, 570, 19, 1036, 37, 1530, 51, 1800, 60],
-      [2876, 570, 19, 1064, 38, 1590, 53, 1890, 63],
-      [3034, 600, 20, 1120, 40, 1680, 56, 1980, 66],
-      [3196, 630, 21, 1204, 43, 1770, 59, 2100, 70],
-      [3362, 660, 22, 1260, 45, 1860, 62, 2220, 74],
-      [3532, 720, 24, 1316, 47, 1950, 65, 2310, 77],
-      [3706, 750, 25, 1372, 49, 2040, 68, 2430, 81]
-    ];
-    versions = versions.map(function(v, index) {
-      if (!index)
-        return {};
-      var res = {};
-      for (var i = 1; i < 8; i += 2) {
-        var length = v[0] - v[i];
-        var num_template = v[i + 1];
-        var ec_level = EC_LEVELS[i / 2 | 0];
-        var level = {
-          version: index,
-          ec_level,
-          data_len: length,
-          ec_len: v[i] / num_template,
-          blocks: [],
-          ec: []
-        };
-        for (var k = num_template, n = length; k > 0; k--) {
-          var block = n / k | 0;
-          level.blocks.push(block);
-          n -= block;
-        }
-        res[ec_level] = level;
-      }
-      return res;
-    });
-    function getTemplate(message, ec_level) {
-      var i = 1;
-      var len;
-      if (message.data1) {
-        len = Math.ceil(message.data1.length / 8);
-      } else {
-        i = 10;
-      }
-      for (; i < 10; i++) {
-        var version = versions[i][ec_level];
-        if (version.data_len >= len) {
-          return _deepCopy(version);
-        }
-      }
-      if (message.data10) {
-        len = Math.ceil(message.data10.length / 8);
-      } else {
-        i = 27;
-      }
-      for (; i < 27; i++) {
-        var version = versions[i][ec_level];
-        if (version.data_len >= len) {
-          return _deepCopy(version);
-        }
-      }
-      len = Math.ceil(message.data27.length / 8);
-      for (; i < 41; i++) {
-        var version = versions[i][ec_level];
-        if (version.data_len >= len) {
-          return _deepCopy(version);
-        }
-      }
-      throw new Error("Too much data");
-    }
-    function fillTemplate(message, template) {
-      var blocks = new Buffer(template.data_len);
-      blocks.fill(0);
-      if (template.version < 10) {
-        message = message.data1;
-      } else if (template.version < 27) {
-        message = message.data10;
-      } else {
-        message = message.data27;
-      }
-      var len = message.length;
-      for (var i = 0; i < len; i += 8) {
-        var b = 0;
-        for (var j = 0; j < 8; j++) {
-          b = b << 1 | (message[i + j] ? 1 : 0);
-        }
-        blocks[i / 8] = b;
-      }
-      var pad = 236;
-      for (var i = Math.ceil((len + 4) / 8); i < blocks.length; i++) {
-        blocks[i] = pad;
-        pad = pad == 236 ? 17 : 236;
-      }
-      var offset = 0;
-      template.blocks = template.blocks.map(function(n) {
-        var b2 = blocks.slice(offset, offset + n);
-        offset += n;
-        template.ec.push(calculateEC(b2, template.ec_len));
-        return b2;
-      });
-      return template;
-    }
-    function QR(text, ec_level, parse_url) {
-      ec_level = EC_LEVELS.indexOf(ec_level) > -1 ? ec_level : "M";
-      var message = encode(text, parse_url);
-      var data = fillTemplate(message, getTemplate(message, ec_level));
-      return matrix.getMatrix(data);
-    }
-    module2.exports = {
-      QR,
-      getTemplate,
-      fillTemplate
-    };
-  }
-});
-
-// node_modules/qr-image/lib/crc32buffer.js
-var require_crc32buffer2 = __commonJS({
-  "node_modules/qr-image/lib/crc32buffer.js"(exports, module2) {
-    "use strict";
-    var crc_table = [];
-    for (var n = 0; n < 256; n++) {
-      c = crc_table[n] = new Buffer(4);
-      c.writeUInt32BE(n, 0);
-      for (k = 0; k < 8; k++) {
-        b0 = c[0] & 1;
-        b1 = c[1] & 1;
-        b2 = c[2] & 1;
-        b3 = c[3] & 1;
-        c[0] = c[0] >> 1 ^ (b3 ? 237 : 0);
-        c[1] = c[1] >> 1 ^ (b3 ? 184 : 0) ^ (b0 ? 128 : 0);
-        c[2] = c[2] >> 1 ^ (b3 ? 131 : 0) ^ (b1 ? 128 : 0);
-        c[3] = c[3] >> 1 ^ (b3 ? 32 : 0) ^ (b2 ? 128 : 0);
-      }
-    }
-    var c;
-    var b0;
-    var b1;
-    var b2;
-    var b3;
-    var k;
-    function update(c2, buf) {
-      var l = buf.length;
-      for (var n2 = 0; n2 < l; n2++) {
-        var e = crc_table[c2[3] ^ buf[n2]];
-        c2[3] = e[3] ^ c2[2];
-        c2[2] = e[2] ^ c2[1];
-        c2[1] = e[1] ^ c2[0];
-        c2[0] = e[0];
-      }
-    }
-    function crc32() {
-      var l = arguments.length;
-      var c2 = new Buffer(4);
-      c2.fill(255);
-      for (var i = 0; i < l; i++) {
-        update(c2, new Buffer(arguments[i]));
-      }
-      c2[0] = c2[0] ^ 255;
-      c2[1] = c2[1] ^ 255;
-      c2[2] = c2[2] ^ 255;
-      c2[3] = c2[3] ^ 255;
-      return c2.readUInt32BE(0);
-    }
-    module2.exports = crc32;
-  }
-});
-
-// node_modules/qr-image/lib/crc32.js
-var require_crc322 = __commonJS({
-  "node_modules/qr-image/lib/crc32.js"(exports, module2) {
-    "use strict";
-    (function() {
-      if (process.arch === "arm") {
-        module2.exports = require_crc32buffer2();
-        return;
-      }
-      var crc_table = [];
-      (function() {
-        for (var n = 0; n < 256; n++) {
-          var c = n;
-          for (var k = 0; k < 8; k++) {
-            if (c & 1) {
-              c = 3988292384 ^ c >>> 1;
-            } else {
-              c = c >>> 1;
-            }
-          }
-          crc_table[n] = c >>> 0;
-        }
-      })();
-      function update(c, buf) {
-        var l = buf.length;
-        for (var n = 0; n < l; n++) {
-          c = crc_table[(c ^ buf[n]) & 255] ^ c >>> 8;
-        }
-        return c;
-      }
-      function crc32() {
-        var l = arguments.length;
-        var c = -1;
-        for (var i = 0; i < l; i++) {
-          c = update(c, new Buffer(arguments[i]));
-        }
-        c = (c ^ -1) >>> 0;
-        return c;
-      }
-      module2.exports = crc32;
-    })();
-  }
-});
-
-// node_modules/qr-image/lib/png.js
-var require_png2 = __commonJS({
-  "node_modules/qr-image/lib/png.js"(exports, module2) {
-    "use strict";
-    var zlib = require("zlib");
-    var crc32 = require_crc322();
-    var PNG_HEAD = new Buffer([137, 80, 78, 71, 13, 10, 26, 10]);
-    var PNG_IHDR = new Buffer([0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0]);
-    var PNG_IDAT = new Buffer([0, 0, 0, 0, 73, 68, 65, 84]);
-    var PNG_IEND = new Buffer([0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130]);
-    function png(bitmap2, stream) {
-      stream.push(PNG_HEAD);
-      var IHDR = Buffer.concat([PNG_IHDR]);
-      IHDR.writeUInt32BE(bitmap2.size, 8);
-      IHDR.writeUInt32BE(bitmap2.size, 12);
-      IHDR.writeUInt32BE(crc32(IHDR.slice(4, -4)), 21);
-      stream.push(IHDR);
-      var IDAT = Buffer.concat([
-        PNG_IDAT,
-        zlib.deflateSync(bitmap2.data, { level: 9 }),
-        new Buffer(4)
-      ]);
-      IDAT.writeUInt32BE(IDAT.length - 12, 0);
-      IDAT.writeUInt32BE(crc32(IDAT.slice(4, -4)), IDAT.length - 4);
-      stream.push(IDAT);
-      stream.push(PNG_IEND);
-      stream.push(null);
-    }
-    function bitmap(matrix, size, margin) {
-      var N = matrix.length;
-      var X = (N + 2 * margin) * size;
-      var data = new Buffer((X + 1) * X);
-      data.fill(255);
-      for (var i = 0; i < X; i++) {
-        data[i * (X + 1)] = 0;
-      }
-      for (var i = 0; i < N; i++) {
-        for (var j = 0; j < N; j++) {
-          if (matrix[i][j]) {
-            var offset = ((margin + i) * (X + 1) + (margin + j)) * size + 1;
-            data.fill(0, offset, offset + size);
-            for (var c = 1; c < size; c++) {
-              data.copy(data, offset + c * (X + 1), offset, offset + size);
-            }
-          }
-        }
-      }
-      return {
-        data,
-        size: X
-      };
-    }
-    module2.exports = {
-      bitmap,
-      png
-    };
-  }
-});
-
-// node_modules/qr-image/lib/vector.js
-var require_vector2 = __commonJS({
-  "node_modules/qr-image/lib/vector.js"(exports, module2) {
-    "use strict";
-    function matrix2path(matrix) {
-      var N = matrix.length;
-      var filled = [];
-      for (var row = -1; row <= N; row++) {
-        filled[row] = [];
-      }
-      var path = [];
-      for (var row = 0; row < N; row++) {
-        for (var col = 0; col < N; col++) {
-          if (filled[row][col])
-            continue;
-          filled[row][col] = 1;
-          if (isDark(row, col)) {
-            if (!isDark(row - 1, col)) {
-              path.push(plot(row, col, "right"));
-            }
-          } else {
-            if (isDark(row, col - 1)) {
-              path.push(plot(row, col, "down"));
-            }
-          }
-        }
-      }
-      return path;
-      function isDark(row2, col2) {
-        if (row2 < 0 || col2 < 0 || row2 >= N || col2 >= N)
-          return false;
-        return !!matrix[row2][col2];
-      }
-      function plot(row0, col0, dir) {
-        filled[row0][col0] = 1;
-        var res = [];
-        res.push(["M", col0, row0]);
-        var row2 = row0;
-        var col2 = col0;
-        var len = 0;
-        do {
-          switch (dir) {
-            case "right":
-              filled[row2][col2] = 1;
-              if (isDark(row2, col2)) {
-                filled[row2 - 1][col2] = 1;
-                if (isDark(row2 - 1, col2)) {
-                  res.push(["h", len]);
-                  len = 0;
-                  dir = "up";
-                } else {
-                  len++;
-                  col2++;
-                }
-              } else {
-                res.push(["h", len]);
-                len = 0;
-                dir = "down";
-              }
-              break;
-            case "left":
-              filled[row2 - 1][col2 - 1] = 1;
-              if (isDark(row2 - 1, col2 - 1)) {
-                filled[row2][col2 - 1] = 1;
-                if (isDark(row2, col2 - 1)) {
-                  res.push(["h", -len]);
-                  len = 0;
-                  dir = "down";
-                } else {
-                  len++;
-                  col2--;
-                }
-              } else {
-                res.push(["h", -len]);
-                len = 0;
-                dir = "up";
-              }
-              break;
-            case "down":
-              filled[row2][col2 - 1] = 1;
-              if (isDark(row2, col2 - 1)) {
-                filled[row2][col2] = 1;
-                if (isDark(row2, col2)) {
-                  res.push(["v", len]);
-                  len = 0;
-                  dir = "right";
-                } else {
-                  len++;
-                  row2++;
-                }
-              } else {
-                res.push(["v", len]);
-                len = 0;
-                dir = "left";
-              }
-              break;
-            case "up":
-              filled[row2 - 1][col2] = 1;
-              if (isDark(row2 - 1, col2)) {
-                filled[row2 - 1][col2 - 1] = 1;
-                if (isDark(row2 - 1, col2 - 1)) {
-                  res.push(["v", -len]);
-                  len = 0;
-                  dir = "left";
-                } else {
-                  len++;
-                  row2--;
-                }
-              } else {
-                res.push(["v", -len]);
-                len = 0;
-                dir = "right";
-              }
-              break;
-          }
-        } while (row2 != row0 || col2 != col0);
-        return res;
-      }
-    }
-    function pushSVGPath(matrix, stream, margin) {
-      matrix2path(matrix).forEach(function(subpath) {
-        var res = "";
-        for (var k = 0; k < subpath.length; k++) {
-          var item = subpath[k];
-          switch (item[0]) {
-            case "M":
-              res += "M" + (item[1] + margin) + " " + (item[2] + margin);
-              break;
-            default:
-              res += item.join("");
-          }
-        }
-        res += "z";
-        stream.push(res);
-      });
-    }
-    function SVG_object(matrix, margin) {
-      var stream = [];
-      pushSVGPath(matrix, stream, margin);
-      var result = {
-        size: matrix.length + 2 * margin,
-        path: stream.filter(Boolean).join("")
-      };
-      return result;
-    }
-    function SVG(matrix, stream, margin, size) {
-      var X = matrix.length + 2 * margin;
-      stream.push('<svg xmlns="http://www.w3.org/2000/svg" ');
-      if (size > 0) {
-        var XY = X * size;
-        stream.push('width="' + XY + '" height="' + XY + '" ');
-      }
-      stream.push('viewBox="0 0 ' + X + " " + X + '">');
-      stream.push('<path d="');
-      pushSVGPath(matrix, stream, margin);
-      stream.push('"/></svg>');
-      stream.push(null);
-    }
-    function EPS(matrix, stream, margin) {
-      var N = matrix.length;
-      var scale = 9;
-      var X = (N + 2 * margin) * scale;
-      stream.push([
-        "%!PS-Adobe-3.0 EPSF-3.0",
-        "%%BoundingBox: 0 0 " + X + " " + X,
-        "/h { 0 rlineto } bind def",
-        "/v { 0 exch neg rlineto } bind def",
-        "/M { neg " + (N + margin) + " add moveto } bind def",
-        "/z { closepath } bind def",
-        scale + " " + scale + " scale",
-        ""
-      ].join("\n"));
-      matrix2path(matrix).forEach(function(subpath) {
-        var res = "";
-        for (var k = 0; k < subpath.length; k++) {
-          var item = subpath[k];
-          switch (item[0]) {
-            case "M":
-              res += item[1] + margin + " " + item[2] + " M ";
-              break;
-            default:
-              res += item[1] + " " + item[0] + " ";
-          }
-        }
-        res += "z\n";
-        stream.push(res);
-      });
-      stream.push("fill\n%%EOF\n");
-      stream.push(null);
-    }
-    function PDF(matrix, stream, margin) {
-      var N = matrix.length;
-      var scale = 9;
-      var X = (N + 2 * margin) * scale;
-      var data = [
-        "%PDF-1.0\n\n",
-        "1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n",
-        "2 0 obj << /Type /Pages /Count 1 /Kids [ 3 0 R ] >> endobj\n"
-      ];
-      data.push("3 0 obj << /Type /Page /Parent 2 0 R /Resources <<>> /Contents 4 0 R /MediaBox [ 0 0 " + X + " " + X + " ] >> endobj\n");
-      var path = scale + " 0 0 " + scale + " 0 0 cm\n";
-      path += matrix2path(matrix).map(function(subpath) {
-        var res = "";
-        var x, y;
-        for (var k = 0; k < subpath.length; k++) {
-          var item = subpath[k];
-          switch (item[0]) {
-            case "M":
-              x = item[1] + margin;
-              y = N - item[2] + margin;
-              res += x + " " + y + " m ";
-              break;
-            case "h":
-              x += item[1];
-              res += x + " " + y + " l ";
-              break;
-            case "v":
-              y -= item[1];
-              res += x + " " + y + " l ";
-              break;
-          }
-        }
-        res += "h";
-        return res;
-      }).join("\n");
-      path += "\nf\n";
-      data.push("4 0 obj << /Length " + path.length + " >> stream\n" + path + "endstream\nendobj\n");
-      var xref = "xref\n0 5\n0000000000 65535 f \n";
-      for (var i = 1, l = data[0].length; i < 5; i++) {
-        xref += ("0000000000" + l).substr(-10) + " 00000 n \n";
-        l += data[i].length;
-      }
-      data.push(xref, "trailer << /Root 1 0 R /Size 5 >>\n", "startxref\n" + l + "\n%%EOF\n");
-      stream.push(data.join(""));
-      stream.push(null);
-    }
-    module2.exports = {
-      svg: SVG,
-      eps: EPS,
-      pdf: PDF,
-      svg_object: SVG_object
-    };
-  }
-});
-
-// node_modules/qr-image/lib/qr.js
-var require_qr2 = __commonJS({
-  "node_modules/qr-image/lib/qr.js"(exports, module2) {
-    "use strict";
-    var Readable2 = require("stream").Readable;
-    var QR = require_qr_base2().QR;
-    var png = require_png2();
-    var vector = require_vector2();
-    var fn_noop = function() {
-    };
-    var BITMAP_OPTIONS = {
-      parse_url: false,
-      ec_level: "M",
-      size: 5,
-      margin: 4,
-      customize: null
-    };
-    var VECTOR_OPTIONS = {
-      parse_url: false,
-      ec_level: "M",
-      margin: 1,
-      size: 0
-    };
-    function get_options(options, force_type) {
-      if (typeof options === "string") {
-        options = { "ec_level": options };
-      } else {
-        options = options || {};
-      }
-      var _options = {
-        type: String(force_type || options.type || "png").toLowerCase()
-      };
-      var defaults = _options.type == "png" ? BITMAP_OPTIONS : VECTOR_OPTIONS;
-      for (var k in defaults) {
-        _options[k] = k in options ? options[k] : defaults[k];
-      }
-      return _options;
-    }
-    function qr_image(text, options) {
-      options = get_options(options);
-      var matrix = QR(text, options.ec_level, options.parse_url);
-      var stream = new Readable2();
-      stream._read = fn_noop;
-      switch (options.type) {
-        case "svg":
-        case "pdf":
-        case "eps":
-          process.nextTick(function() {
-            vector[options.type](matrix, stream, options.margin, options.size);
-          });
-          break;
-        case "svgpath":
-          process.nextTick(function() {
-            var obj = vector.svg_object(matrix, options.margin, options.size);
-            stream.push(obj.path);
-            stream.push(null);
-          });
-          break;
-        case "png":
-        default:
-          process.nextTick(function() {
-            var bitmap = png.bitmap(matrix, options.size, options.margin);
-            if (options.customize) {
-              options.customize(bitmap);
-            }
-            png.png(bitmap, stream);
-          });
-      }
-      return stream;
-    }
-    function qr_image_sync(text, options) {
-      options = get_options(options);
-      var matrix = QR(text, options.ec_level, options.parse_url);
-      var stream = [];
-      var result;
-      switch (options.type) {
-        case "svg":
-        case "pdf":
-        case "eps":
-          vector[options.type](matrix, stream, options.margin, options.size);
-          result = stream.filter(Boolean).join("");
-          break;
-        case "png":
-        default:
-          var bitmap = png.bitmap(matrix, options.size, options.margin);
-          if (options.customize) {
-            options.customize(bitmap);
-          }
-          png.png(bitmap, stream);
-          result = Buffer.concat(stream.filter(Boolean));
-      }
-      return result;
-    }
-    function svg_object(text, options) {
-      options = get_options(options, "svg");
-      var matrix = QR(text, options.ec_level);
-      return vector.svg_object(matrix, options.margin);
-    }
-    module2.exports = {
-      matrix: QR,
-      image: qr_image,
-      imageSync: qr_image_sync,
-      svgObject: svg_object
-    };
-  }
-});
-
 // src/index.js
 __export(exports, {
   BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT: () => BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT,
@@ -50698,7 +48603,7 @@ var Metronome_default = Metronome;
 // src/OLED/OLED.ts
 var import_oled_font_5x7 = __toModule(require_oled_font_5x7());
 var import_oled_js = __toModule(require_oled());
-var import_qr_image = __toModule(require_qr2());
+var import_qr_image = __toModule(require_qr());
 var OLED_WIDTH = 128;
 var OLED_HEIGHT = 64;
 var OLED = class extends import_oled_js.default {
@@ -50989,14 +48894,20 @@ var Timer = class extends import_events7.default {
     this.value = value;
     this.interval = void 0;
   }
-  start() {
+  startInterval() {
     if (this.interval) {
-      return;
+      clearInterval(this.interval);
     }
     this.interval = setInterval(() => {
       this.value++;
       this.emit("change", this.value);
     }, 1e3);
+  }
+  start() {
+    if (this.interval) {
+      return;
+    }
+    this.startInterval();
     this.emit("start");
   }
   stop() {
@@ -51005,6 +48916,7 @@ var Timer = class extends import_events7.default {
     this.emit("stop");
   }
   reset() {
+    this.startInterval();
     this.value = 0;
     this.emit("change", this.value);
     this.emit("reset");
