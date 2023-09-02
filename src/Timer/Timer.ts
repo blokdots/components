@@ -11,16 +11,22 @@ class Timer extends EventEmitter {
     this.interval;
   }
 
+  startInterval() {
+    if (this.interval) {
+      clearInterval(this.interval);
+    }
+    this.interval = setInterval(() => {
+      this.value++;
+      this.emit("change", this.value);
+    }, 1000);
+  }
+
   start() {
     if (this.interval) {
       return;
     }
 
-    this.interval = setInterval(() => {
-      this.value++;
-      this.emit("change", this.value);
-    }, 1000);
-
+    this.startInterval();
     this.emit("start");
   }
 
@@ -31,6 +37,7 @@ class Timer extends EventEmitter {
   }
 
   reset() {
+    this.startInterval();
     this.value = 0;
     this.emit("change", this.value);
     this.emit("reset");

@@ -4559,14 +4559,20 @@ var Timer = class extends import_events8.default {
     this.value = value;
     this.interval;
   }
-  start() {
+  startInterval() {
     if (this.interval) {
-      return;
+      clearInterval(this.interval);
     }
     this.interval = setInterval(() => {
       this.value++;
       this.emit("change", this.value);
     }, 1e3);
+  }
+  start() {
+    if (this.interval) {
+      return;
+    }
+    this.startInterval();
     this.emit("start");
   }
   stop() {
@@ -4575,6 +4581,7 @@ var Timer = class extends import_events8.default {
     this.emit("stop");
   }
   reset() {
+    this.startInterval();
     this.value = 0;
     this.emit("change", this.value);
     this.emit("reset");
