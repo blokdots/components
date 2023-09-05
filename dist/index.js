@@ -234,7 +234,9 @@ var require_language = __commonJS({
       var match = simpleLanguageRegExp.exec(str);
       if (!match)
         return null;
-      var prefix = match[1], suffix = match[2], full = prefix;
+      var prefix = match[1];
+      var suffix = match[2];
+      var full = prefix;
       if (suffix)
         full += "-" + suffix;
       var q = 1;
@@ -476,7 +478,10 @@ var require_mediaType = __commonJS({
 var require_negotiator = __commonJS({
   "node_modules/negotiator/index.js"(exports, module2) {
     "use strict";
-    var modules = Object.create(null);
+    var preferredCharsets = require_charset();
+    var preferredEncodings = require_encoding();
+    var preferredLanguages = require_language();
+    var preferredMediaTypes = require_mediaType();
     module2.exports = Negotiator;
     module2.exports.Negotiator = Negotiator;
     function Negotiator(request) {
@@ -490,7 +495,6 @@ var require_negotiator = __commonJS({
       return set && set[0];
     };
     Negotiator.prototype.charsets = function charsets(available) {
-      var preferredCharsets = loadModule("charset").preferredCharsets;
       return preferredCharsets(this.request.headers["accept-charset"], available);
     };
     Negotiator.prototype.encoding = function encoding(available) {
@@ -498,7 +502,6 @@ var require_negotiator = __commonJS({
       return set && set[0];
     };
     Negotiator.prototype.encodings = function encodings(available) {
-      var preferredEncodings = loadModule("encoding").preferredEncodings;
       return preferredEncodings(this.request.headers["accept-encoding"], available);
     };
     Negotiator.prototype.language = function language(available) {
@@ -506,7 +509,6 @@ var require_negotiator = __commonJS({
       return set && set[0];
     };
     Negotiator.prototype.languages = function languages(available) {
-      var preferredLanguages = loadModule("language").preferredLanguages;
       return preferredLanguages(this.request.headers["accept-language"], available);
     };
     Negotiator.prototype.mediaType = function mediaType(available) {
@@ -514,7 +516,6 @@ var require_negotiator = __commonJS({
       return set && set[0];
     };
     Negotiator.prototype.mediaTypes = function mediaTypes(available) {
-      var preferredMediaTypes = loadModule("mediaType").preferredMediaTypes;
       return preferredMediaTypes(this.request.headers.accept, available);
     };
     Negotiator.prototype.preferredCharset = Negotiator.prototype.charset;
@@ -525,30 +526,6 @@ var require_negotiator = __commonJS({
     Negotiator.prototype.preferredLanguages = Negotiator.prototype.languages;
     Negotiator.prototype.preferredMediaType = Negotiator.prototype.mediaType;
     Negotiator.prototype.preferredMediaTypes = Negotiator.prototype.mediaTypes;
-    function loadModule(moduleName) {
-      var module3 = modules[moduleName];
-      if (module3 !== void 0) {
-        return module3;
-      }
-      switch (moduleName) {
-        case "charset":
-          module3 = require_charset();
-          break;
-        case "encoding":
-          module3 = require_encoding();
-          break;
-        case "language":
-          module3 = require_language();
-          break;
-        case "mediaType":
-          module3 = require_mediaType();
-          break;
-        default:
-          throw new Error("Cannot find module '" + moduleName + "'");
-      }
-      modules[moduleName] = module3;
-      return module3;
-    }
   }
 });
 
@@ -807,6 +784,10 @@ var require_db = __commonJS({
       "application/cfw": {
         source: "iana"
       },
+      "application/city+json": {
+        source: "iana",
+        compressible: true
+      },
       "application/clr": {
         source: "iana"
       },
@@ -850,7 +831,8 @@ var require_db = __commonJS({
       },
       "application/cpl+xml": {
         source: "iana",
-        compressible: true
+        compressible: true,
+        extensions: ["cpl"]
       },
       "application/csrattrs": {
         source: "iana"
@@ -884,6 +866,11 @@ var require_db = __commonJS({
         source: "iana",
         compressible: true,
         extensions: ["mpd"]
+      },
+      "application/dash-patch+xml": {
+        source: "iana",
+        compressible: true,
+        extensions: ["mpp"]
       },
       "application/dashdelta": {
         source: "iana"
@@ -1425,7 +1412,8 @@ var require_db = __commonJS({
       },
       "application/media-policy-dataset+xml": {
         source: "iana",
-        compressible: true
+        compressible: true,
+        extensions: ["mpf"]
       },
       "application/media_control+xml": {
         source: "iana",
@@ -1581,6 +1569,9 @@ var require_db = __commonJS({
       "application/oauth-authz-req+jwt": {
         source: "iana"
       },
+      "application/oblivious-dns-message": {
+        source: "iana"
+      },
       "application/ocsp-request": {
         source: "iana"
       },
@@ -1673,7 +1664,8 @@ var require_db = __commonJS({
         extensions: ["pgp"]
       },
       "application/pgp-keys": {
-        source: "iana"
+        source: "iana",
+        extensions: ["asc"]
       },
       "application/pgp-signature": {
         source: "iana",
@@ -3204,6 +3196,10 @@ var require_db = __commonJS({
       "application/vnd.ecip.rlp": {
         source: "iana"
       },
+      "application/vnd.eclipse.ditto+json": {
+        source: "iana",
+        compressible: true
+      },
       "application/vnd.ecowin.chart": {
         source: "iana",
         extensions: ["mag"]
@@ -3361,6 +3357,10 @@ var require_db = __commonJS({
       "application/vnd.etsi.tsl.der": {
         source: "iana"
       },
+      "application/vnd.eu.kasparian.car+json": {
+        source: "iana",
+        compressible: true
+      },
       "application/vnd.eudora.data": {
         source: "iana"
       },
@@ -3390,6 +3390,10 @@ var require_db = __commonJS({
       },
       "application/vnd.f-secure.mobile": {
         source: "iana"
+      },
+      "application/vnd.familysearch.gedcom+zip": {
+        source: "iana",
+        compressible: false
       },
       "application/vnd.fastcopy-disk-image": {
         source: "iana"
@@ -3680,6 +3684,16 @@ var require_db = __commonJS({
       "application/vnd.hhe.lesson-player": {
         source: "iana",
         extensions: ["les"]
+      },
+      "application/vnd.hl7cda+xml": {
+        source: "iana",
+        charset: "UTF-8",
+        compressible: true
+      },
+      "application/vnd.hl7v2+xml": {
+        source: "iana",
+        charset: "UTF-8",
+        compressible: true
       },
       "application/vnd.hp-hpgl": {
         source: "iana",
@@ -4093,6 +4107,10 @@ var require_db = __commonJS({
       "application/vnd.mason+json": {
         source: "iana",
         compressible: true
+      },
+      "application/vnd.maxar.archive.3tz+zip": {
+        source: "iana",
+        compressible: false
       },
       "application/vnd.maxmind.maxmind-db": {
         source: "iana"
@@ -5714,6 +5732,10 @@ var require_db = __commonJS({
         source: "iana",
         compressible: true
       },
+      "application/vnd.syft+json": {
+        source: "iana",
+        compressible: true
+      },
       "application/vnd.symbian.install": {
         source: "apache",
         extensions: ["sis", "sisx"]
@@ -6104,7 +6126,8 @@ var require_db = __commonJS({
       },
       "application/watcherinfo+xml": {
         source: "iana",
-        compressible: true
+        compressible: true,
+        extensions: ["wif"]
       },
       "application/webpush-options+json": {
         source: "iana",
@@ -7524,10 +7547,12 @@ var require_db = __commonJS({
         extensions: ["apng"]
       },
       "image/avci": {
-        source: "iana"
+        source: "iana",
+        extensions: ["avci"]
       },
       "image/avcs": {
-        source: "iana"
+        source: "iana",
+        extensions: ["avcs"]
       },
       "image/avif": {
         source: "iana",
@@ -9663,7 +9688,7 @@ var require_parser_v3 = __commonJS({
       if (typeof data === "string") {
         type = data.charAt(0);
         if (type === "b") {
-          return decodeBase64Packet(data.substr(1), binaryType);
+          return decodeBase64Packet(data.slice(1), binaryType);
         }
         if (utf8decode) {
           data = tryDecode(data);
@@ -9675,7 +9700,7 @@ var require_parser_v3 = __commonJS({
           return err;
         }
         if (data.length > 1) {
-          return { type: packetslist[type], data: data.substring(1) };
+          return { type: packetslist[type], data: data.slice(1) };
         } else {
           return { type: packetslist[type] };
         }
@@ -9702,7 +9727,7 @@ var require_parser_v3 = __commonJS({
     }
     function decodeBase64Packet(msg, binaryType) {
       var type = packetslist[msg.charAt(0)];
-      var data = Buffer.from(msg.substr(1), "base64");
+      var data = Buffer.from(msg.slice(1), "base64");
       if (binaryType === "arraybuffer") {
         var abv = new Uint8Array(data.length);
         for (var i = 0; i < abv.length; i++) {
@@ -9770,7 +9795,7 @@ var require_parser_v3 = __commonJS({
         if (length === "" || length != (n = Number(length))) {
           return callback(err, 0, 1);
         }
-        msg = data.substr(i + 1, n);
+        msg = data.slice(i + 1, i + 1 + n);
         if (length != msg.length) {
           return callback(err, 0, 1);
         }
@@ -9991,9 +10016,9 @@ var require_ms = __commonJS({
   }
 });
 
-// node_modules/engine.io/node_modules/debug/src/common.js
+// node_modules/debug/src/common.js
 var require_common = __commonJS({
-  "node_modules/engine.io/node_modules/debug/src/common.js"(exports, module2) {
+  "node_modules/debug/src/common.js"(exports, module2) {
     function setup(env) {
       createDebug.debug = createDebug;
       createDebug.default = createDebug;
@@ -10103,7 +10128,7 @@ var require_common = __commonJS({
           }
           namespaces = split[i].replace(/\*/g, ".*?");
           if (namespaces[0] === "-") {
-            createDebug.skips.push(new RegExp("^" + namespaces.substr(1) + "$"));
+            createDebug.skips.push(new RegExp("^" + namespaces.slice(1) + "$"));
           } else {
             createDebug.names.push(new RegExp("^" + namespaces + "$"));
           }
@@ -10154,9 +10179,9 @@ var require_common = __commonJS({
   }
 });
 
-// node_modules/engine.io/node_modules/debug/src/browser.js
+// node_modules/debug/src/browser.js
 var require_browser = __commonJS({
-  "node_modules/engine.io/node_modules/debug/src/browser.js"(exports, module2) {
+  "node_modules/debug/src/browser.js"(exports, module2) {
     exports.formatArgs = formatArgs;
     exports.save = save;
     exports.load = load;
@@ -10415,9 +10440,9 @@ var require_supports_color = __commonJS({
   }
 });
 
-// node_modules/engine.io/node_modules/debug/src/node.js
+// node_modules/debug/src/node.js
 var require_node = __commonJS({
-  "node_modules/engine.io/node_modules/debug/src/node.js"(exports, module2) {
+  "node_modules/debug/src/node.js"(exports, module2) {
     var tty = require("tty");
     var util = require("util");
     exports.init = init;
@@ -10586,9 +10611,9 @@ var require_node = __commonJS({
   }
 });
 
-// node_modules/engine.io/node_modules/debug/src/index.js
+// node_modules/debug/src/index.js
 var require_src = __commonJS({
-  "node_modules/engine.io/node_modules/debug/src/index.js"(exports, module2) {
+  "node_modules/debug/src/index.js"(exports, module2) {
     if (typeof process === "undefined" || process.type === "renderer" || process.browser === true || process.__nwjs) {
       module2.exports = require_browser();
     } else {
@@ -10761,8 +10786,8 @@ var require_polling = __commonJS({
             contentLength = Buffer.byteLength(chunks);
           }
           if (contentLength > this.maxHttpBufferSize) {
-            chunks = isBinary ? Buffer.concat([]) : "";
-            req.connection.destroy();
+            res.writeHead(413).end();
+            cleanup();
           }
         };
         const onEnd = () => {
@@ -11098,7 +11123,8 @@ var require_socket = __commonJS({
           sid: this.id,
           upgrades: this.getAvailableUpgrades(),
           pingInterval: this.server.opts.pingInterval,
-          pingTimeout: this.server.opts.pingTimeout
+          pingTimeout: this.server.opts.pingTimeout,
+          maxPayload: this.server.opts.maxHttpBufferSize
         }));
         if (this.server.opts.initialPacket) {
           this.sendPacket("message", this.server.opts.initialPacket);
@@ -11395,7 +11421,6 @@ var require_cookie = __commonJS({
     exports.serialize = serialize;
     var decode = decodeURIComponent;
     var encode = encodeURIComponent;
-    var pairSplitRegExp = /; */;
     var fieldContentRegExp = /^[\u0009\u0020-\u007e\u0080-\u00ff]+$/;
     function parse(str, options) {
       if (typeof str !== "string") {
@@ -11403,20 +11428,20 @@ var require_cookie = __commonJS({
       }
       var obj = {};
       var opt = options || {};
-      var pairs = str.split(pairSplitRegExp);
+      var pairs = str.split(";");
       var dec = opt.decode || decode;
       for (var i = 0; i < pairs.length; i++) {
         var pair = pairs[i];
-        var eq_idx = pair.indexOf("=");
-        if (eq_idx < 0) {
+        var index = pair.indexOf("=");
+        if (index < 0) {
           continue;
         }
-        var key = pair.substr(0, eq_idx).trim();
-        var val = pair.substr(++eq_idx, pair.length).trim();
-        if (val[0] == '"') {
-          val = val.slice(1, -1);
-        }
+        var key = pair.substring(0, index).trim();
         if (obj[key] == void 0) {
+          var val = pair.substring(index + 1, pair.length).trim();
+          if (val[0] === '"') {
+            val = val.slice(1, -1);
+          }
           obj[key] = tryDecode(val, dec);
         }
       }
@@ -14738,7 +14763,7 @@ var require_server = __commonJS({
         const destroyUpgradeTimeout = options.destroyUpgradeTimeout || 1e3;
         path += "/";
         function check(req) {
-          return path === req.url.substr(0, path.length);
+          return path === req.url.slice(0, path.length);
         }
         const listeners = server.listeners("request").slice(0);
         server.removeAllListeners("request");
@@ -14763,6 +14788,9 @@ var require_server = __commonJS({
             } else if (options.destroyUpgrade !== false) {
               setTimeout(function() {
                 if (socket.writable && socket.bytesWritten <= 0) {
+                  socket.on("error", (e) => {
+                    debug("error while destroying upgrade: %s", e.message);
+                  });
                   return socket.end();
                 }
               }, destroyUpgradeTimeout);
@@ -15158,49 +15186,71 @@ var require_polling2 = __commonJS({
           res.end();
           return;
         }
+        const expectedContentLength = Number(req.headers["content-length"]);
+        if (!expectedContentLength) {
+          this.onError("content-length header required");
+          res.writeStatus("411 Length Required").end();
+          return;
+        }
+        if (expectedContentLength > this.maxHttpBufferSize) {
+          this.onError("payload too large");
+          res.writeStatus("413 Payload Too Large").end();
+          return;
+        }
         const isBinary = req.headers["content-type"] === "application/octet-stream";
         if (isBinary && this.protocol === 4) {
           return this.onError("invalid content");
         }
         this.dataReq = req;
         this.dataRes = res;
-        let chunks = [];
-        let contentLength = 0;
-        const cleanup = () => {
-          this.dataReq = this.dataRes = chunks = null;
-        };
-        const onClose = () => {
-          cleanup();
-          this.onError("data request connection closed prematurely");
-        };
+        let buffer;
+        let offset = 0;
         const headers = {
           "Content-Type": "text/html"
         };
         this.headers(req, headers);
-        Object.keys(headers).forEach((key) => {
+        for (let key in headers) {
           res.writeHeader(key, String(headers[key]));
-        });
-        const onEnd = () => {
-          this.onData(Buffer.concat(chunks).toString());
-          if (this.readyState !== "closing") {
-            res.end("ok");
-          }
-          cleanup();
+        }
+        const onEnd = (buffer2) => {
+          this.onData(buffer2.toString());
+          this.onDataRequestCleanup();
+          res.end("ok");
         };
-        res.onAborted(onClose);
-        res.onData((chunk, isLast) => {
-          chunks.push(Buffer.from(chunk));
-          contentLength += Buffer.byteLength(chunk);
-          if (contentLength > this.maxHttpBufferSize) {
-            this.onError("payload too large");
-            res.writeStatus("413 Payload Too Large");
-            res.end();
+        res.onAborted(() => {
+          this.onDataRequestCleanup();
+          this.onError("data request connection closed prematurely");
+        });
+        res.onData((arrayBuffer, isLast) => {
+          const totalLength = offset + arrayBuffer.byteLength;
+          if (totalLength > expectedContentLength) {
+            this.onError("content-length mismatch");
+            res.close();
             return;
           }
-          if (isLast) {
-            onEnd();
+          if (!buffer) {
+            if (isLast) {
+              onEnd(Buffer.from(arrayBuffer));
+              return;
+            }
+            buffer = Buffer.allocUnsafe(expectedContentLength);
           }
+          Buffer.from(arrayBuffer).copy(buffer, offset);
+          if (isLast) {
+            if (totalLength != expectedContentLength) {
+              this.onError("content-length mismatch");
+              res.writeStatus("400 Content-Length Mismatch").end();
+              this.onDataRequestCleanup();
+              return;
+            }
+            onEnd(buffer);
+            return;
+          }
+          offset = totalLength;
         });
+      }
+      onDataRequestCleanup() {
+        this.dataReq = this.dataRes = null;
       }
       onData(data) {
         debug('received "%s"', data);
@@ -15652,12 +15702,10 @@ var require_engine_io = __commonJS({
   }
 });
 
-// node_modules/component-emitter/index.js
+// node_modules/@socket.io/component-emitter/index.js
 var require_component_emitter = __commonJS({
-  "node_modules/component-emitter/index.js"(exports, module2) {
-    if (typeof module2 !== "undefined") {
-      module2.exports = Emitter;
-    }
+  "node_modules/@socket.io/component-emitter/index.js"(exports) {
+    exports.Emitter = Emitter;
     function Emitter(obj) {
       if (obj)
         return mixin(obj);
@@ -15722,6 +15770,7 @@ var require_component_emitter = __commonJS({
       }
       return this;
     };
+    Emitter.prototype.emitReserved = Emitter.prototype.emit;
     Emitter.prototype.listeners = function(event) {
       this._callbacks = this._callbacks || {};
       return this._callbacks["$" + event] || [];
@@ -15732,9 +15781,9 @@ var require_component_emitter = __commonJS({
   }
 });
 
-// node_modules/socket.io-parser/dist/is-binary.js
+// node_modules/socket.io-parser/build/cjs/is-binary.js
 var require_is_binary = __commonJS({
-  "node_modules/socket.io-parser/dist/is-binary.js"(exports) {
+  "node_modules/socket.io-parser/build/cjs/is-binary.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.hasBinary = exports.isBinary = void 0;
@@ -15778,13 +15827,13 @@ var require_is_binary = __commonJS({
   }
 });
 
-// node_modules/socket.io-parser/dist/binary.js
+// node_modules/socket.io-parser/build/cjs/binary.js
 var require_binary = __commonJS({
-  "node_modules/socket.io-parser/dist/binary.js"(exports) {
+  "node_modules/socket.io-parser/build/cjs/binary.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.reconstructPacket = exports.deconstructPacket = void 0;
-    var is_binary_1 = require_is_binary();
+    var is_binary_js_1 = require_is_binary();
     function deconstructPacket(packet) {
       const buffers = [];
       const packetData = packet.data;
@@ -15797,7 +15846,7 @@ var require_binary = __commonJS({
     function _deconstructPacket(data, buffers) {
       if (!data)
         return data;
-      if (is_binary_1.isBinary(data)) {
+      if ((0, is_binary_js_1.isBinary)(data)) {
         const placeholder = { _placeholder: true, num: buffers.length };
         buffers.push(data);
         return placeholder;
@@ -15810,7 +15859,7 @@ var require_binary = __commonJS({
       } else if (typeof data === "object" && !(data instanceof Date)) {
         const newData = {};
         for (const key in data) {
-          if (data.hasOwnProperty(key)) {
+          if (Object.prototype.hasOwnProperty.call(data, key)) {
             newData[key] = _deconstructPacket(data[key], buffers);
           }
         }
@@ -15820,22 +15869,27 @@ var require_binary = __commonJS({
     }
     function reconstructPacket(packet, buffers) {
       packet.data = _reconstructPacket(packet.data, buffers);
-      packet.attachments = void 0;
+      delete packet.attachments;
       return packet;
     }
     exports.reconstructPacket = reconstructPacket;
     function _reconstructPacket(data, buffers) {
       if (!data)
         return data;
-      if (data && data._placeholder) {
-        return buffers[data.num];
+      if (data && data._placeholder === true) {
+        const isIndexValid = typeof data.num === "number" && data.num >= 0 && data.num < buffers.length;
+        if (isIndexValid) {
+          return buffers[data.num];
+        } else {
+          throw new Error("illegal attachments");
+        }
       } else if (Array.isArray(data)) {
         for (let i = 0; i < data.length; i++) {
           data[i] = _reconstructPacket(data[i], buffers);
         }
       } else if (typeof data === "object") {
         for (const key in data) {
-          if (data.hasOwnProperty(key)) {
+          if (Object.prototype.hasOwnProperty.call(data, key)) {
             data[key] = _reconstructPacket(data[key], buffers);
           }
         }
@@ -15845,526 +15899,17 @@ var require_binary = __commonJS({
   }
 });
 
-// node_modules/socket.io-parser/node_modules/debug/src/common.js
-var require_common2 = __commonJS({
-  "node_modules/socket.io-parser/node_modules/debug/src/common.js"(exports, module2) {
-    function setup(env) {
-      createDebug.debug = createDebug;
-      createDebug.default = createDebug;
-      createDebug.coerce = coerce;
-      createDebug.disable = disable;
-      createDebug.enable = enable;
-      createDebug.enabled = enabled;
-      createDebug.humanize = require_ms();
-      createDebug.destroy = destroy;
-      Object.keys(env).forEach((key) => {
-        createDebug[key] = env[key];
-      });
-      createDebug.names = [];
-      createDebug.skips = [];
-      createDebug.formatters = {};
-      function selectColor(namespace) {
-        let hash = 0;
-        for (let i = 0; i < namespace.length; i++) {
-          hash = (hash << 5) - hash + namespace.charCodeAt(i);
-          hash |= 0;
-        }
-        return createDebug.colors[Math.abs(hash) % createDebug.colors.length];
-      }
-      createDebug.selectColor = selectColor;
-      function createDebug(namespace) {
-        let prevTime;
-        let enableOverride = null;
-        let namespacesCache;
-        let enabledCache;
-        function debug(...args) {
-          if (!debug.enabled) {
-            return;
-          }
-          const self2 = debug;
-          const curr = Number(new Date());
-          const ms = curr - (prevTime || curr);
-          self2.diff = ms;
-          self2.prev = prevTime;
-          self2.curr = curr;
-          prevTime = curr;
-          args[0] = createDebug.coerce(args[0]);
-          if (typeof args[0] !== "string") {
-            args.unshift("%O");
-          }
-          let index = 0;
-          args[0] = args[0].replace(/%([a-zA-Z%])/g, (match, format) => {
-            if (match === "%%") {
-              return "%";
-            }
-            index++;
-            const formatter = createDebug.formatters[format];
-            if (typeof formatter === "function") {
-              const val = args[index];
-              match = formatter.call(self2, val);
-              args.splice(index, 1);
-              index--;
-            }
-            return match;
-          });
-          createDebug.formatArgs.call(self2, args);
-          const logFn = self2.log || createDebug.log;
-          logFn.apply(self2, args);
-        }
-        debug.namespace = namespace;
-        debug.useColors = createDebug.useColors();
-        debug.color = createDebug.selectColor(namespace);
-        debug.extend = extend;
-        debug.destroy = createDebug.destroy;
-        Object.defineProperty(debug, "enabled", {
-          enumerable: true,
-          configurable: false,
-          get: () => {
-            if (enableOverride !== null) {
-              return enableOverride;
-            }
-            if (namespacesCache !== createDebug.namespaces) {
-              namespacesCache = createDebug.namespaces;
-              enabledCache = createDebug.enabled(namespace);
-            }
-            return enabledCache;
-          },
-          set: (v) => {
-            enableOverride = v;
-          }
-        });
-        if (typeof createDebug.init === "function") {
-          createDebug.init(debug);
-        }
-        return debug;
-      }
-      function extend(namespace, delimiter) {
-        const newDebug = createDebug(this.namespace + (typeof delimiter === "undefined" ? ":" : delimiter) + namespace);
-        newDebug.log = this.log;
-        return newDebug;
-      }
-      function enable(namespaces) {
-        createDebug.save(namespaces);
-        createDebug.namespaces = namespaces;
-        createDebug.names = [];
-        createDebug.skips = [];
-        let i;
-        const split = (typeof namespaces === "string" ? namespaces : "").split(/[\s,]+/);
-        const len = split.length;
-        for (i = 0; i < len; i++) {
-          if (!split[i]) {
-            continue;
-          }
-          namespaces = split[i].replace(/\*/g, ".*?");
-          if (namespaces[0] === "-") {
-            createDebug.skips.push(new RegExp("^" + namespaces.substr(1) + "$"));
-          } else {
-            createDebug.names.push(new RegExp("^" + namespaces + "$"));
-          }
-        }
-      }
-      function disable() {
-        const namespaces = [
-          ...createDebug.names.map(toNamespace),
-          ...createDebug.skips.map(toNamespace).map((namespace) => "-" + namespace)
-        ].join(",");
-        createDebug.enable("");
-        return namespaces;
-      }
-      function enabled(name) {
-        if (name[name.length - 1] === "*") {
-          return true;
-        }
-        let i;
-        let len;
-        for (i = 0, len = createDebug.skips.length; i < len; i++) {
-          if (createDebug.skips[i].test(name)) {
-            return false;
-          }
-        }
-        for (i = 0, len = createDebug.names.length; i < len; i++) {
-          if (createDebug.names[i].test(name)) {
-            return true;
-          }
-        }
-        return false;
-      }
-      function toNamespace(regexp) {
-        return regexp.toString().substring(2, regexp.toString().length - 2).replace(/\.\*\?$/, "*");
-      }
-      function coerce(val) {
-        if (val instanceof Error) {
-          return val.stack || val.message;
-        }
-        return val;
-      }
-      function destroy() {
-        console.warn("Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
-      }
-      createDebug.enable(createDebug.load());
-      return createDebug;
-    }
-    module2.exports = setup;
-  }
-});
-
-// node_modules/socket.io-parser/node_modules/debug/src/browser.js
-var require_browser2 = __commonJS({
-  "node_modules/socket.io-parser/node_modules/debug/src/browser.js"(exports, module2) {
-    exports.formatArgs = formatArgs;
-    exports.save = save;
-    exports.load = load;
-    exports.useColors = useColors;
-    exports.storage = localstorage();
-    exports.destroy = (() => {
-      let warned = false;
-      return () => {
-        if (!warned) {
-          warned = true;
-          console.warn("Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
-        }
-      };
-    })();
-    exports.colors = [
-      "#0000CC",
-      "#0000FF",
-      "#0033CC",
-      "#0033FF",
-      "#0066CC",
-      "#0066FF",
-      "#0099CC",
-      "#0099FF",
-      "#00CC00",
-      "#00CC33",
-      "#00CC66",
-      "#00CC99",
-      "#00CCCC",
-      "#00CCFF",
-      "#3300CC",
-      "#3300FF",
-      "#3333CC",
-      "#3333FF",
-      "#3366CC",
-      "#3366FF",
-      "#3399CC",
-      "#3399FF",
-      "#33CC00",
-      "#33CC33",
-      "#33CC66",
-      "#33CC99",
-      "#33CCCC",
-      "#33CCFF",
-      "#6600CC",
-      "#6600FF",
-      "#6633CC",
-      "#6633FF",
-      "#66CC00",
-      "#66CC33",
-      "#9900CC",
-      "#9900FF",
-      "#9933CC",
-      "#9933FF",
-      "#99CC00",
-      "#99CC33",
-      "#CC0000",
-      "#CC0033",
-      "#CC0066",
-      "#CC0099",
-      "#CC00CC",
-      "#CC00FF",
-      "#CC3300",
-      "#CC3333",
-      "#CC3366",
-      "#CC3399",
-      "#CC33CC",
-      "#CC33FF",
-      "#CC6600",
-      "#CC6633",
-      "#CC9900",
-      "#CC9933",
-      "#CCCC00",
-      "#CCCC33",
-      "#FF0000",
-      "#FF0033",
-      "#FF0066",
-      "#FF0099",
-      "#FF00CC",
-      "#FF00FF",
-      "#FF3300",
-      "#FF3333",
-      "#FF3366",
-      "#FF3399",
-      "#FF33CC",
-      "#FF33FF",
-      "#FF6600",
-      "#FF6633",
-      "#FF9900",
-      "#FF9933",
-      "#FFCC00",
-      "#FFCC33"
-    ];
-    function useColors() {
-      if (typeof window !== "undefined" && window.process && (window.process.type === "renderer" || window.process.__nwjs)) {
-        return true;
-      }
-      if (typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) {
-        return false;
-      }
-      return typeof document !== "undefined" && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance || typeof window !== "undefined" && window.console && (window.console.firebug || window.console.exception && window.console.table) || typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31 || typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
-    }
-    function formatArgs(args) {
-      args[0] = (this.useColors ? "%c" : "") + this.namespace + (this.useColors ? " %c" : " ") + args[0] + (this.useColors ? "%c " : " ") + "+" + module2.exports.humanize(this.diff);
-      if (!this.useColors) {
-        return;
-      }
-      const c = "color: " + this.color;
-      args.splice(1, 0, c, "color: inherit");
-      let index = 0;
-      let lastC = 0;
-      args[0].replace(/%[a-zA-Z%]/g, (match) => {
-        if (match === "%%") {
-          return;
-        }
-        index++;
-        if (match === "%c") {
-          lastC = index;
-        }
-      });
-      args.splice(lastC, 0, c);
-    }
-    exports.log = console.debug || console.log || (() => {
-    });
-    function save(namespaces) {
-      try {
-        if (namespaces) {
-          exports.storage.setItem("debug", namespaces);
-        } else {
-          exports.storage.removeItem("debug");
-        }
-      } catch (error) {
-      }
-    }
-    function load() {
-      let r;
-      try {
-        r = exports.storage.getItem("debug");
-      } catch (error) {
-      }
-      if (!r && typeof process !== "undefined" && "env" in process) {
-        r = process.env.DEBUG;
-      }
-      return r;
-    }
-    function localstorage() {
-      try {
-        return localStorage;
-      } catch (error) {
-      }
-    }
-    module2.exports = require_common2()(exports);
-    var { formatters } = module2.exports;
-    formatters.j = function(v) {
-      try {
-        return JSON.stringify(v);
-      } catch (error) {
-        return "[UnexpectedJSONParseError]: " + error.message;
-      }
-    };
-  }
-});
-
-// node_modules/socket.io-parser/node_modules/debug/src/node.js
-var require_node2 = __commonJS({
-  "node_modules/socket.io-parser/node_modules/debug/src/node.js"(exports, module2) {
-    var tty = require("tty");
-    var util = require("util");
-    exports.init = init;
-    exports.log = log;
-    exports.formatArgs = formatArgs;
-    exports.save = save;
-    exports.load = load;
-    exports.useColors = useColors;
-    exports.destroy = util.deprecate(() => {
-    }, "Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
-    exports.colors = [6, 2, 3, 4, 5, 1];
-    try {
-      const supportsColor = require_supports_color();
-      if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
-        exports.colors = [
-          20,
-          21,
-          26,
-          27,
-          32,
-          33,
-          38,
-          39,
-          40,
-          41,
-          42,
-          43,
-          44,
-          45,
-          56,
-          57,
-          62,
-          63,
-          68,
-          69,
-          74,
-          75,
-          76,
-          77,
-          78,
-          79,
-          80,
-          81,
-          92,
-          93,
-          98,
-          99,
-          112,
-          113,
-          128,
-          129,
-          134,
-          135,
-          148,
-          149,
-          160,
-          161,
-          162,
-          163,
-          164,
-          165,
-          166,
-          167,
-          168,
-          169,
-          170,
-          171,
-          172,
-          173,
-          178,
-          179,
-          184,
-          185,
-          196,
-          197,
-          198,
-          199,
-          200,
-          201,
-          202,
-          203,
-          204,
-          205,
-          206,
-          207,
-          208,
-          209,
-          214,
-          215,
-          220,
-          221
-        ];
-      }
-    } catch (error) {
-    }
-    exports.inspectOpts = Object.keys(process.env).filter((key) => {
-      return /^debug_/i.test(key);
-    }).reduce((obj, key) => {
-      const prop = key.substring(6).toLowerCase().replace(/_([a-z])/g, (_, k) => {
-        return k.toUpperCase();
-      });
-      let val = process.env[key];
-      if (/^(yes|on|true|enabled)$/i.test(val)) {
-        val = true;
-      } else if (/^(no|off|false|disabled)$/i.test(val)) {
-        val = false;
-      } else if (val === "null") {
-        val = null;
-      } else {
-        val = Number(val);
-      }
-      obj[prop] = val;
-      return obj;
-    }, {});
-    function useColors() {
-      return "colors" in exports.inspectOpts ? Boolean(exports.inspectOpts.colors) : tty.isatty(process.stderr.fd);
-    }
-    function formatArgs(args) {
-      const { namespace: name, useColors: useColors2 } = this;
-      if (useColors2) {
-        const c = this.color;
-        const colorCode = "[3" + (c < 8 ? c : "8;5;" + c);
-        const prefix = `  ${colorCode};1m${name} [0m`;
-        args[0] = prefix + args[0].split("\n").join("\n" + prefix);
-        args.push(colorCode + "m+" + module2.exports.humanize(this.diff) + "[0m");
-      } else {
-        args[0] = getDate() + name + " " + args[0];
-      }
-    }
-    function getDate() {
-      if (exports.inspectOpts.hideDate) {
-        return "";
-      }
-      return new Date().toISOString() + " ";
-    }
-    function log(...args) {
-      return process.stderr.write(util.format(...args) + "\n");
-    }
-    function save(namespaces) {
-      if (namespaces) {
-        process.env.DEBUG = namespaces;
-      } else {
-        delete process.env.DEBUG;
-      }
-    }
-    function load() {
-      return process.env.DEBUG;
-    }
-    function init(debug) {
-      debug.inspectOpts = {};
-      const keys = Object.keys(exports.inspectOpts);
-      for (let i = 0; i < keys.length; i++) {
-        debug.inspectOpts[keys[i]] = exports.inspectOpts[keys[i]];
-      }
-    }
-    module2.exports = require_common2()(exports);
-    var { formatters } = module2.exports;
-    formatters.o = function(v) {
-      this.inspectOpts.colors = this.useColors;
-      return util.inspect(v, this.inspectOpts).split("\n").map((str) => str.trim()).join(" ");
-    };
-    formatters.O = function(v) {
-      this.inspectOpts.colors = this.useColors;
-      return util.inspect(v, this.inspectOpts);
-    };
-  }
-});
-
-// node_modules/socket.io-parser/node_modules/debug/src/index.js
-var require_src2 = __commonJS({
-  "node_modules/socket.io-parser/node_modules/debug/src/index.js"(exports, module2) {
-    if (typeof process === "undefined" || process.type === "renderer" || process.browser === true || process.__nwjs) {
-      module2.exports = require_browser2();
-    } else {
-      module2.exports = require_node2();
-    }
-  }
-});
-
-// node_modules/socket.io-parser/dist/index.js
-var require_dist = __commonJS({
-  "node_modules/socket.io-parser/dist/index.js"(exports) {
+// node_modules/socket.io-parser/build/cjs/index.js
+var require_cjs2 = __commonJS({
+  "node_modules/socket.io-parser/build/cjs/index.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Decoder = exports.Encoder = exports.PacketType = exports.protocol = void 0;
-    var Emitter = require_component_emitter();
-    var binary_1 = require_binary();
-    var is_binary_1 = require_is_binary();
-    var debug = require_src2()("socket.io-parser");
+    var component_emitter_1 = require_component_emitter();
+    var binary_js_1 = require_binary();
+    var is_binary_js_1 = require_is_binary();
+    var debug_1 = require_src();
+    var debug = (0, debug_1.default)("socket.io-parser");
     exports.protocol = 5;
     var PacketType;
     (function(PacketType2) {
@@ -16377,12 +15922,19 @@ var require_dist = __commonJS({
       PacketType2[PacketType2["BINARY_ACK"] = 6] = "BINARY_ACK";
     })(PacketType = exports.PacketType || (exports.PacketType = {}));
     var Encoder2 = class {
+      constructor(replacer) {
+        this.replacer = replacer;
+      }
       encode(obj) {
         debug("encoding packet %j", obj);
         if (obj.type === PacketType.EVENT || obj.type === PacketType.ACK) {
-          if (is_binary_1.hasBinary(obj)) {
-            obj.type = obj.type === PacketType.EVENT ? PacketType.BINARY_EVENT : PacketType.BINARY_ACK;
-            return this.encodeAsBinary(obj);
+          if ((0, is_binary_js_1.hasBinary)(obj)) {
+            return this.encodeAsBinary({
+              type: obj.type === PacketType.EVENT ? PacketType.BINARY_EVENT : PacketType.BINARY_ACK,
+              nsp: obj.nsp,
+              data: obj.data,
+              id: obj.id
+            });
           }
         }
         return [this.encodeAsString(obj)];
@@ -16399,13 +15951,13 @@ var require_dist = __commonJS({
           str += obj.id;
         }
         if (obj.data != null) {
-          str += JSON.stringify(obj.data);
+          str += JSON.stringify(obj.data, this.replacer);
         }
         debug("encoded %j as %s", obj, str);
         return str;
       }
       encodeAsBinary(obj) {
-        const deconstruction = binary_1.deconstructPacket(obj);
+        const deconstruction = (0, binary_js_1.deconstructPacket)(obj);
         const pack = this.encodeAsString(deconstruction.packet);
         const buffers = deconstruction.buffers;
         buffers.unshift(pack);
@@ -16413,30 +15965,36 @@ var require_dist = __commonJS({
       }
     };
     exports.Encoder = Encoder2;
-    var Decoder = class extends Emitter {
-      constructor() {
+    var Decoder = class extends component_emitter_1.Emitter {
+      constructor(reviver) {
         super();
+        this.reviver = reviver;
       }
       add(obj) {
         let packet;
         if (typeof obj === "string") {
+          if (this.reconstructor) {
+            throw new Error("got plaintext data when reconstructing a packet");
+          }
           packet = this.decodeString(obj);
-          if (packet.type === PacketType.BINARY_EVENT || packet.type === PacketType.BINARY_ACK) {
+          const isBinaryEvent = packet.type === PacketType.BINARY_EVENT;
+          if (isBinaryEvent || packet.type === PacketType.BINARY_ACK) {
+            packet.type = isBinaryEvent ? PacketType.EVENT : PacketType.ACK;
             this.reconstructor = new BinaryReconstructor(packet);
             if (packet.attachments === 0) {
-              super.emit("decoded", packet);
+              super.emitReserved("decoded", packet);
             }
           } else {
-            super.emit("decoded", packet);
+            super.emitReserved("decoded", packet);
           }
-        } else if (is_binary_1.isBinary(obj) || obj.base64) {
+        } else if ((0, is_binary_js_1.isBinary)(obj) || obj.base64) {
           if (!this.reconstructor) {
             throw new Error("got binary data when not reconstructing a packet");
           } else {
             packet = this.reconstructor.takeBinaryData(obj);
             if (packet) {
               this.reconstructor = null;
-              super.emit("decoded", packet);
+              super.emitReserved("decoded", packet);
             }
           }
         } else {
@@ -16489,7 +16047,7 @@ var require_dist = __commonJS({
           p.id = Number(str.substring(start, i + 1));
         }
         if (str.charAt(++i)) {
-          const payload = tryParse(str.substr(i));
+          const payload = this.tryParse(str.substr(i));
           if (Decoder.isPayloadValid(p.type, payload)) {
             p.data = payload;
           } else {
@@ -16498,6 +16056,13 @@ var require_dist = __commonJS({
         }
         debug("decoded %s as %j", str, p);
         return p;
+      }
+      tryParse(str) {
+        try {
+          return JSON.parse(str, this.reviver);
+        } catch (e) {
+          return false;
+        }
       }
       static isPayloadValid(type, payload) {
         switch (type) {
@@ -16518,17 +16083,11 @@ var require_dist = __commonJS({
       destroy() {
         if (this.reconstructor) {
           this.reconstructor.finishedReconstruction();
+          this.reconstructor = null;
         }
       }
     };
     exports.Decoder = Decoder;
-    function tryParse(str) {
-      try {
-        return JSON.parse(str);
-      } catch (e) {
-        return false;
-      }
-    }
     var BinaryReconstructor = class {
       constructor(packet) {
         this.packet = packet;
@@ -16538,7 +16097,7 @@ var require_dist = __commonJS({
       takeBinaryData(binData) {
         this.buffers.push(binData);
         if (this.buffers.length === this.reconPack.attachments) {
-          const packet = binary_1.reconstructPacket(this.reconPack, this.buffers);
+          const packet = (0, binary_js_1.reconstructPacket)(this.reconPack, this.buffers);
           this.finishedReconstruction();
           return packet;
         }
@@ -16552,524 +16111,14 @@ var require_dist = __commonJS({
   }
 });
 
-// node_modules/socket.io/node_modules/debug/src/common.js
-var require_common3 = __commonJS({
-  "node_modules/socket.io/node_modules/debug/src/common.js"(exports, module2) {
-    function setup(env) {
-      createDebug.debug = createDebug;
-      createDebug.default = createDebug;
-      createDebug.coerce = coerce;
-      createDebug.disable = disable;
-      createDebug.enable = enable;
-      createDebug.enabled = enabled;
-      createDebug.humanize = require_ms();
-      createDebug.destroy = destroy;
-      Object.keys(env).forEach((key) => {
-        createDebug[key] = env[key];
-      });
-      createDebug.names = [];
-      createDebug.skips = [];
-      createDebug.formatters = {};
-      function selectColor(namespace) {
-        let hash = 0;
-        for (let i = 0; i < namespace.length; i++) {
-          hash = (hash << 5) - hash + namespace.charCodeAt(i);
-          hash |= 0;
-        }
-        return createDebug.colors[Math.abs(hash) % createDebug.colors.length];
-      }
-      createDebug.selectColor = selectColor;
-      function createDebug(namespace) {
-        let prevTime;
-        let enableOverride = null;
-        let namespacesCache;
-        let enabledCache;
-        function debug(...args) {
-          if (!debug.enabled) {
-            return;
-          }
-          const self2 = debug;
-          const curr = Number(new Date());
-          const ms = curr - (prevTime || curr);
-          self2.diff = ms;
-          self2.prev = prevTime;
-          self2.curr = curr;
-          prevTime = curr;
-          args[0] = createDebug.coerce(args[0]);
-          if (typeof args[0] !== "string") {
-            args.unshift("%O");
-          }
-          let index = 0;
-          args[0] = args[0].replace(/%([a-zA-Z%])/g, (match, format) => {
-            if (match === "%%") {
-              return "%";
-            }
-            index++;
-            const formatter = createDebug.formatters[format];
-            if (typeof formatter === "function") {
-              const val = args[index];
-              match = formatter.call(self2, val);
-              args.splice(index, 1);
-              index--;
-            }
-            return match;
-          });
-          createDebug.formatArgs.call(self2, args);
-          const logFn = self2.log || createDebug.log;
-          logFn.apply(self2, args);
-        }
-        debug.namespace = namespace;
-        debug.useColors = createDebug.useColors();
-        debug.color = createDebug.selectColor(namespace);
-        debug.extend = extend;
-        debug.destroy = createDebug.destroy;
-        Object.defineProperty(debug, "enabled", {
-          enumerable: true,
-          configurable: false,
-          get: () => {
-            if (enableOverride !== null) {
-              return enableOverride;
-            }
-            if (namespacesCache !== createDebug.namespaces) {
-              namespacesCache = createDebug.namespaces;
-              enabledCache = createDebug.enabled(namespace);
-            }
-            return enabledCache;
-          },
-          set: (v) => {
-            enableOverride = v;
-          }
-        });
-        if (typeof createDebug.init === "function") {
-          createDebug.init(debug);
-        }
-        return debug;
-      }
-      function extend(namespace, delimiter) {
-        const newDebug = createDebug(this.namespace + (typeof delimiter === "undefined" ? ":" : delimiter) + namespace);
-        newDebug.log = this.log;
-        return newDebug;
-      }
-      function enable(namespaces) {
-        createDebug.save(namespaces);
-        createDebug.namespaces = namespaces;
-        createDebug.names = [];
-        createDebug.skips = [];
-        let i;
-        const split = (typeof namespaces === "string" ? namespaces : "").split(/[\s,]+/);
-        const len = split.length;
-        for (i = 0; i < len; i++) {
-          if (!split[i]) {
-            continue;
-          }
-          namespaces = split[i].replace(/\*/g, ".*?");
-          if (namespaces[0] === "-") {
-            createDebug.skips.push(new RegExp("^" + namespaces.substr(1) + "$"));
-          } else {
-            createDebug.names.push(new RegExp("^" + namespaces + "$"));
-          }
-        }
-      }
-      function disable() {
-        const namespaces = [
-          ...createDebug.names.map(toNamespace),
-          ...createDebug.skips.map(toNamespace).map((namespace) => "-" + namespace)
-        ].join(",");
-        createDebug.enable("");
-        return namespaces;
-      }
-      function enabled(name) {
-        if (name[name.length - 1] === "*") {
-          return true;
-        }
-        let i;
-        let len;
-        for (i = 0, len = createDebug.skips.length; i < len; i++) {
-          if (createDebug.skips[i].test(name)) {
-            return false;
-          }
-        }
-        for (i = 0, len = createDebug.names.length; i < len; i++) {
-          if (createDebug.names[i].test(name)) {
-            return true;
-          }
-        }
-        return false;
-      }
-      function toNamespace(regexp) {
-        return regexp.toString().substring(2, regexp.toString().length - 2).replace(/\.\*\?$/, "*");
-      }
-      function coerce(val) {
-        if (val instanceof Error) {
-          return val.stack || val.message;
-        }
-        return val;
-      }
-      function destroy() {
-        console.warn("Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
-      }
-      createDebug.enable(createDebug.load());
-      return createDebug;
-    }
-    module2.exports = setup;
-  }
-});
-
-// node_modules/socket.io/node_modules/debug/src/browser.js
-var require_browser3 = __commonJS({
-  "node_modules/socket.io/node_modules/debug/src/browser.js"(exports, module2) {
-    exports.formatArgs = formatArgs;
-    exports.save = save;
-    exports.load = load;
-    exports.useColors = useColors;
-    exports.storage = localstorage();
-    exports.destroy = (() => {
-      let warned = false;
-      return () => {
-        if (!warned) {
-          warned = true;
-          console.warn("Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
-        }
-      };
-    })();
-    exports.colors = [
-      "#0000CC",
-      "#0000FF",
-      "#0033CC",
-      "#0033FF",
-      "#0066CC",
-      "#0066FF",
-      "#0099CC",
-      "#0099FF",
-      "#00CC00",
-      "#00CC33",
-      "#00CC66",
-      "#00CC99",
-      "#00CCCC",
-      "#00CCFF",
-      "#3300CC",
-      "#3300FF",
-      "#3333CC",
-      "#3333FF",
-      "#3366CC",
-      "#3366FF",
-      "#3399CC",
-      "#3399FF",
-      "#33CC00",
-      "#33CC33",
-      "#33CC66",
-      "#33CC99",
-      "#33CCCC",
-      "#33CCFF",
-      "#6600CC",
-      "#6600FF",
-      "#6633CC",
-      "#6633FF",
-      "#66CC00",
-      "#66CC33",
-      "#9900CC",
-      "#9900FF",
-      "#9933CC",
-      "#9933FF",
-      "#99CC00",
-      "#99CC33",
-      "#CC0000",
-      "#CC0033",
-      "#CC0066",
-      "#CC0099",
-      "#CC00CC",
-      "#CC00FF",
-      "#CC3300",
-      "#CC3333",
-      "#CC3366",
-      "#CC3399",
-      "#CC33CC",
-      "#CC33FF",
-      "#CC6600",
-      "#CC6633",
-      "#CC9900",
-      "#CC9933",
-      "#CCCC00",
-      "#CCCC33",
-      "#FF0000",
-      "#FF0033",
-      "#FF0066",
-      "#FF0099",
-      "#FF00CC",
-      "#FF00FF",
-      "#FF3300",
-      "#FF3333",
-      "#FF3366",
-      "#FF3399",
-      "#FF33CC",
-      "#FF33FF",
-      "#FF6600",
-      "#FF6633",
-      "#FF9900",
-      "#FF9933",
-      "#FFCC00",
-      "#FFCC33"
-    ];
-    function useColors() {
-      if (typeof window !== "undefined" && window.process && (window.process.type === "renderer" || window.process.__nwjs)) {
-        return true;
-      }
-      if (typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) {
-        return false;
-      }
-      return typeof document !== "undefined" && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance || typeof window !== "undefined" && window.console && (window.console.firebug || window.console.exception && window.console.table) || typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31 || typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
-    }
-    function formatArgs(args) {
-      args[0] = (this.useColors ? "%c" : "") + this.namespace + (this.useColors ? " %c" : " ") + args[0] + (this.useColors ? "%c " : " ") + "+" + module2.exports.humanize(this.diff);
-      if (!this.useColors) {
-        return;
-      }
-      const c = "color: " + this.color;
-      args.splice(1, 0, c, "color: inherit");
-      let index = 0;
-      let lastC = 0;
-      args[0].replace(/%[a-zA-Z%]/g, (match) => {
-        if (match === "%%") {
-          return;
-        }
-        index++;
-        if (match === "%c") {
-          lastC = index;
-        }
-      });
-      args.splice(lastC, 0, c);
-    }
-    exports.log = console.debug || console.log || (() => {
-    });
-    function save(namespaces) {
-      try {
-        if (namespaces) {
-          exports.storage.setItem("debug", namespaces);
-        } else {
-          exports.storage.removeItem("debug");
-        }
-      } catch (error) {
-      }
-    }
-    function load() {
-      let r;
-      try {
-        r = exports.storage.getItem("debug");
-      } catch (error) {
-      }
-      if (!r && typeof process !== "undefined" && "env" in process) {
-        r = process.env.DEBUG;
-      }
-      return r;
-    }
-    function localstorage() {
-      try {
-        return localStorage;
-      } catch (error) {
-      }
-    }
-    module2.exports = require_common3()(exports);
-    var { formatters } = module2.exports;
-    formatters.j = function(v) {
-      try {
-        return JSON.stringify(v);
-      } catch (error) {
-        return "[UnexpectedJSONParseError]: " + error.message;
-      }
-    };
-  }
-});
-
-// node_modules/socket.io/node_modules/debug/src/node.js
-var require_node3 = __commonJS({
-  "node_modules/socket.io/node_modules/debug/src/node.js"(exports, module2) {
-    var tty = require("tty");
-    var util = require("util");
-    exports.init = init;
-    exports.log = log;
-    exports.formatArgs = formatArgs;
-    exports.save = save;
-    exports.load = load;
-    exports.useColors = useColors;
-    exports.destroy = util.deprecate(() => {
-    }, "Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
-    exports.colors = [6, 2, 3, 4, 5, 1];
-    try {
-      const supportsColor = require_supports_color();
-      if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
-        exports.colors = [
-          20,
-          21,
-          26,
-          27,
-          32,
-          33,
-          38,
-          39,
-          40,
-          41,
-          42,
-          43,
-          44,
-          45,
-          56,
-          57,
-          62,
-          63,
-          68,
-          69,
-          74,
-          75,
-          76,
-          77,
-          78,
-          79,
-          80,
-          81,
-          92,
-          93,
-          98,
-          99,
-          112,
-          113,
-          128,
-          129,
-          134,
-          135,
-          148,
-          149,
-          160,
-          161,
-          162,
-          163,
-          164,
-          165,
-          166,
-          167,
-          168,
-          169,
-          170,
-          171,
-          172,
-          173,
-          178,
-          179,
-          184,
-          185,
-          196,
-          197,
-          198,
-          199,
-          200,
-          201,
-          202,
-          203,
-          204,
-          205,
-          206,
-          207,
-          208,
-          209,
-          214,
-          215,
-          220,
-          221
-        ];
-      }
-    } catch (error) {
-    }
-    exports.inspectOpts = Object.keys(process.env).filter((key) => {
-      return /^debug_/i.test(key);
-    }).reduce((obj, key) => {
-      const prop = key.substring(6).toLowerCase().replace(/_([a-z])/g, (_, k) => {
-        return k.toUpperCase();
-      });
-      let val = process.env[key];
-      if (/^(yes|on|true|enabled)$/i.test(val)) {
-        val = true;
-      } else if (/^(no|off|false|disabled)$/i.test(val)) {
-        val = false;
-      } else if (val === "null") {
-        val = null;
-      } else {
-        val = Number(val);
-      }
-      obj[prop] = val;
-      return obj;
-    }, {});
-    function useColors() {
-      return "colors" in exports.inspectOpts ? Boolean(exports.inspectOpts.colors) : tty.isatty(process.stderr.fd);
-    }
-    function formatArgs(args) {
-      const { namespace: name, useColors: useColors2 } = this;
-      if (useColors2) {
-        const c = this.color;
-        const colorCode = "[3" + (c < 8 ? c : "8;5;" + c);
-        const prefix = `  ${colorCode};1m${name} [0m`;
-        args[0] = prefix + args[0].split("\n").join("\n" + prefix);
-        args.push(colorCode + "m+" + module2.exports.humanize(this.diff) + "[0m");
-      } else {
-        args[0] = getDate() + name + " " + args[0];
-      }
-    }
-    function getDate() {
-      if (exports.inspectOpts.hideDate) {
-        return "";
-      }
-      return new Date().toISOString() + " ";
-    }
-    function log(...args) {
-      return process.stderr.write(util.format(...args) + "\n");
-    }
-    function save(namespaces) {
-      if (namespaces) {
-        process.env.DEBUG = namespaces;
-      } else {
-        delete process.env.DEBUG;
-      }
-    }
-    function load() {
-      return process.env.DEBUG;
-    }
-    function init(debug) {
-      debug.inspectOpts = {};
-      const keys = Object.keys(exports.inspectOpts);
-      for (let i = 0; i < keys.length; i++) {
-        debug.inspectOpts[keys[i]] = exports.inspectOpts[keys[i]];
-      }
-    }
-    module2.exports = require_common3()(exports);
-    var { formatters } = module2.exports;
-    formatters.o = function(v) {
-      this.inspectOpts.colors = this.useColors;
-      return util.inspect(v, this.inspectOpts).split("\n").map((str) => str.trim()).join(" ");
-    };
-    formatters.O = function(v) {
-      this.inspectOpts.colors = this.useColors;
-      return util.inspect(v, this.inspectOpts);
-    };
-  }
-});
-
-// node_modules/socket.io/node_modules/debug/src/index.js
-var require_src3 = __commonJS({
-  "node_modules/socket.io/node_modules/debug/src/index.js"(exports, module2) {
-    if (typeof process === "undefined" || process.type === "renderer" || process.browser === true || process.__nwjs) {
-      module2.exports = require_browser3();
-    } else {
-      module2.exports = require_node3();
-    }
-  }
-});
-
 // node_modules/socket.io/dist/client.js
 var require_client = __commonJS({
   "node_modules/socket.io/dist/client.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Client = void 0;
-    var socket_io_parser_1 = require_dist();
-    var debugModule = require_src3();
+    var socket_io_parser_1 = require_cjs2();
+    var debugModule = require_src();
     var url = require("url");
     var debug = debugModule("socket.io:client");
     var Client = class {
@@ -17180,26 +16229,31 @@ var require_client = __commonJS({
         try {
           this.decoder.add(data);
         } catch (e) {
+          debug("invalid packet format");
           this.onerror(e);
         }
       }
       ondecoded(packet) {
-        if (socket_io_parser_1.PacketType.CONNECT === packet.type) {
-          if (this.conn.protocol === 3) {
-            const parsed = url.parse(packet.nsp, true);
-            this.connect(parsed.pathname, parsed.query);
-          } else {
-            this.connect(packet.nsp, packet.data);
-          }
+        let namespace;
+        let authPayload;
+        if (this.conn.protocol === 3) {
+          const parsed = url.parse(packet.nsp, true);
+          namespace = parsed.pathname;
+          authPayload = parsed.query;
         } else {
-          const socket = this.nsps.get(packet.nsp);
-          if (socket) {
-            process.nextTick(function() {
-              socket._onpacket(packet);
-            });
-          } else {
-            debug("no socket for namespace %s", packet.nsp);
-          }
+          namespace = packet.nsp;
+          authPayload = packet.data;
+        }
+        const socket = this.nsps.get(namespace);
+        if (!socket && packet.type === socket_io_parser_1.PacketType.CONNECT) {
+          this.connect(namespace, authPayload);
+        } else if (socket && packet.type !== socket_io_parser_1.PacketType.CONNECT && packet.type !== socket_io_parser_1.PacketType.CONNECT_ERROR) {
+          process.nextTick(function() {
+            socket._onpacket(packet);
+          });
+        } else {
+          debug("invalid state (packet type: %s)", packet.type);
+          this.close();
         }
       }
       onerror(err) {
@@ -17270,7 +16324,7 @@ var require_broadcast_operator = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.RemoteSocket = exports.BroadcastOperator = void 0;
     var socket_1 = require_socket2();
-    var socket_io_parser_1 = require_dist();
+    var socket_io_parser_1 = require_cjs2();
     var BroadcastOperator = class {
       constructor(adapter, rooms = new Set(), exceptRooms = new Set(), flags = {}) {
         this.adapter = adapter;
@@ -17311,22 +16365,59 @@ var require_broadcast_operator = __commonJS({
         const flags = Object.assign({}, this.flags, { local: true });
         return new BroadcastOperator(this.adapter, this.rooms, this.exceptRooms, flags);
       }
+      timeout(timeout) {
+        const flags = Object.assign({}, this.flags, { timeout });
+        return new BroadcastOperator(this.adapter, this.rooms, this.exceptRooms, flags);
+      }
       emit(ev, ...args) {
         if (socket_1.RESERVED_EVENTS.has(ev)) {
-          throw new Error(`"${ev}" is a reserved event name`);
+          throw new Error(`"${String(ev)}" is a reserved event name`);
         }
         const data = [ev, ...args];
         const packet = {
           type: socket_io_parser_1.PacketType.EVENT,
           data
         };
-        if (typeof data[data.length - 1] == "function") {
-          throw new Error("Callbacks are not supported when broadcasting");
+        const withAck = typeof data[data.length - 1] === "function";
+        if (!withAck) {
+          this.adapter.broadcast(packet, {
+            rooms: this.rooms,
+            except: this.exceptRooms,
+            flags: this.flags
+          });
+          return true;
         }
-        this.adapter.broadcast(packet, {
+        const ack = data.pop();
+        let timedOut = false;
+        let responses = [];
+        const timer = setTimeout(() => {
+          timedOut = true;
+          ack.apply(this, [new Error("operation has timed out"), responses]);
+        }, this.flags.timeout);
+        let expectedServerCount = -1;
+        let actualServerCount = 0;
+        let expectedClientCount = 0;
+        const checkCompleteness = () => {
+          if (!timedOut && expectedServerCount === actualServerCount && responses.length === expectedClientCount) {
+            clearTimeout(timer);
+            ack.apply(this, [null, responses]);
+          }
+        };
+        this.adapter.broadcastWithAck(packet, {
           rooms: this.rooms,
           except: this.exceptRooms,
           flags: this.flags
+        }, (clientCount) => {
+          expectedClientCount += clientCount;
+          actualServerCount++;
+          checkCompleteness();
+        }, (clientResponse) => {
+          responses.push(clientResponse);
+          checkCompleteness();
+        });
+        this.adapter.serverCount().then((serverCount) => {
+          expectedServerCount = serverCount;
+          checkCompleteness();
         });
         return true;
       }
@@ -17339,7 +16430,8 @@ var require_broadcast_operator = __commonJS({
       fetchSockets() {
         return this.adapter.fetchSockets({
           rooms: this.rooms,
-          except: this.exceptRooms
+          except: this.exceptRooms,
+          flags: this.flags
         }).then((sockets) => {
           return sockets.map((socket) => {
             if (socket instanceof socket_1.Socket) {
@@ -17353,19 +16445,22 @@ var require_broadcast_operator = __commonJS({
       socketsJoin(room) {
         this.adapter.addSockets({
           rooms: this.rooms,
-          except: this.exceptRooms
+          except: this.exceptRooms,
+          flags: this.flags
         }, Array.isArray(room) ? room : [room]);
       }
       socketsLeave(room) {
         this.adapter.delSockets({
           rooms: this.rooms,
-          except: this.exceptRooms
+          except: this.exceptRooms,
+          flags: this.flags
         }, Array.isArray(room) ? room : [room]);
       }
       disconnectSockets(close = false) {
         this.adapter.disconnectSockets({
           rooms: this.rooms,
-          except: this.exceptRooms
+          except: this.exceptRooms,
+          flags: this.flags
         }, close);
       }
     };
@@ -17405,8 +16500,8 @@ var require_socket2 = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Socket = exports.RESERVED_EVENTS = void 0;
-    var socket_io_parser_1 = require_dist();
-    var debug_1 = __importDefault(require_src3());
+    var socket_io_parser_1 = require_cjs2();
+    var debug_1 = __importDefault(require_src());
     var typed_events_1 = require_typed_events();
     var base64id_1 = __importDefault(require_base64id());
     var broadcast_operator_1 = require_broadcast_operator();
@@ -17419,6 +16514,8 @@ var require_socket2 = __commonJS({
       "newListener",
       "removeListener"
     ]);
+    function noop() {
+    }
     var Socket2 = class extends typed_events_1.StrictEventEmitter {
       constructor(nsp, client, auth) {
         super();
@@ -17453,7 +16550,7 @@ var require_socket2 = __commonJS({
       }
       emit(ev, ...args) {
         if (exports.RESERVED_EVENTS.has(ev)) {
-          throw new Error(`"${ev}" is a reserved event name`);
+          throw new Error(`"${String(ev)}" is a reserved event name`);
         }
         const data = [ev, ...args];
         const packet = {
@@ -17468,6 +16565,7 @@ var require_socket2 = __commonJS({
         }
         const flags = Object.assign({}, this.flags);
         this.flags = {};
+        this.notifyOutgoingListeners(packet);
         this.packet(packet, flags);
         return true;
       }
@@ -17548,8 +16646,6 @@ var require_socket2 = __commonJS({
           case socket_io_parser_1.PacketType.DISCONNECT:
             this.ondisconnect();
             break;
-          case socket_io_parser_1.PacketType.CONNECT_ERROR:
-            this._onerror(new Error(packet.data));
         }
       }
       onevent(packet) {
@@ -17610,12 +16706,16 @@ var require_socket2 = __commonJS({
           return this;
         debug("closing socket - reason %s", reason);
         this.emitReserved("disconnecting", reason);
-        this.leaveAll();
+        this._cleanup();
         this.nsp._remove(this);
         this.client._remove(this);
         this.connected = false;
         this.emitReserved("disconnect", reason);
         return;
+      }
+      _cleanup() {
+        this.leaveAll();
+        this.join = noop;
       }
       _error(err) {
         this.packet({ type: socket_io_parser_1.PacketType.CONNECT_ERROR, data: err });
@@ -17725,6 +16825,44 @@ var require_socket2 = __commonJS({
       listenersAny() {
         return this._anyListeners || [];
       }
+      onAnyOutgoing(listener) {
+        this._anyOutgoingListeners = this._anyOutgoingListeners || [];
+        this._anyOutgoingListeners.push(listener);
+        return this;
+      }
+      prependAnyOutgoing(listener) {
+        this._anyOutgoingListeners = this._anyOutgoingListeners || [];
+        this._anyOutgoingListeners.unshift(listener);
+        return this;
+      }
+      offAnyOutgoing(listener) {
+        if (!this._anyOutgoingListeners) {
+          return this;
+        }
+        if (listener) {
+          const listeners = this._anyOutgoingListeners;
+          for (let i = 0; i < listeners.length; i++) {
+            if (listener === listeners[i]) {
+              listeners.splice(i, 1);
+              return this;
+            }
+          }
+        } else {
+          this._anyOutgoingListeners = [];
+        }
+        return this;
+      }
+      listenersAnyOutgoing() {
+        return this._anyOutgoingListeners || [];
+      }
+      notifyOutgoingListeners(packet) {
+        if (this._anyOutgoingListeners && this._anyOutgoingListeners.length) {
+          const listeners = this._anyOutgoingListeners.slice();
+          for (const listener of listeners) {
+            listener.apply(this, packet.data);
+          }
+        }
+      }
       newBroadcastOperator() {
         const flags = Object.assign({}, this.flags);
         this.flags = {};
@@ -17746,7 +16884,7 @@ var require_namespace = __commonJS({
     exports.Namespace = exports.RESERVED_EVENTS = void 0;
     var socket_1 = require_socket2();
     var typed_events_1 = require_typed_events();
-    var debug_1 = __importDefault(require_src3());
+    var debug_1 = __importDefault(require_src());
     var broadcast_operator_1 = require_broadcast_operator();
     var debug = (0, debug_1.default)("socket.io:namespace");
     exports.RESERVED_EVENTS = new Set(["connect", "connection", "new_namespace"]);
@@ -17796,26 +16934,29 @@ var require_namespace = __commonJS({
         const socket = new socket_1.Socket(this, client, query);
         this.run(socket, (err) => {
           process.nextTick(() => {
-            if (client.conn.readyState == "open") {
-              if (err) {
-                if (client.conn.protocol === 3) {
-                  return socket._error(err.data || err.message);
-                } else {
-                  return socket._error({
-                    message: err.message,
-                    data: err.data
-                  });
-                }
-              }
-              this.sockets.set(socket.id, socket);
-              socket._onconnect();
-              if (fn)
-                fn();
-              this.emitReserved("connect", socket);
-              this.emitReserved("connection", socket);
-            } else {
+            if (client.conn.readyState !== "open") {
               debug("next called after client was closed - ignoring socket");
+              socket._cleanup();
+              return;
             }
+            if (err) {
+              debug("middleware error, sending CONNECT_ERROR packet to the client");
+              socket._cleanup();
+              if (client.conn.protocol === 3) {
+                return socket._error(err.data || err.message);
+              } else {
+                return socket._error({
+                  message: err.message,
+                  data: err.data
+                });
+              }
+            }
+            this.sockets.set(socket.id, socket);
+            socket._onconnect();
+            if (fn)
+              fn();
+            this.emitReserved("connect", socket);
+            this.emitReserved("connection", socket);
           });
         });
         return socket;
@@ -17840,7 +16981,7 @@ var require_namespace = __commonJS({
       }
       serverSideEmit(ev, ...args) {
         if (exports.RESERVED_EVENTS.has(ev)) {
-          throw new Error(`"${ev}" is a reserved event name`);
+          throw new Error(`"${String(ev)}" is a reserved event name`);
         }
         args.unshift(ev);
         this.adapter.serverSideEmit(args);
@@ -17860,6 +17001,9 @@ var require_namespace = __commonJS({
       }
       get local() {
         return new broadcast_operator_1.BroadcastOperator(this.adapter).local;
+      }
+      timeout(timeout) {
+        return new broadcast_operator_1.BroadcastOperator(this.adapter).timeout(timeout);
       }
       fetchSockets() {
         return new broadcast_operator_1.BroadcastOperator(this.adapter).fetchSockets();
@@ -17923,7 +17067,7 @@ var require_parent_namespace = __commonJS({
 });
 
 // node_modules/socket.io-adapter/dist/index.js
-var require_dist2 = __commonJS({
+var require_dist = __commonJS({
   "node_modules/socket.io-adapter/dist/index.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -17940,6 +17084,9 @@ var require_dist2 = __commonJS({
       init() {
       }
       close() {
+      }
+      serverCount() {
+        return Promise.resolve(1);
       }
       addAll(id, rooms) {
         if (!this.sids.has(id)) {
@@ -17994,8 +17141,32 @@ var require_dist2 = __commonJS({
         packet.nsp = this.nsp.name;
         const encodedPackets = this.encoder.encode(packet);
         this.apply(opts, (socket) => {
+          if (typeof socket.notifyOutgoingListeners === "function") {
+            socket.notifyOutgoingListeners(packet);
+          }
           socket.client.writeToEngine(encodedPackets, packetOpts);
         });
+      }
+      broadcastWithAck(packet, opts, clientCountCallback, ack) {
+        const flags = opts.flags || {};
+        const packetOpts = {
+          preEncoded: true,
+          volatile: flags.volatile,
+          compress: flags.compress
+        };
+        packet.nsp = this.nsp.name;
+        packet.id = this.nsp._ids++;
+        const encodedPackets = this.encoder.encode(packet);
+        let clientCount = 0;
+        this.apply(opts, (socket) => {
+          clientCount++;
+          socket.acks.set(packet.id, ack);
+          if (typeof socket.notifyOutgoingListeners === "function") {
+            socket.notifyOutgoingListeners(packet);
+          }
+          socket.client.writeToEngine(encodedPackets, packetOpts);
+        });
+        clientCountCallback(clientCount);
       }
       sockets(rooms) {
         const sids = new Set();
@@ -18069,7 +17240,7 @@ var require_dist2 = __commonJS({
         return exceptSids;
       }
       serverSideEmit(packet) {
-        throw new Error("this adapter does not support the serverSideEmit() functionality");
+        console.warn("this adapter does not support the serverSideEmit() functionality");
       }
     };
     exports.Adapter = Adapter;
@@ -18085,9 +17256,9 @@ var require_uws = __commonJS({
     };
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.serveFile = exports.restoreAdapter = exports.patchAdapter = void 0;
-    var socket_io_adapter_1 = require_dist2();
+    var socket_io_adapter_1 = require_dist();
     var fs_1 = require("fs");
-    var debug_1 = __importDefault(require_src3());
+    var debug_1 = __importDefault(require_src());
     var debug = (0, debug_1.default)("socket.io:adapter-uws");
     var SEPARATOR = "";
     var { addAll, del, broadcast } = socket_io_adapter_1.Adapter.prototype;
@@ -18106,7 +17277,9 @@ var require_uws = __commonJS({
         if (isNew) {
           socket.conn.on("upgrade", () => {
             const rooms2 = this.sids.get(id);
-            subscribe(this.nsp.name, socket, isNew, rooms2);
+            if (rooms2) {
+              subscribe(this.nsp.name, socket, isNew, rooms2);
+            }
           });
         }
       };
@@ -18207,7 +17380,7 @@ var require_package = __commonJS({
   "node_modules/socket.io/package.json"(exports, module2) {
     module2.exports = {
       name: "socket.io",
-      version: "4.4.1",
+      version: "4.5.4",
       description: "node.js realtime framework server",
       keywords: [
         "realtime",
@@ -18247,7 +17420,7 @@ var require_package = __commonJS({
         compile: "rimraf ./dist && tsc",
         test: "npm run format:check && npm run compile && npm run test:types && npm run test:unit",
         "test:types": "tsd",
-        "test:unit": "nyc mocha --require ts-node/register --reporter spec --slow 200 --bail --timeout 10000 test/socket.io.ts",
+        "test:unit": "nyc mocha --require ts-node/register --reporter spec --slow 200 --bail --timeout 10000 test/index.ts",
         "format:check": 'prettier --check "lib/**/*.ts" "test/**/*.ts"',
         "format:fix": 'prettier --write "lib/**/*.ts" "test/**/*.ts"',
         prepack: "npm run compile"
@@ -18256,23 +17429,23 @@ var require_package = __commonJS({
         accepts: "~1.3.4",
         base64id: "~2.0.0",
         debug: "~4.3.2",
-        "engine.io": "~6.1.0",
-        "socket.io-adapter": "~2.3.3",
-        "socket.io-parser": "~4.0.4"
+        "engine.io": "~6.2.1",
+        "socket.io-adapter": "~2.4.0",
+        "socket.io-parser": "~4.2.1"
       },
       devDependencies: {
         "@types/mocha": "^9.0.0",
         "expect.js": "0.3.1",
-        mocha: "^3.5.3",
+        mocha: "^10.0.0",
         nyc: "^15.1.0",
         prettier: "^2.3.2",
         rimraf: "^3.0.2",
-        "socket.io-client": "4.4.1",
+        "socket.io-client": "4.5.4",
         "socket.io-client-v2": "npm:socket.io-client@^2.4.0",
-        superagent: "^6.1.0",
+        superagent: "^8.0.0",
         supertest: "^6.1.6",
         "ts-node": "^10.2.1",
-        tsd: "^0.17.0",
+        tsd: "^0.21.0",
         typescript: "^4.4.2",
         "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.0.0"
       },
@@ -18305,15 +17478,19 @@ var require_package = __commonJS({
 });
 
 // node_modules/socket.io/dist/index.js
-var require_dist3 = __commonJS({
+var require_dist2 = __commonJS({
   "node_modules/socket.io/dist/index.js"(exports, module2) {
     "use strict";
     var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
-      Object.defineProperty(o, k2, { enumerable: true, get: function() {
-        return m[k];
-      } });
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
     } : function(o, m, k, k2) {
       if (k2 === void 0)
         k2 = k;
@@ -18355,15 +17532,15 @@ var require_dist3 = __commonJS({
       return namespace_1.Namespace;
     } });
     var parent_namespace_1 = require_parent_namespace();
-    var socket_io_adapter_1 = require_dist2();
-    var parser = __importStar(require_dist());
-    var debug_1 = __importDefault(require_src3());
+    var socket_io_adapter_1 = require_dist();
+    var parser = __importStar(require_cjs2());
+    var debug_1 = __importDefault(require_src());
     var socket_1 = require_socket2();
     Object.defineProperty(exports, "Socket", { enumerable: true, get: function() {
       return socket_1.Socket;
     } });
     var typed_events_1 = require_typed_events();
-    var uws_js_1 = require_uws();
+    var uws_1 = require_uws();
     var debug = (0, debug_1.default)("socket.io:server");
     var clientVersion = require_package().version;
     var dotMapRegex = /\.map/;
@@ -18498,10 +17675,10 @@ var require_dist3 = __commonJS({
             res.writeHeader("content-type", "application/" + (isMap ? "json" : "javascript"));
             res.writeHeader("etag", expectedEtag);
             const filepath = path.join(__dirname, "../client-dist/", filename);
-            (0, uws_js_1.serveFile)(res, filepath);
+            (0, uws_1.serveFile)(res, filepath);
           });
         }
-        (0, uws_js_1.patchAdapter)(app);
+        (0, uws_1.patchAdapter)(app);
       }
       initEngine(srv, opts) {
         debug("creating engine.io instance with opts %j", opts);
@@ -18620,7 +17797,7 @@ var require_dist3 = __commonJS({
           socket._onclose("server shutting down");
         }
         this.engine.close();
-        (0, uws_js_1.restoreAdapter)();
+        (0, uws_1.restoreAdapter)();
         if (this.httpServer) {
           this.httpServer.close(fn);
         } else {
@@ -18637,8 +17814,8 @@ var require_dist3 = __commonJS({
       in(room) {
         return this.sockets.in(room);
       }
-      except(name) {
-        return this.sockets.except(name);
+      except(room) {
+        return this.sockets.except(room);
       }
       send(...args) {
         this.sockets.emit("message", ...args);
@@ -18662,6 +17839,9 @@ var require_dist3 = __commonJS({
       }
       get local() {
         return this.sockets.local;
+      }
+      timeout(timeout) {
+        return this.sockets.timeout(timeout);
       }
       fetchSockets() {
         return this.sockets.fetchSockets();
@@ -18689,6 +17869,7 @@ var require_dist3 = __commonJS({
     module2.exports.Server = Server2;
     module2.exports.Namespace = namespace_1.Namespace;
     module2.exports.Socket = socket_1.Socket;
+    var socket_2 = require_socket2();
   }
 });
 
@@ -20465,6 +19646,32 @@ var require_websocket4 = __commonJS({
         opts.socketPath = parts[0];
         opts.path = parts[1];
       }
+      if (opts.followRedirects) {
+        if (websocket._redirects === 0) {
+          websocket._originalUnixSocket = isUnixSocket;
+          websocket._originalSecure = isSecure;
+          websocket._originalHostOrSocketPath = isUnixSocket ? opts.socketPath : parsedUrl.host;
+          const headers = options && options.headers;
+          options = { ...options, headers: {} };
+          if (headers) {
+            for (const [key2, value] of Object.entries(headers)) {
+              options.headers[key2.toLowerCase()] = value;
+            }
+          }
+        } else {
+          const isSameHost = isUnixSocket ? websocket._originalUnixSocket ? opts.socketPath === websocket._originalHostOrSocketPath : false : websocket._originalUnixSocket ? false : parsedUrl.host === websocket._originalHostOrSocketPath;
+          if (!isSameHost || websocket._originalSecure && !isSecure) {
+            delete opts.headers.authorization;
+            delete opts.headers.cookie;
+            if (!isSameHost)
+              delete opts.headers.host;
+            opts.auth = void 0;
+          }
+        }
+        if (opts.auth && !options.headers.authorization) {
+          options.headers.authorization = "Basic " + Buffer.from(opts.auth).toString("base64");
+        }
+      }
       let req = websocket._req = get(opts);
       if (opts.timeout) {
         req.on("timeout", () => {
@@ -20503,6 +19710,10 @@ var require_websocket4 = __commonJS({
         if (websocket.readyState !== WebSocket2.CONNECTING)
           return;
         req = websocket._req = null;
+        if (res.headers.upgrade.toLowerCase() !== "websocket") {
+          abortHandshake(websocket, socket, "Invalid Upgrade header");
+          return;
+        }
         const digest = createHash("sha1").update(key + GUID).digest("base64");
         if (res.headers["sec-websocket-accept"] !== digest) {
           abortHandshake(websocket, socket, "Invalid Sec-WebSocket-Accept header");
@@ -21267,11 +20478,12 @@ var require_conversions = __commonJS({
   "node_modules/ansi-styles/node_modules/color-convert/conversions.js"(exports, module2) {
     var cssKeywords = require_color_name();
     var reverseKeywords = {};
-    for (var key in cssKeywords) {
+    for (key in cssKeywords) {
       if (cssKeywords.hasOwnProperty(key)) {
         reverseKeywords[cssKeywords[key]] = key;
       }
     }
+    var key;
     var convert = module2.exports = {
       rgb: { channels: 3, labels: "rgb" },
       hsl: { channels: 3, labels: "hsl" },
@@ -21289,7 +20501,7 @@ var require_conversions = __commonJS({
       apple: { channels: 3, labels: ["r16", "g16", "b16"] },
       gray: { channels: 1, labels: ["gray"] }
     };
-    for (var model in convert) {
+    for (model in convert) {
       if (convert.hasOwnProperty(model)) {
         if (!("channels" in convert[model])) {
           throw new Error("missing channels property: " + model);
@@ -21310,6 +20522,7 @@ var require_conversions = __commonJS({
     }
     var channels;
     var labels;
+    var model;
     convert.rgb.hsl = function(rgb) {
       var r = rgb[0] / 255;
       var g = rgb[1] / 255;
@@ -24210,1849 +23423,15 @@ var require_browser_serialport = __commonJS({
   }
 });
 
-// node_modules/debug/src/common.js
-var require_common4 = __commonJS({
-  "node_modules/debug/src/common.js"(exports, module2) {
-    function setup(env) {
-      createDebug.debug = createDebug;
-      createDebug.default = createDebug;
-      createDebug.coerce = coerce;
-      createDebug.disable = disable;
-      createDebug.enable = enable;
-      createDebug.enabled = enabled;
-      createDebug.humanize = require_ms();
-      createDebug.destroy = destroy;
-      Object.keys(env).forEach((key) => {
-        createDebug[key] = env[key];
-      });
-      createDebug.names = [];
-      createDebug.skips = [];
-      createDebug.formatters = {};
-      function selectColor(namespace) {
-        let hash = 0;
-        for (let i = 0; i < namespace.length; i++) {
-          hash = (hash << 5) - hash + namespace.charCodeAt(i);
-          hash |= 0;
-        }
-        return createDebug.colors[Math.abs(hash) % createDebug.colors.length];
-      }
-      createDebug.selectColor = selectColor;
-      function createDebug(namespace) {
-        let prevTime;
-        let enableOverride = null;
-        let namespacesCache;
-        let enabledCache;
-        function debug(...args) {
-          if (!debug.enabled) {
-            return;
-          }
-          const self2 = debug;
-          const curr = Number(new Date());
-          const ms = curr - (prevTime || curr);
-          self2.diff = ms;
-          self2.prev = prevTime;
-          self2.curr = curr;
-          prevTime = curr;
-          args[0] = createDebug.coerce(args[0]);
-          if (typeof args[0] !== "string") {
-            args.unshift("%O");
-          }
-          let index = 0;
-          args[0] = args[0].replace(/%([a-zA-Z%])/g, (match, format) => {
-            if (match === "%%") {
-              return "%";
-            }
-            index++;
-            const formatter = createDebug.formatters[format];
-            if (typeof formatter === "function") {
-              const val = args[index];
-              match = formatter.call(self2, val);
-              args.splice(index, 1);
-              index--;
-            }
-            return match;
-          });
-          createDebug.formatArgs.call(self2, args);
-          const logFn = self2.log || createDebug.log;
-          logFn.apply(self2, args);
-        }
-        debug.namespace = namespace;
-        debug.useColors = createDebug.useColors();
-        debug.color = createDebug.selectColor(namespace);
-        debug.extend = extend;
-        debug.destroy = createDebug.destroy;
-        Object.defineProperty(debug, "enabled", {
-          enumerable: true,
-          configurable: false,
-          get: () => {
-            if (enableOverride !== null) {
-              return enableOverride;
-            }
-            if (namespacesCache !== createDebug.namespaces) {
-              namespacesCache = createDebug.namespaces;
-              enabledCache = createDebug.enabled(namespace);
-            }
-            return enabledCache;
-          },
-          set: (v) => {
-            enableOverride = v;
-          }
-        });
-        if (typeof createDebug.init === "function") {
-          createDebug.init(debug);
-        }
-        return debug;
-      }
-      function extend(namespace, delimiter) {
-        const newDebug = createDebug(this.namespace + (typeof delimiter === "undefined" ? ":" : delimiter) + namespace);
-        newDebug.log = this.log;
-        return newDebug;
-      }
-      function enable(namespaces) {
-        createDebug.save(namespaces);
-        createDebug.namespaces = namespaces;
-        createDebug.names = [];
-        createDebug.skips = [];
-        let i;
-        const split = (typeof namespaces === "string" ? namespaces : "").split(/[\s,]+/);
-        const len = split.length;
-        for (i = 0; i < len; i++) {
-          if (!split[i]) {
-            continue;
-          }
-          namespaces = split[i].replace(/\*/g, ".*?");
-          if (namespaces[0] === "-") {
-            createDebug.skips.push(new RegExp("^" + namespaces.substr(1) + "$"));
-          } else {
-            createDebug.names.push(new RegExp("^" + namespaces + "$"));
-          }
-        }
-      }
-      function disable() {
-        const namespaces = [
-          ...createDebug.names.map(toNamespace),
-          ...createDebug.skips.map(toNamespace).map((namespace) => "-" + namespace)
-        ].join(",");
-        createDebug.enable("");
-        return namespaces;
-      }
-      function enabled(name) {
-        if (name[name.length - 1] === "*") {
-          return true;
-        }
-        let i;
-        let len;
-        for (i = 0, len = createDebug.skips.length; i < len; i++) {
-          if (createDebug.skips[i].test(name)) {
-            return false;
-          }
-        }
-        for (i = 0, len = createDebug.names.length; i < len; i++) {
-          if (createDebug.names[i].test(name)) {
-            return true;
-          }
-        }
-        return false;
-      }
-      function toNamespace(regexp) {
-        return regexp.toString().substring(2, regexp.toString().length - 2).replace(/\.\*\?$/, "*");
-      }
-      function coerce(val) {
-        if (val instanceof Error) {
-          return val.stack || val.message;
-        }
-        return val;
-      }
-      function destroy() {
-        console.warn("Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
-      }
-      createDebug.enable(createDebug.load());
-      return createDebug;
-    }
-    module2.exports = setup;
-  }
-});
-
-// node_modules/debug/src/browser.js
-var require_browser4 = __commonJS({
-  "node_modules/debug/src/browser.js"(exports, module2) {
-    exports.formatArgs = formatArgs;
-    exports.save = save;
-    exports.load = load;
-    exports.useColors = useColors;
-    exports.storage = localstorage();
-    exports.destroy = (() => {
-      let warned = false;
-      return () => {
-        if (!warned) {
-          warned = true;
-          console.warn("Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
-        }
-      };
-    })();
-    exports.colors = [
-      "#0000CC",
-      "#0000FF",
-      "#0033CC",
-      "#0033FF",
-      "#0066CC",
-      "#0066FF",
-      "#0099CC",
-      "#0099FF",
-      "#00CC00",
-      "#00CC33",
-      "#00CC66",
-      "#00CC99",
-      "#00CCCC",
-      "#00CCFF",
-      "#3300CC",
-      "#3300FF",
-      "#3333CC",
-      "#3333FF",
-      "#3366CC",
-      "#3366FF",
-      "#3399CC",
-      "#3399FF",
-      "#33CC00",
-      "#33CC33",
-      "#33CC66",
-      "#33CC99",
-      "#33CCCC",
-      "#33CCFF",
-      "#6600CC",
-      "#6600FF",
-      "#6633CC",
-      "#6633FF",
-      "#66CC00",
-      "#66CC33",
-      "#9900CC",
-      "#9900FF",
-      "#9933CC",
-      "#9933FF",
-      "#99CC00",
-      "#99CC33",
-      "#CC0000",
-      "#CC0033",
-      "#CC0066",
-      "#CC0099",
-      "#CC00CC",
-      "#CC00FF",
-      "#CC3300",
-      "#CC3333",
-      "#CC3366",
-      "#CC3399",
-      "#CC33CC",
-      "#CC33FF",
-      "#CC6600",
-      "#CC6633",
-      "#CC9900",
-      "#CC9933",
-      "#CCCC00",
-      "#CCCC33",
-      "#FF0000",
-      "#FF0033",
-      "#FF0066",
-      "#FF0099",
-      "#FF00CC",
-      "#FF00FF",
-      "#FF3300",
-      "#FF3333",
-      "#FF3366",
-      "#FF3399",
-      "#FF33CC",
-      "#FF33FF",
-      "#FF6600",
-      "#FF6633",
-      "#FF9900",
-      "#FF9933",
-      "#FFCC00",
-      "#FFCC33"
-    ];
-    function useColors() {
-      if (typeof window !== "undefined" && window.process && (window.process.type === "renderer" || window.process.__nwjs)) {
-        return true;
-      }
-      if (typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) {
-        return false;
-      }
-      return typeof document !== "undefined" && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance || typeof window !== "undefined" && window.console && (window.console.firebug || window.console.exception && window.console.table) || typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31 || typeof navigator !== "undefined" && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
-    }
-    function formatArgs(args) {
-      args[0] = (this.useColors ? "%c" : "") + this.namespace + (this.useColors ? " %c" : " ") + args[0] + (this.useColors ? "%c " : " ") + "+" + module2.exports.humanize(this.diff);
-      if (!this.useColors) {
-        return;
-      }
-      const c = "color: " + this.color;
-      args.splice(1, 0, c, "color: inherit");
-      let index = 0;
-      let lastC = 0;
-      args[0].replace(/%[a-zA-Z%]/g, (match) => {
-        if (match === "%%") {
-          return;
-        }
-        index++;
-        if (match === "%c") {
-          lastC = index;
-        }
-      });
-      args.splice(lastC, 0, c);
-    }
-    exports.log = console.debug || console.log || (() => {
-    });
-    function save(namespaces) {
-      try {
-        if (namespaces) {
-          exports.storage.setItem("debug", namespaces);
-        } else {
-          exports.storage.removeItem("debug");
-        }
-      } catch (error) {
-      }
-    }
-    function load() {
-      let r;
-      try {
-        r = exports.storage.getItem("debug");
-      } catch (error) {
-      }
-      if (!r && typeof process !== "undefined" && "env" in process) {
-        r = process.env.DEBUG;
-      }
-      return r;
-    }
-    function localstorage() {
-      try {
-        return localStorage;
-      } catch (error) {
-      }
-    }
-    module2.exports = require_common4()(exports);
-    var { formatters } = module2.exports;
-    formatters.j = function(v) {
-      try {
-        return JSON.stringify(v);
-      } catch (error) {
-        return "[UnexpectedJSONParseError]: " + error.message;
-      }
-    };
-  }
-});
-
-// node_modules/debug/src/node.js
-var require_node4 = __commonJS({
-  "node_modules/debug/src/node.js"(exports, module2) {
-    var tty = require("tty");
-    var util = require("util");
-    exports.init = init;
-    exports.log = log;
-    exports.formatArgs = formatArgs;
-    exports.save = save;
-    exports.load = load;
-    exports.useColors = useColors;
-    exports.destroy = util.deprecate(() => {
-    }, "Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.");
-    exports.colors = [6, 2, 3, 4, 5, 1];
-    try {
-      const supportsColor = require_supports_color();
-      if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
-        exports.colors = [
-          20,
-          21,
-          26,
-          27,
-          32,
-          33,
-          38,
-          39,
-          40,
-          41,
-          42,
-          43,
-          44,
-          45,
-          56,
-          57,
-          62,
-          63,
-          68,
-          69,
-          74,
-          75,
-          76,
-          77,
-          78,
-          79,
-          80,
-          81,
-          92,
-          93,
-          98,
-          99,
-          112,
-          113,
-          128,
-          129,
-          134,
-          135,
-          148,
-          149,
-          160,
-          161,
-          162,
-          163,
-          164,
-          165,
-          166,
-          167,
-          168,
-          169,
-          170,
-          171,
-          172,
-          173,
-          178,
-          179,
-          184,
-          185,
-          196,
-          197,
-          198,
-          199,
-          200,
-          201,
-          202,
-          203,
-          204,
-          205,
-          206,
-          207,
-          208,
-          209,
-          214,
-          215,
-          220,
-          221
-        ];
-      }
-    } catch (error) {
-    }
-    exports.inspectOpts = Object.keys(process.env).filter((key) => {
-      return /^debug_/i.test(key);
-    }).reduce((obj, key) => {
-      const prop = key.substring(6).toLowerCase().replace(/_([a-z])/g, (_, k) => {
-        return k.toUpperCase();
-      });
-      let val = process.env[key];
-      if (/^(yes|on|true|enabled)$/i.test(val)) {
-        val = true;
-      } else if (/^(no|off|false|disabled)$/i.test(val)) {
-        val = false;
-      } else if (val === "null") {
-        val = null;
-      } else {
-        val = Number(val);
-      }
-      obj[prop] = val;
-      return obj;
-    }, {});
-    function useColors() {
-      return "colors" in exports.inspectOpts ? Boolean(exports.inspectOpts.colors) : tty.isatty(process.stderr.fd);
-    }
-    function formatArgs(args) {
-      const { namespace: name, useColors: useColors2 } = this;
-      if (useColors2) {
-        const c = this.color;
-        const colorCode = "[3" + (c < 8 ? c : "8;5;" + c);
-        const prefix = `  ${colorCode};1m${name} [0m`;
-        args[0] = prefix + args[0].split("\n").join("\n" + prefix);
-        args.push(colorCode + "m+" + module2.exports.humanize(this.diff) + "[0m");
-      } else {
-        args[0] = getDate() + name + " " + args[0];
-      }
-    }
-    function getDate() {
-      if (exports.inspectOpts.hideDate) {
-        return "";
-      }
-      return new Date().toISOString() + " ";
-    }
-    function log(...args) {
-      return process.stderr.write(util.format(...args) + "\n");
-    }
-    function save(namespaces) {
-      if (namespaces) {
-        process.env.DEBUG = namespaces;
-      } else {
-        delete process.env.DEBUG;
-      }
-    }
-    function load() {
-      return process.env.DEBUG;
-    }
-    function init(debug) {
-      debug.inspectOpts = {};
-      const keys = Object.keys(exports.inspectOpts);
-      for (let i = 0; i < keys.length; i++) {
-        debug.inspectOpts[keys[i]] = exports.inspectOpts[keys[i]];
-      }
-    }
-    module2.exports = require_common4()(exports);
-    var { formatters } = module2.exports;
-    formatters.o = function(v) {
-      this.inspectOpts.colors = this.useColors;
-      return util.inspect(v, this.inspectOpts).split("\n").map((str) => str.trim()).join(" ");
-    };
-    formatters.O = function(v) {
-      this.inspectOpts.colors = this.useColors;
-      return util.inspect(v, this.inspectOpts);
-    };
-  }
-});
-
-// node_modules/debug/src/index.js
-var require_src4 = __commonJS({
-  "node_modules/debug/src/index.js"(exports, module2) {
-    if (typeof process === "undefined" || process.type === "renderer" || process.browser === true || process.__nwjs) {
-      module2.exports = require_browser4();
-    } else {
-      module2.exports = require_node4();
-    }
-  }
-});
-
-// node_modules/@serialport/stream/lib/index.js
-var require_lib2 = __commonJS({
-  "node_modules/@serialport/stream/lib/index.js"(exports, module2) {
-    var stream = require("stream");
-    var util = require("util");
-    var debug = require_src4()("serialport/stream");
-    var DATABITS = Object.freeze([5, 6, 7, 8]);
-    var STOPBITS = Object.freeze([1, 1.5, 2]);
-    var PARITY = Object.freeze(["none", "even", "mark", "odd", "space"]);
-    var FLOWCONTROLS = Object.freeze(["xon", "xoff", "xany", "rtscts"]);
-    var defaultSettings = Object.freeze({
-      autoOpen: true,
-      endOnClose: false,
-      baudRate: 9600,
-      dataBits: 8,
-      hupcl: true,
-      lock: true,
-      parity: "none",
-      rtscts: false,
-      stopBits: 1,
-      xany: false,
-      xoff: false,
-      xon: false,
-      highWaterMark: 64 * 1024
-    });
-    var defaultSetFlags = Object.freeze({
-      brk: false,
-      cts: false,
-      dtr: true,
-      dts: false,
-      rts: true
-    });
-    function allocNewReadPool(poolSize) {
-      const pool = Buffer.allocUnsafe(poolSize);
-      pool.used = 0;
-      return pool;
-    }
-    function SerialPort(path, options, openCallback) {
-      if (!(this instanceof SerialPort)) {
-        return new SerialPort(path, options, openCallback);
-      }
-      if (options instanceof Function) {
-        openCallback = options;
-        options = {};
-      }
-      const settings = { ...defaultSettings, ...options };
-      stream.Duplex.call(this, {
-        highWaterMark: settings.highWaterMark
-      });
-      const Binding = settings.binding || SerialPort.Binding;
-      if (!Binding) {
-        throw new TypeError('"Bindings" is invalid pass it as `options.binding` or set it on `SerialPort.Binding`');
-      }
-      if (!path) {
-        throw new TypeError(`"path" is not defined: ${path}`);
-      }
-      if (settings.baudrate) {
-        throw new TypeError(`"baudrate" is an unknown option, did you mean "baudRate"?`);
-      }
-      if (typeof settings.baudRate !== "number") {
-        throw new TypeError(`"baudRate" must be a number: ${settings.baudRate}`);
-      }
-      if (DATABITS.indexOf(settings.dataBits) === -1) {
-        throw new TypeError(`"databits" is invalid: ${settings.dataBits}`);
-      }
-      if (STOPBITS.indexOf(settings.stopBits) === -1) {
-        throw new TypeError(`"stopbits" is invalid: ${settings.stopbits}`);
-      }
-      if (PARITY.indexOf(settings.parity) === -1) {
-        throw new TypeError(`"parity" is invalid: ${settings.parity}`);
-      }
-      FLOWCONTROLS.forEach((control) => {
-        if (typeof settings[control] !== "boolean") {
-          throw new TypeError(`"${control}" is not boolean: ${settings[control]}`);
-        }
-      });
-      const binding = new Binding({
-        bindingOptions: settings.bindingOptions
-      });
-      Object.defineProperties(this, {
-        binding: {
-          enumerable: true,
-          value: binding
-        },
-        path: {
-          enumerable: true,
-          value: path
-        },
-        settings: {
-          enumerable: true,
-          value: settings
-        }
-      });
-      this.opening = false;
-      this.closing = false;
-      this._pool = allocNewReadPool(this.settings.highWaterMark);
-      this._kMinPoolSpace = 128;
-      if (this.settings.autoOpen) {
-        this.open(openCallback);
-      }
-    }
-    util.inherits(SerialPort, stream.Duplex);
-    Object.defineProperties(SerialPort.prototype, {
-      isOpen: {
-        enumerable: true,
-        get() {
-          return this.binding.isOpen && !this.closing;
-        }
-      },
-      baudRate: {
-        enumerable: true,
-        get() {
-          return this.settings.baudRate;
-        }
-      }
-    });
-    SerialPort.prototype._error = function(error, callback) {
-      if (callback) {
-        callback.call(this, error);
-      } else {
-        this.emit("error", error);
-      }
-    };
-    SerialPort.prototype._asyncError = function(error, callback) {
-      process.nextTick(() => this._error(error, callback));
-    };
-    SerialPort.prototype.open = function(openCallback) {
-      if (this.isOpen) {
-        return this._asyncError(new Error("Port is already open"), openCallback);
-      }
-      if (this.opening) {
-        return this._asyncError(new Error("Port is opening"), openCallback);
-      }
-      this.opening = true;
-      debug("opening", `path: ${this.path}`);
-      this.binding.open(this.path, this.settings).then(() => {
-        debug("opened", `path: ${this.path}`);
-        this.opening = false;
-        this.emit("open");
-        if (openCallback) {
-          openCallback.call(this, null);
-        }
-      }, (err) => {
-        this.opening = false;
-        debug("Binding #open had an error", err);
-        this._error(err, openCallback);
-      });
-    };
-    SerialPort.prototype.update = function(options, callback) {
-      if (typeof options !== "object") {
-        throw TypeError('"options" is not an object');
-      }
-      if (!this.isOpen) {
-        debug("update attempted, but port is not open");
-        return this._asyncError(new Error("Port is not open"), callback);
-      }
-      const settings = { ...defaultSettings, ...options };
-      this.settings.baudRate = settings.baudRate;
-      debug("update", `baudRate: ${settings.baudRate}`);
-      this.binding.update(this.settings).then(() => {
-        debug("binding.update", "finished");
-        if (callback) {
-          callback.call(this, null);
-        }
-      }, (err) => {
-        debug("binding.update", "error", err);
-        return this._error(err, callback);
-      });
-    };
-    var superWrite = SerialPort.prototype.write;
-    SerialPort.prototype.write = function(data, encoding, callback) {
-      if (Array.isArray(data)) {
-        data = Buffer.from(data);
-      }
-      return superWrite.call(this, data, encoding, callback);
-    };
-    SerialPort.prototype._write = function(data, encoding, callback) {
-      if (!this.isOpen) {
-        return this.once("open", function afterOpenWrite() {
-          this._write(data, encoding, callback);
-        });
-      }
-      debug("_write", `${data.length} bytes of data`);
-      this.binding.write(data).then(() => {
-        debug("binding.write", "write finished");
-        callback(null);
-      }, (err) => {
-        debug("binding.write", "error", err);
-        if (!err.canceled) {
-          this._disconnected(err);
-        }
-        callback(err);
-      });
-    };
-    SerialPort.prototype._writev = function(data, callback) {
-      debug("_writev", `${data.length} chunks of data`);
-      const dataV = data.map((write) => write.chunk);
-      this._write(Buffer.concat(dataV), null, callback);
-    };
-    SerialPort.prototype._read = function(bytesToRead) {
-      if (!this.isOpen) {
-        debug("_read", "queueing _read for after open");
-        this.once("open", () => {
-          this._read(bytesToRead);
-        });
-        return;
-      }
-      if (!this._pool || this._pool.length - this._pool.used < this._kMinPoolSpace) {
-        debug("_read", "discarding the read buffer pool because it is below kMinPoolSpace");
-        this._pool = allocNewReadPool(this.settings.highWaterMark);
-      }
-      const pool = this._pool;
-      const toRead = Math.min(pool.length - pool.used, bytesToRead);
-      const start = pool.used;
-      debug("_read", `reading`, { start, toRead });
-      this.binding.read(pool, start, toRead).then(({ bytesRead }) => {
-        debug("binding.read", `finished`, { bytesRead });
-        if (bytesRead === 0) {
-          debug("binding.read", "Zero bytes read closing readable stream");
-          this.push(null);
-          return;
-        }
-        pool.used += bytesRead;
-        this.push(pool.slice(start, start + bytesRead));
-      }, (err) => {
-        debug("binding.read", `error`, err);
-        if (!err.canceled) {
-          this._disconnected(err);
-        }
-        this._read(bytesToRead);
-      });
-    };
-    SerialPort.prototype._disconnected = function(err) {
-      if (!this.isOpen) {
-        debug("disconnected aborted because already closed", err);
-        return;
-      }
-      debug("disconnected", err);
-      err.disconnected = true;
-      this.close(null, err);
-    };
-    SerialPort.prototype.close = function(callback, disconnectError) {
-      disconnectError = disconnectError || null;
-      if (!this.isOpen) {
-        debug("close attempted, but port is not open");
-        return this._asyncError(new Error("Port is not open"), callback);
-      }
-      this.closing = true;
-      debug("#close");
-      this.binding.close().then(() => {
-        this.closing = false;
-        debug("binding.close", "finished");
-        this.emit("close", disconnectError);
-        if (this.settings.endOnClose) {
-          this.emit("end");
-        }
-        if (callback) {
-          callback.call(this, disconnectError);
-        }
-      }, (err) => {
-        this.closing = false;
-        debug("binding.close", "had an error", err);
-        return this._error(err, callback);
-      });
-    };
-    SerialPort.prototype.set = function(options, callback) {
-      if (typeof options !== "object") {
-        throw TypeError('"options" is not an object');
-      }
-      if (!this.isOpen) {
-        debug("set attempted, but port is not open");
-        return this._asyncError(new Error("Port is not open"), callback);
-      }
-      const settings = { ...defaultSetFlags, ...options };
-      debug("#set", settings);
-      this.binding.set(settings).then(() => {
-        debug("binding.set", "finished");
-        if (callback) {
-          callback.call(this, null);
-        }
-      }, (err) => {
-        debug("binding.set", "had an error", err);
-        return this._error(err, callback);
-      });
-    };
-    SerialPort.prototype.get = function(callback) {
-      if (!this.isOpen) {
-        debug("get attempted, but port is not open");
-        return this._asyncError(new Error("Port is not open"), callback);
-      }
-      debug("#get");
-      this.binding.get().then((status) => {
-        debug("binding.get", "finished");
-        if (callback) {
-          callback.call(this, null, status);
-        }
-      }, (err) => {
-        debug("binding.get", "had an error", err);
-        return this._error(err, callback);
-      });
-    };
-    SerialPort.prototype.flush = function(callback) {
-      if (!this.isOpen) {
-        debug("flush attempted, but port is not open");
-        return this._asyncError(new Error("Port is not open"), callback);
-      }
-      debug("#flush");
-      this.binding.flush().then(() => {
-        debug("binding.flush", "finished");
-        if (callback) {
-          callback.call(this, null);
-        }
-      }, (err) => {
-        debug("binding.flush", "had an error", err);
-        return this._error(err, callback);
-      });
-    };
-    SerialPort.prototype.drain = function(callback) {
-      debug("drain");
-      if (!this.isOpen) {
-        debug("drain queuing on port open");
-        return this.once("open", () => {
-          this.drain(callback);
-        });
-      }
-      this.binding.drain().then(() => {
-        debug("binding.drain", "finished");
-        if (callback) {
-          callback.call(this, null);
-        }
-      }, (err) => {
-        debug("binding.drain", "had an error", err);
-        return this._error(err, callback);
-      });
-    };
-    SerialPort.list = async function(callback) {
-      debug(".list");
-      if (!SerialPort.Binding) {
-        throw new TypeError("No Binding set on `SerialPort.Binding`");
-      }
-      if (callback) {
-        throw new TypeError("SerialPort.list no longer takes a callback and only returns a promise");
-      }
-      return SerialPort.Binding.list();
-    };
-    module2.exports = SerialPort;
-  }
-});
-
-// node_modules/file-uri-to-path/index.js
-var require_file_uri_to_path = __commonJS({
-  "node_modules/file-uri-to-path/index.js"(exports, module2) {
-    var sep = require("path").sep || "/";
-    module2.exports = fileUriToPath;
-    function fileUriToPath(uri) {
-      if (typeof uri != "string" || uri.length <= 7 || uri.substring(0, 7) != "file://") {
-        throw new TypeError("must pass in a file:// URI to convert to a file path");
-      }
-      var rest = decodeURI(uri.substring(7));
-      var firstSlash = rest.indexOf("/");
-      var host = rest.substring(0, firstSlash);
-      var path = rest.substring(firstSlash + 1);
-      if (host == "localhost")
-        host = "";
-      if (host) {
-        host = sep + sep + host;
-      }
-      path = path.replace(/^(.+)\|/, "$1:");
-      if (sep == "\\") {
-        path = path.replace(/\//g, "\\");
-      }
-      if (/^.+\:/.test(path)) {
-      } else {
-        path = sep + path;
-      }
-      return host + path;
-    }
-  }
-});
-
-// node_modules/bindings/bindings.js
-var require_bindings = __commonJS({
-  "node_modules/bindings/bindings.js"(exports, module2) {
-    var fs = require("fs");
-    var path = require("path");
-    var fileURLToPath = require_file_uri_to_path();
-    var join = path.join;
-    var dirname = path.dirname;
-    var exists = fs.accessSync && function(path2) {
-      try {
-        fs.accessSync(path2);
-      } catch (e) {
-        return false;
-      }
-      return true;
-    } || fs.existsSync || path.existsSync;
-    var defaults = {
-      arrow: process.env.NODE_BINDINGS_ARROW || " \u2192 ",
-      compiled: process.env.NODE_BINDINGS_COMPILED_DIR || "compiled",
-      platform: process.platform,
-      arch: process.arch,
-      nodePreGyp: "node-v" + process.versions.modules + "-" + process.platform + "-" + process.arch,
-      version: process.versions.node,
-      bindings: "bindings.node",
-      try: [
-        ["module_root", "build", "bindings"],
-        ["module_root", "build", "Debug", "bindings"],
-        ["module_root", "build", "Release", "bindings"],
-        ["module_root", "out", "Debug", "bindings"],
-        ["module_root", "Debug", "bindings"],
-        ["module_root", "out", "Release", "bindings"],
-        ["module_root", "Release", "bindings"],
-        ["module_root", "build", "default", "bindings"],
-        ["module_root", "compiled", "version", "platform", "arch", "bindings"],
-        ["module_root", "addon-build", "release", "install-root", "bindings"],
-        ["module_root", "addon-build", "debug", "install-root", "bindings"],
-        ["module_root", "addon-build", "default", "install-root", "bindings"],
-        ["module_root", "lib", "binding", "nodePreGyp", "bindings"]
-      ]
-    };
-    function bindings(opts) {
-      if (typeof opts == "string") {
-        opts = { bindings: opts };
-      } else if (!opts) {
-        opts = {};
-      }
-      Object.keys(defaults).map(function(i2) {
-        if (!(i2 in opts))
-          opts[i2] = defaults[i2];
-      });
-      if (!opts.module_root) {
-        opts.module_root = exports.getRoot(exports.getFileName());
-      }
-      if (path.extname(opts.bindings) != ".node") {
-        opts.bindings += ".node";
-      }
-      var requireFunc = typeof __webpack_require__ === "function" ? __non_webpack_require__ : require;
-      var tries = [], i = 0, l = opts.try.length, n, b, err;
-      for (; i < l; i++) {
-        n = join.apply(null, opts.try[i].map(function(p) {
-          return opts[p] || p;
-        }));
-        tries.push(n);
-        try {
-          b = opts.path ? requireFunc.resolve(n) : requireFunc(n);
-          if (!opts.path) {
-            b.path = n;
-          }
-          return b;
-        } catch (e) {
-          if (e.code !== "MODULE_NOT_FOUND" && e.code !== "QUALIFIED_PATH_RESOLUTION_FAILED" && !/not find/i.test(e.message)) {
-            throw e;
-          }
-        }
-      }
-      err = new Error("Could not locate the bindings file. Tried:\n" + tries.map(function(a) {
-        return opts.arrow + a;
-      }).join("\n"));
-      err.tries = tries;
-      throw err;
-    }
-    module2.exports = exports = bindings;
-    exports.getFileName = function getFileName(calling_file) {
-      var origPST = Error.prepareStackTrace, origSTL = Error.stackTraceLimit, dummy = {}, fileName;
-      Error.stackTraceLimit = 10;
-      Error.prepareStackTrace = function(e, st) {
-        for (var i = 0, l = st.length; i < l; i++) {
-          fileName = st[i].getFileName();
-          if (fileName !== __filename) {
-            if (calling_file) {
-              if (fileName !== calling_file) {
-                return;
-              }
-            } else {
-              return;
-            }
-          }
-        }
-      };
-      Error.captureStackTrace(dummy);
-      dummy.stack;
-      Error.prepareStackTrace = origPST;
-      Error.stackTraceLimit = origSTL;
-      var fileSchema = "file://";
-      if (fileName.indexOf(fileSchema) === 0) {
-        fileName = fileURLToPath(fileName);
-      }
-      return fileName;
-    };
-    exports.getRoot = function getRoot(file) {
-      var dir = dirname(file), prev;
-      while (true) {
-        if (dir === ".") {
-          dir = process.cwd();
-        }
-        if (exists(join(dir, "package.json")) || exists(join(dir, "node_modules"))) {
-          return dir;
-        }
-        if (prev === dir) {
-          throw new Error('Could not find module root given file: "' + file + '". Do you have a `package.json` file? ');
-        }
-        prev = dir;
-        dir = join(dir, "..");
-      }
-    };
-  }
-});
-
-// node_modules/@serialport/binding-abstract/lib/index.js
-var require_lib3 = __commonJS({
-  "node_modules/@serialport/binding-abstract/lib/index.js"(exports, module2) {
-    var debug = require_src4()("serialport/binding-abstract");
-    var AbstractBinding = class {
-      static async list() {
-        debug("list");
-      }
-      constructor(opt = {}) {
-        if (typeof opt !== "object") {
-          throw new TypeError('"options" is not an object');
-        }
-      }
-      async open(path, options) {
-        if (!path) {
-          throw new TypeError('"path" is not a valid port');
-        }
-        if (typeof options !== "object") {
-          throw new TypeError('"options" is not an object');
-        }
-        debug("open");
-        if (this.isOpen) {
-          throw new Error("Already open");
-        }
-      }
-      async close() {
-        debug("close");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-      }
-      async read(buffer, offset, length) {
-        if (!Buffer.isBuffer(buffer)) {
-          throw new TypeError('"buffer" is not a Buffer');
-        }
-        if (typeof offset !== "number" || isNaN(length)) {
-          throw new TypeError(`"offset" is not an integer got "${isNaN(length) ? "NaN" : typeof offset}"`);
-        }
-        if (typeof length !== "number" || isNaN(length)) {
-          throw new TypeError(`"length" is not an integer got "${isNaN(length) ? "NaN" : typeof length}"`);
-        }
-        debug("read");
-        if (buffer.length < offset + length) {
-          throw new Error("buffer is too small");
-        }
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-      }
-      async write(buffer) {
-        if (!Buffer.isBuffer(buffer)) {
-          throw new TypeError('"buffer" is not a Buffer');
-        }
-        debug("write", buffer.length, "bytes");
-        if (!this.isOpen) {
-          debug("write", "error port is not open");
-          throw new Error("Port is not open");
-        }
-      }
-      async update(options) {
-        if (typeof options !== "object") {
-          throw TypeError('"options" is not an object');
-        }
-        if (typeof options.baudRate !== "number") {
-          throw new TypeError('"options.baudRate" is not a number');
-        }
-        debug("update");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-      }
-      async set(options) {
-        if (typeof options !== "object") {
-          throw new TypeError('"options" is not an object');
-        }
-        debug("set");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-      }
-      async get() {
-        debug("get");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-      }
-      async getBaudRate() {
-        debug("getbaudRate");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-      }
-      async flush() {
-        debug("flush");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-      }
-      async drain() {
-        debug("drain");
-        if (!this.isOpen) {
-          throw new Error("Port is not open");
-        }
-      }
-    };
-    module2.exports = AbstractBinding;
-  }
-});
-
-// node_modules/@serialport/bindings/lib/win32-sn-parser.js
-var require_win32_sn_parser = __commonJS({
-  "node_modules/@serialport/bindings/lib/win32-sn-parser.js"(exports, module2) {
-    var PARSERS = [/USB\\(?:.+)\\(.+)/, /FTDIBUS\\(?:.+)\+(.+?)A?\\.+/];
-    module2.exports = function(pnpId) {
-      if (!pnpId) {
-        return null;
-      }
-      for (const parser of PARSERS) {
-        const sn = pnpId.match(parser);
-        if (sn) {
-          return sn[1];
-        }
-      }
-      return null;
-    };
-  }
-});
-
-// node_modules/@serialport/bindings/lib/legacy.js
-var require_legacy = __commonJS({
-  "node_modules/@serialport/bindings/lib/legacy.js"(exports, module2) {
-    var warningSent = false;
-    var wrapWithHiddenComName = async (portsPromise) => {
-      const ports = await portsPromise;
-      return ports.map((port) => {
-        const newPort = { ...port };
-        return Object.defineProperties(newPort, {
-          comName: {
-            get() {
-              if (!warningSent) {
-                warningSent = true;
-                console.warn(`"PortInfo.comName" has been deprecated. You should now use "PortInfo.path". The property will be removed in the next major release.`);
-              }
-              return newPort.path;
-            },
-            enumerable: false
-          }
-        });
-      });
-    };
-    module2.exports = {
-      wrapWithHiddenComName
-    };
-  }
-});
-
-// node_modules/@serialport/bindings/lib/win32.js
-var require_win32 = __commonJS({
-  "node_modules/@serialport/bindings/lib/win32.js"(exports, module2) {
-    var binding = require_bindings()("bindings.node");
-    var AbstractBinding = require_lib3();
-    var { promisify } = require("util");
-    var serialNumParser = require_win32_sn_parser();
-    var asyncList = promisify(binding.list);
-    var asyncOpen = promisify(binding.open);
-    var asyncClose = promisify(binding.close);
-    var asyncRead = promisify(binding.read);
-    var asyncWrite = promisify(binding.write);
-    var asyncUpdate = promisify(binding.update);
-    var asyncSet = promisify(binding.set);
-    var asyncGet = promisify(binding.get);
-    var asyncGetBaudRate = promisify(binding.getBaudRate);
-    var asyncDrain = promisify(binding.drain);
-    var asyncFlush = promisify(binding.flush);
-    var { wrapWithHiddenComName } = require_legacy();
-    var WindowsBinding = class extends AbstractBinding {
-      static async list() {
-        const ports = await asyncList();
-        return wrapWithHiddenComName(ports.map((port) => {
-          if (port.pnpId && !port.serialNumber) {
-            const serialNumber = serialNumParser(port.pnpId);
-            if (serialNumber) {
-              return {
-                ...port,
-                serialNumber
-              };
-            }
-          }
-          return port;
-        }));
-      }
-      constructor(opt = {}) {
-        super(opt);
-        this.bindingOptions = { ...opt.bindingOptions };
-        this.fd = null;
-        this.writeOperation = null;
-      }
-      get isOpen() {
-        return this.fd !== null;
-      }
-      async open(path, options) {
-        await super.open(path, options);
-        this.openOptions = { ...this.bindingOptions, ...options };
-        const fd = await asyncOpen(path, this.openOptions);
-        this.fd = fd;
-      }
-      async close() {
-        await super.close();
-        const fd = this.fd;
-        this.fd = null;
-        return asyncClose(fd);
-      }
-      async read(buffer, offset, length) {
-        await super.read(buffer, offset, length);
-        try {
-          const bytesRead = await asyncRead(this.fd, buffer, offset, length);
-          return { bytesRead, buffer };
-        } catch (err) {
-          if (!this.isOpen) {
-            err.canceled = true;
-          }
-          throw err;
-        }
-      }
-      async write(buffer) {
-        this.writeOperation = super.write(buffer).then(async () => {
-          if (buffer.length === 0) {
-            return;
-          }
-          await asyncWrite(this.fd, buffer);
-          this.writeOperation = null;
-        });
-        return this.writeOperation;
-      }
-      async update(options) {
-        await super.update(options);
-        return asyncUpdate(this.fd, options);
-      }
-      async set(options) {
-        await super.set(options);
-        return asyncSet(this.fd, options);
-      }
-      async get() {
-        await super.get();
-        return asyncGet(this.fd);
-      }
-      async getBaudRate() {
-        await super.get();
-        return asyncGetBaudRate(this.fd);
-      }
-      async drain() {
-        await super.drain();
-        await this.writeOperation;
-        return asyncDrain(this.fd);
-      }
-      async flush() {
-        await super.flush();
-        return asyncFlush(this.fd);
-      }
-    };
-    module2.exports = WindowsBinding;
-  }
-});
-
-// node_modules/@serialport/bindings/lib/poller.js
-var require_poller = __commonJS({
-  "node_modules/@serialport/bindings/lib/poller.js"(exports, module2) {
-    var debug = require_src4();
-    var logger = debug("serialport/bindings/poller");
-    var EventEmitter10 = require("events");
-    var PollerBindings = require_bindings()("bindings.node").Poller;
-    var EVENTS = {
-      UV_READABLE: 1,
-      UV_WRITABLE: 2,
-      UV_DISCONNECT: 4
-    };
-    function handleEvent(error, eventFlag) {
-      if (error) {
-        logger("error", error);
-        this.emit("readable", error);
-        this.emit("writable", error);
-        this.emit("disconnect", error);
-        return;
-      }
-      if (eventFlag & EVENTS.UV_READABLE) {
-        logger('received "readable"');
-        this.emit("readable", null);
-      }
-      if (eventFlag & EVENTS.UV_WRITABLE) {
-        logger('received "writable"');
-        this.emit("writable", null);
-      }
-      if (eventFlag & EVENTS.UV_DISCONNECT) {
-        logger('received "disconnect"');
-        this.emit("disconnect", null);
-      }
-    }
-    var Poller = class extends EventEmitter10 {
-      constructor(fd, FDPoller = PollerBindings) {
-        logger("Creating poller");
-        super();
-        this.poller = new FDPoller(fd, handleEvent.bind(this));
-      }
-      once(event, callback) {
-        switch (event) {
-          case "readable":
-            this.poll(EVENTS.UV_READABLE);
-            break;
-          case "writable":
-            this.poll(EVENTS.UV_WRITABLE);
-            break;
-          case "disconnect":
-            this.poll(EVENTS.UV_DISCONNECT);
-            break;
-        }
-        return super.once(event, callback);
-      }
-      poll(eventFlag) {
-        eventFlag = eventFlag || 0;
-        if (eventFlag & EVENTS.UV_READABLE) {
-          logger('Polling for "readable"');
-        }
-        if (eventFlag & EVENTS.UV_WRITABLE) {
-          logger('Polling for "writable"');
-        }
-        if (eventFlag & EVENTS.UV_DISCONNECT) {
-          logger('Polling for "disconnect"');
-        }
-        this.poller.poll(eventFlag);
-      }
-      stop() {
-        logger("Stopping poller");
-        this.poller.stop();
-        this.emitCanceled();
-      }
-      destroy() {
-        logger("Destroying poller");
-        this.poller.destroy();
-        this.emitCanceled();
-      }
-      emitCanceled() {
-        const err = new Error("Canceled");
-        err.canceled = true;
-        this.emit("readable", err);
-        this.emit("writable", err);
-        this.emit("disconnect", err);
-      }
-    };
-    Poller.EVENTS = EVENTS;
-    module2.exports = Poller;
-  }
-});
-
-// node_modules/@serialport/bindings/lib/unix-read.js
-var require_unix_read = __commonJS({
-  "node_modules/@serialport/bindings/lib/unix-read.js"(exports, module2) {
-    var fs = require("fs");
-    var debug = require_src4();
-    var logger = debug("serialport/bindings/unixRead");
-    var { promisify } = require("util");
-    var readAsync = promisify(fs.read);
-    var readable = (binding) => {
-      return new Promise((resolve, reject) => {
-        binding.poller.once("readable", (err) => err ? reject(err) : resolve());
-      });
-    };
-    var unixRead = async ({ binding, buffer, offset, length, fsReadAsync = readAsync }) => {
-      logger("Starting read");
-      if (!binding.isOpen) {
-        const err = new Error("Port is not open");
-        err.canceled = true;
-        throw err;
-      }
-      try {
-        const { bytesRead } = await fsReadAsync(binding.fd, buffer, offset, length, null);
-        if (bytesRead === 0) {
-          return unixRead({ binding, buffer, offset, length, fsReadAsync });
-        }
-        logger("Finished read", bytesRead, "bytes");
-        return { bytesRead, buffer };
-      } catch (err) {
-        logger("read error", err);
-        if (err.code === "EAGAIN" || err.code === "EWOULDBLOCK" || err.code === "EINTR") {
-          if (!binding.isOpen) {
-            const err2 = new Error("Port is not open");
-            err2.canceled = true;
-            throw err2;
-          }
-          logger("waiting for readable because of code:", err.code);
-          await readable(binding);
-          return unixRead({ binding, buffer, offset, length, fsReadAsync });
-        }
-        const disconnectError = err.code === "EBADF" || err.code === "ENXIO" || err.code === "UNKNOWN" || err.errno === -1;
-        if (disconnectError) {
-          err.canceled = true;
-          logger("disconnecting", err);
-        }
-        throw err;
-      }
-    };
-    module2.exports = unixRead;
-  }
-});
-
-// node_modules/@serialport/bindings/lib/unix-write.js
-var require_unix_write = __commonJS({
-  "node_modules/@serialport/bindings/lib/unix-write.js"(exports, module2) {
-    var fs = require("fs");
-    var debug = require_src4();
-    var logger = debug("serialport/bindings/unixWrite");
-    var { promisify } = require("util");
-    var writeAsync = promisify(fs.write);
-    var writable = (binding) => {
-      return new Promise((resolve, reject) => {
-        binding.poller.once("writable", (err) => err ? reject(err) : resolve());
-      });
-    };
-    var unixWrite = async ({ binding, buffer, offset = 0, fsWriteAsync = writeAsync }) => {
-      const bytesToWrite = buffer.length - offset;
-      logger("Starting write", buffer.length, "bytes offset", offset, "bytesToWrite", bytesToWrite);
-      if (!binding.isOpen) {
-        throw new Error("Port is not open");
-      }
-      try {
-        const { bytesWritten } = await fsWriteAsync(binding.fd, buffer, offset, bytesToWrite);
-        logger("write returned: wrote", bytesWritten, "bytes");
-        if (bytesWritten + offset < buffer.length) {
-          if (!binding.isOpen) {
-            throw new Error("Port is not open");
-          }
-          return unixWrite({ binding, buffer, offset: bytesWritten + offset, fsWriteAsync });
-        }
-        logger("Finished writing", bytesWritten + offset, "bytes");
-      } catch (err) {
-        logger("write errored", err);
-        if (err.code === "EAGAIN" || err.code === "EWOULDBLOCK" || err.code === "EINTR") {
-          if (!binding.isOpen) {
-            throw new Error("Port is not open");
-          }
-          logger("waiting for writable because of code:", err.code);
-          await writable(binding);
-          return unixWrite({ binding, buffer, offset, fsWriteAsync });
-        }
-        const disconnectError = err.code === "EBADF" || err.code === "ENXIO" || err.code === "UNKNOWN" || err.errno === -1;
-        if (disconnectError) {
-          err.disconnect = true;
-          logger("disconnecting", err);
-        }
-        logger("error", err);
-        throw err;
-      }
-    };
-    module2.exports = unixWrite;
-  }
-});
-
-// node_modules/@serialport/bindings/lib/darwin.js
-var require_darwin = __commonJS({
-  "node_modules/@serialport/bindings/lib/darwin.js"(exports, module2) {
-    var { promisify } = require("util");
-    var binding = require_bindings()("bindings.node");
-    var AbstractBinding = require_lib3();
-    var Poller = require_poller();
-    var unixRead = require_unix_read();
-    var unixWrite = require_unix_write();
-    var { wrapWithHiddenComName } = require_legacy();
-    var defaultBindingOptions = Object.freeze({
-      vmin: 1,
-      vtime: 0
-    });
-    var asyncList = promisify(binding.list);
-    var asyncOpen = promisify(binding.open);
-    var asyncClose = promisify(binding.close);
-    var asyncUpdate = promisify(binding.update);
-    var asyncSet = promisify(binding.set);
-    var asyncGet = promisify(binding.get);
-    var asyncGetBaudRate = promisify(binding.getBaudRate);
-    var asyncDrain = promisify(binding.drain);
-    var asyncFlush = promisify(binding.flush);
-    var DarwinBinding = class extends AbstractBinding {
-      static list() {
-        return wrapWithHiddenComName(asyncList());
-      }
-      constructor(opt = {}) {
-        super(opt);
-        this.bindingOptions = { ...defaultBindingOptions, ...opt.bindingOptions };
-        this.fd = null;
-        this.writeOperation = null;
-      }
-      get isOpen() {
-        return this.fd !== null;
-      }
-      async open(path, options) {
-        await super.open(path, options);
-        this.openOptions = { ...this.bindingOptions, ...options };
-        const fd = await asyncOpen(path, this.openOptions);
-        this.fd = fd;
-        this.poller = new Poller(fd);
-      }
-      async close() {
-        await super.close();
-        const fd = this.fd;
-        this.poller.stop();
-        this.poller.destroy();
-        this.poller = null;
-        this.openOptions = null;
-        this.fd = null;
-        return asyncClose(fd);
-      }
-      async read(buffer, offset, length) {
-        await super.read(buffer, offset, length);
-        return unixRead({ binding: this, buffer, offset, length });
-      }
-      async write(buffer) {
-        this.writeOperation = super.write(buffer).then(async () => {
-          if (buffer.length === 0) {
-            return;
-          }
-          await unixWrite({ binding: this, buffer });
-          this.writeOperation = null;
-        });
-        return this.writeOperation;
-      }
-      async update(options) {
-        await super.update(options);
-        return asyncUpdate(this.fd, options);
-      }
-      async set(options) {
-        await super.set(options);
-        return asyncSet(this.fd, options);
-      }
-      async get() {
-        await super.get();
-        return asyncGet(this.fd);
-      }
-      async getBaudRate() {
-        await super.get();
-        return asyncGetBaudRate(this.fd);
-      }
-      async drain() {
-        await super.drain();
-        await this.writeOperation;
-        return asyncDrain(this.fd);
-      }
-      async flush() {
-        await super.flush();
-        return asyncFlush(this.fd);
-      }
-    };
-    module2.exports = DarwinBinding;
-  }
-});
-
-// node_modules/@serialport/parser-delimiter/lib/index.js
-var require_lib4 = __commonJS({
-  "node_modules/@serialport/parser-delimiter/lib/index.js"(exports, module2) {
-    var { Transform } = require("stream");
-    var DelimiterParser = class extends Transform {
-      constructor(options = {}) {
-        super(options);
-        if (options.delimiter === void 0) {
-          throw new TypeError('"delimiter" is not a bufferable object');
-        }
-        if (options.delimiter.length === 0) {
-          throw new TypeError('"delimiter" has a 0 or undefined length');
-        }
-        this.includeDelimiter = options.includeDelimiter !== void 0 ? options.includeDelimiter : false;
-        this.delimiter = Buffer.from(options.delimiter);
-        this.buffer = Buffer.alloc(0);
-      }
-      _transform(chunk, encoding, cb) {
-        let data = Buffer.concat([this.buffer, chunk]);
-        let position;
-        while ((position = data.indexOf(this.delimiter)) !== -1) {
-          this.push(data.slice(0, position + (this.includeDelimiter ? this.delimiter.length : 0)));
-          data = data.slice(position + this.delimiter.length);
-        }
-        this.buffer = data;
-        cb();
-      }
-      _flush(cb) {
-        this.push(this.buffer);
-        this.buffer = Buffer.alloc(0);
-        cb();
-      }
-    };
-    module2.exports = DelimiterParser;
-  }
-});
-
-// node_modules/@serialport/parser-readline/lib/index.js
-var require_lib5 = __commonJS({
-  "node_modules/@serialport/parser-readline/lib/index.js"(exports, module2) {
-    var DelimiterParser = require_lib4();
-    var ReadLineParser = class extends DelimiterParser {
+// node_modules/@serialport/parser-byte-length/dist/index.js
+var require_dist3 = __commonJS({
+  "node_modules/@serialport/parser-byte-length/dist/index.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.ByteLengthParser = void 0;
+    var stream_1 = require("stream");
+    var ByteLengthParser = class extends stream_1.Transform {
       constructor(options) {
-        const opts = {
-          delimiter: Buffer.from("\n", "utf8"),
-          encoding: "utf8",
-          ...options
-        };
-        if (typeof opts.delimiter === "string") {
-          opts.delimiter = Buffer.from(opts.delimiter, opts.encoding);
-        }
-        super(opts);
-      }
-    };
-    module2.exports = ReadLineParser;
-  }
-});
-
-// node_modules/@serialport/bindings/lib/linux-list.js
-var require_linux_list = __commonJS({
-  "node_modules/@serialport/bindings/lib/linux-list.js"(exports, module2) {
-    var childProcess = require("child_process");
-    var Readline = require_lib5();
-    function checkPathOfDevice(path) {
-      return /(tty(S|WCH|ACM|USB|AMA|MFD|O|XRUSB)|rfcomm)/.test(path) && path;
-    }
-    function propName(name) {
-      return {
-        DEVNAME: "path",
-        ID_VENDOR_ENC: "manufacturer",
-        ID_SERIAL_SHORT: "serialNumber",
-        ID_VENDOR_ID: "vendorId",
-        ID_MODEL_ID: "productId",
-        DEVLINKS: "pnpId"
-      }[name.toUpperCase()];
-    }
-    function decodeHexEscape(str) {
-      return str.replace(/\\x([a-fA-F0-9]{2})/g, (a, b) => {
-        return String.fromCharCode(parseInt(b, 16));
-      });
-    }
-    function propVal(name, val) {
-      if (name === "pnpId") {
-        const match = val.match(/\/by-id\/([^\s]+)/);
-        return match && match[1] || void 0;
-      }
-      if (name === "manufacturer") {
-        return decodeHexEscape(val);
-      }
-      if (/^0x/.test(val)) {
-        return val.substr(2);
-      }
-      return val;
-    }
-    function listLinux() {
-      return new Promise((resolve, reject) => {
-        const ports = [];
-        const ude = childProcess.spawn("udevadm", ["info", "-e"]);
-        const lines = ude.stdout.pipe(new Readline());
-        ude.on("close", (code) => code && reject(new Error(`Error listing ports udevadm exited with error code: ${code}`)));
-        ude.on("error", reject);
-        lines.on("error", reject);
-        let port = {};
-        let skipPort = false;
-        lines.on("data", (line) => {
-          const lineType = line.slice(0, 1);
-          const data = line.slice(3);
-          if (lineType === "P") {
-            port = {
-              manufacturer: void 0,
-              serialNumber: void 0,
-              pnpId: void 0,
-              locationId: void 0,
-              vendorId: void 0,
-              productId: void 0
-            };
-            skipPort = false;
-            return;
-          }
-          if (skipPort) {
-            return;
-          }
-          if (lineType === "N") {
-            if (checkPathOfDevice(data)) {
-              ports.push(port);
-            } else {
-              skipPort = true;
-            }
-            return;
-          }
-          if (lineType === "E") {
-            const keyValue = data.match(/^(.+)=(.*)/);
-            if (!keyValue) {
-              return;
-            }
-            const key = propName(keyValue[1]);
-            if (!key) {
-              return;
-            }
-            port[key] = propVal(key, keyValue[2]);
-          }
-        });
-        lines.on("finish", () => resolve(ports));
-      });
-    }
-    module2.exports = listLinux;
-  }
-});
-
-// node_modules/@serialport/bindings/lib/linux.js
-var require_linux = __commonJS({
-  "node_modules/@serialport/bindings/lib/linux.js"(exports, module2) {
-    var { promisify } = require("util");
-    var binding = require_bindings()("bindings.node");
-    var AbstractBinding = require_lib3();
-    var linuxList = require_linux_list();
-    var Poller = require_poller();
-    var unixRead = require_unix_read();
-    var unixWrite = require_unix_write();
-    var { wrapWithHiddenComName } = require_legacy();
-    var defaultBindingOptions = Object.freeze({
-      vmin: 1,
-      vtime: 0
-    });
-    var asyncOpen = promisify(binding.open);
-    var asyncClose = promisify(binding.close);
-    var asyncUpdate = promisify(binding.update);
-    var asyncSet = promisify(binding.set);
-    var asyncGet = promisify(binding.get);
-    var asyncGetBaudRate = promisify(binding.getBaudRate);
-    var asyncDrain = promisify(binding.drain);
-    var asyncFlush = promisify(binding.flush);
-    var LinuxBinding = class extends AbstractBinding {
-      static list() {
-        return wrapWithHiddenComName(linuxList());
-      }
-      constructor(opt = {}) {
-        super(opt);
-        this.bindingOptions = { ...defaultBindingOptions, ...opt.bindingOptions };
-        this.fd = null;
-        this.writeOperation = null;
-      }
-      get isOpen() {
-        return this.fd !== null;
-      }
-      async open(path, options) {
-        await super.open(path, options);
-        this.openOptions = { ...this.bindingOptions, ...options };
-        const fd = await asyncOpen(path, this.openOptions);
-        this.fd = fd;
-        this.poller = new Poller(fd);
-      }
-      async close() {
-        await super.close();
-        const fd = this.fd;
-        this.poller.stop();
-        this.poller.destroy();
-        this.poller = null;
-        this.openOptions = null;
-        this.fd = null;
-        return asyncClose(fd);
-      }
-      async read(buffer, offset, length) {
-        await super.read(buffer, offset, length);
-        return unixRead({ binding: this, buffer, offset, length });
-      }
-      async write(buffer) {
-        this.writeOperation = super.write(buffer).then(async () => {
-          if (buffer.length === 0) {
-            return;
-          }
-          await unixWrite({ binding: this, buffer });
-          this.writeOperation = null;
-        });
-        return this.writeOperation;
-      }
-      async update(options) {
-        await super.update(options);
-        return asyncUpdate(this.fd, options);
-      }
-      async set(options) {
-        await super.set(options);
-        return asyncSet(this.fd, options);
-      }
-      async get() {
-        await super.get();
-        return asyncGet(this.fd);
-      }
-      async getBaudRate() {
-        await super.get();
-        return asyncGetBaudRate(this.fd);
-      }
-      async drain() {
-        await super.drain();
-        await this.writeOperation;
-        return asyncDrain(this.fd);
-      }
-      async flush() {
-        await super.flush();
-        return asyncFlush(this.fd);
-      }
-    };
-    module2.exports = LinuxBinding;
-  }
-});
-
-// node_modules/@serialport/bindings/lib/index.js
-var require_lib6 = __commonJS({
-  "node_modules/@serialport/bindings/lib/index.js"(exports, module2) {
-    var debug = require_src4()("serialport/bindings");
-    switch (process.platform) {
-      case "win32":
-        debug("loading WindowsBinding");
-        module2.exports = require_win32();
-        break;
-      case "darwin":
-        debug("loading DarwinBinding");
-        module2.exports = require_darwin();
-        break;
-      default:
-        debug("loading LinuxBinding");
-        module2.exports = require_linux();
-    }
-  }
-});
-
-// node_modules/@serialport/parser-byte-length/lib/index.js
-var require_lib7 = __commonJS({
-  "node_modules/@serialport/parser-byte-length/lib/index.js"(exports, module2) {
-    var { Transform } = require("stream");
-    var ByteLengthParser = class extends Transform {
-      constructor(options = {}) {
         super(options);
         if (typeof options.length !== "number") {
           throw new TypeError('"length" is not a number');
@@ -26064,7 +23443,7 @@ var require_lib7 = __commonJS({
         this.position = 0;
         this.buffer = Buffer.alloc(this.length);
       }
-      _transform(chunk, encoding, cb) {
+      _transform(chunk, _encoding, cb) {
         let cursor = 0;
         while (cursor < chunk.length) {
           this.buffer[this.position] = chunk[cursor];
@@ -26084,15 +23463,18 @@ var require_lib7 = __commonJS({
         cb();
       }
     };
-    module2.exports = ByteLengthParser;
+    exports.ByteLengthParser = ByteLengthParser;
   }
 });
 
-// node_modules/@serialport/parser-cctalk/lib/index.js
-var require_lib8 = __commonJS({
-  "node_modules/@serialport/parser-cctalk/lib/index.js"(exports, module2) {
-    var { Transform } = require("stream");
-    var CCTalkParser = class extends Transform {
+// node_modules/@serialport/parser-cctalk/dist/index.js
+var require_dist4 = __commonJS({
+  "node_modules/@serialport/parser-cctalk/dist/index.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.CCTalkParser = void 0;
+    var stream_1 = require("stream");
+    var CCTalkParser = class extends stream_1.Transform {
       constructor(maxDelayBetweenBytesMs = 50) {
         super();
         this.array = [];
@@ -26100,7 +23482,7 @@ var require_lib8 = __commonJS({
         this.lastByteFetchTime = 0;
         this.maxDelayBetweenBytesMs = maxDelayBetweenBytesMs;
       }
-      _transform(buffer, _, cb) {
+      _transform(buffer, encoding, cb) {
         if (this.maxDelayBetweenBytesMs > 0) {
           const now = Date.now();
           if (now - this.lastByteFetchTime > this.maxDelayBetweenBytesMs) {
@@ -26121,24 +23503,202 @@ var require_lib8 = __commonJS({
         cb();
       }
     };
-    module2.exports = CCTalkParser;
+    exports.CCTalkParser = CCTalkParser;
   }
 });
 
-// node_modules/@serialport/parser-ready/lib/index.js
-var require_lib9 = __commonJS({
-  "node_modules/@serialport/parser-ready/lib/index.js"(exports, module2) {
-    var { Transform } = require("stream");
-    var ReadyParser = class extends Transform {
-      constructor(options = {}) {
-        if (options.delimiter === void 0) {
+// node_modules/@serialport/parser-delimiter/dist/index.js
+var require_dist5 = __commonJS({
+  "node_modules/@serialport/parser-delimiter/dist/index.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.DelimiterParser = void 0;
+    var stream_1 = require("stream");
+    var DelimiterParser = class extends stream_1.Transform {
+      constructor({ delimiter, includeDelimiter = false, ...options }) {
+        super(options);
+        if (delimiter === void 0) {
           throw new TypeError('"delimiter" is not a bufferable object');
         }
-        if (options.delimiter.length === 0) {
+        if (delimiter.length === 0) {
+          throw new TypeError('"delimiter" has a 0 or undefined length');
+        }
+        this.includeDelimiter = includeDelimiter;
+        this.delimiter = Buffer.from(delimiter);
+        this.buffer = Buffer.alloc(0);
+      }
+      _transform(chunk, encoding, cb) {
+        let data = Buffer.concat([this.buffer, chunk]);
+        let position;
+        while ((position = data.indexOf(this.delimiter)) !== -1) {
+          this.push(data.slice(0, position + (this.includeDelimiter ? this.delimiter.length : 0)));
+          data = data.slice(position + this.delimiter.length);
+        }
+        this.buffer = data;
+        cb();
+      }
+      _flush(cb) {
+        this.push(this.buffer);
+        this.buffer = Buffer.alloc(0);
+        cb();
+      }
+    };
+    exports.DelimiterParser = DelimiterParser;
+  }
+});
+
+// node_modules/@serialport/parser-inter-byte-timeout/dist/index.js
+var require_dist6 = __commonJS({
+  "node_modules/@serialport/parser-inter-byte-timeout/dist/index.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.InterByteTimeoutParser = void 0;
+    var stream_1 = require("stream");
+    var InterByteTimeoutParser = class extends stream_1.Transform {
+      constructor({ maxBufferSize = 65536, interval, ...transformOptions }) {
+        super(transformOptions);
+        if (!interval) {
+          throw new TypeError('"interval" is required');
+        }
+        if (typeof interval !== "number" || Number.isNaN(interval)) {
+          throw new TypeError('"interval" is not a number');
+        }
+        if (interval < 1) {
+          throw new TypeError('"interval" is not greater than 0');
+        }
+        if (typeof maxBufferSize !== "number" || Number.isNaN(maxBufferSize)) {
+          throw new TypeError('"maxBufferSize" is not a number');
+        }
+        if (maxBufferSize < 1) {
+          throw new TypeError('"maxBufferSize" is not greater than 0');
+        }
+        this.maxBufferSize = maxBufferSize;
+        this.currentPacket = [];
+        this.interval = interval;
+      }
+      _transform(chunk, encoding, cb) {
+        if (this.intervalID) {
+          clearTimeout(this.intervalID);
+        }
+        for (let offset = 0; offset < chunk.length; offset++) {
+          this.currentPacket.push(chunk[offset]);
+          if (this.currentPacket.length >= this.maxBufferSize) {
+            this.emitPacket();
+          }
+        }
+        this.intervalID = setTimeout(this.emitPacket.bind(this), this.interval);
+        cb();
+      }
+      emitPacket() {
+        if (this.intervalID) {
+          clearTimeout(this.intervalID);
+        }
+        if (this.currentPacket.length > 0) {
+          this.push(Buffer.from(this.currentPacket));
+        }
+        this.currentPacket = [];
+      }
+      _flush(cb) {
+        this.emitPacket();
+        cb();
+      }
+    };
+    exports.InterByteTimeoutParser = InterByteTimeoutParser;
+  }
+});
+
+// node_modules/@serialport/parser-packet-length/dist/index.js
+var require_dist7 = __commonJS({
+  "node_modules/@serialport/parser-packet-length/dist/index.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.PacketLengthParser = void 0;
+    var stream_1 = require("stream");
+    var PacketLengthParser = class extends stream_1.Transform {
+      constructor(options = {}) {
+        super(options);
+        const { delimiter = 170, packetOverhead = 2, lengthBytes = 1, lengthOffset = 1, maxLen = 255 } = options;
+        this.opts = {
+          delimiter,
+          packetOverhead,
+          lengthBytes,
+          lengthOffset,
+          maxLen
+        };
+        this.buffer = Buffer.alloc(0);
+        this.start = false;
+      }
+      _transform(chunk, encoding, cb) {
+        for (let ndx = 0; ndx < chunk.length; ndx++) {
+          const byte = chunk[ndx];
+          if (byte === this.opts.delimiter) {
+            this.start = true;
+          }
+          if (this.start === true) {
+            this.buffer = Buffer.concat([this.buffer, Buffer.from([byte])]);
+            if (this.buffer.length >= this.opts.lengthOffset + this.opts.lengthBytes) {
+              const len = this.buffer.readUIntLE(this.opts.lengthOffset, this.opts.lengthBytes);
+              if (this.buffer.length == len + this.opts.packetOverhead || len > this.opts.maxLen) {
+                this.push(this.buffer);
+                this.buffer = Buffer.alloc(0);
+                this.start = false;
+              }
+            }
+          }
+        }
+        cb();
+      }
+      _flush(cb) {
+        this.push(this.buffer);
+        this.buffer = Buffer.alloc(0);
+        cb();
+      }
+    };
+    exports.PacketLengthParser = PacketLengthParser;
+  }
+});
+
+// node_modules/@serialport/parser-readline/dist/index.js
+var require_dist8 = __commonJS({
+  "node_modules/@serialport/parser-readline/dist/index.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.ReadlineParser = void 0;
+    var parser_delimiter_1 = require_dist5();
+    var ReadlineParser = class extends parser_delimiter_1.DelimiterParser {
+      constructor(options) {
+        const opts = {
+          delimiter: Buffer.from("\n", "utf8"),
+          encoding: "utf8",
+          ...options
+        };
+        if (typeof opts.delimiter === "string") {
+          opts.delimiter = Buffer.from(opts.delimiter, opts.encoding);
+        }
+        super(opts);
+      }
+    };
+    exports.ReadlineParser = ReadlineParser;
+  }
+});
+
+// node_modules/@serialport/parser-ready/dist/index.js
+var require_dist9 = __commonJS({
+  "node_modules/@serialport/parser-ready/dist/index.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.ReadyParser = void 0;
+    var stream_1 = require("stream");
+    var ReadyParser = class extends stream_1.Transform {
+      constructor({ delimiter, ...options }) {
+        if (delimiter === void 0) {
+          throw new TypeError('"delimiter" is not a bufferable object');
+        }
+        if (delimiter.length === 0) {
           throw new TypeError('"delimiter" has a 0 or undefined length');
         }
         super(options);
-        this.delimiter = Buffer.from(options.delimiter);
+        this.delimiter = Buffer.from(delimiter);
         this.readOffset = 0;
         this.ready = false;
       }
@@ -26168,34 +23728,37 @@ var require_lib9 = __commonJS({
         cb();
       }
     };
-    module2.exports = ReadyParser;
+    exports.ReadyParser = ReadyParser;
   }
 });
 
-// node_modules/@serialport/parser-regex/lib/index.js
-var require_lib10 = __commonJS({
-  "node_modules/@serialport/parser-regex/lib/index.js"(exports, module2) {
-    var { Transform } = require("stream");
-    var RegexParser = class extends Transform {
-      constructor(options) {
+// node_modules/@serialport/parser-regex/dist/index.js
+var require_dist10 = __commonJS({
+  "node_modules/@serialport/parser-regex/dist/index.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.RegexParser = void 0;
+    var stream_1 = require("stream");
+    var RegexParser = class extends stream_1.Transform {
+      constructor({ regex, ...options }) {
         const opts = {
           encoding: "utf8",
           ...options
         };
-        if (opts.regex === void 0) {
+        if (regex === void 0) {
           throw new TypeError('"options.regex" must be a regular expression pattern or object');
         }
-        if (!(opts.regex instanceof RegExp)) {
-          opts.regex = new RegExp(opts.regex);
+        if (!(regex instanceof RegExp)) {
+          regex = new RegExp(regex.toString());
         }
         super(opts);
-        this.regex = opts.regex;
+        this.regex = regex;
         this.data = "";
       }
       _transform(chunk, encoding, cb) {
         const data = this.data + chunk;
         const parts = data.split(this.regex);
-        this.data = parts.pop();
+        this.data = parts.pop() || "";
         parts.forEach((part) => {
           this.push(part);
         });
@@ -26207,39 +23770,2086 @@ var require_lib10 = __commonJS({
         cb();
       }
     };
-    module2.exports = RegexParser;
+    exports.RegexParser = RegexParser;
   }
 });
 
-// node_modules/serialport/lib/parsers.js
-var require_parsers = __commonJS({
-  "node_modules/serialport/lib/parsers.js"(exports, module2) {
-    module2.exports = {
-      ByteLength: require_lib7(),
-      CCTalk: require_lib8(),
-      Delimiter: require_lib4(),
-      Readline: require_lib5(),
-      Ready: require_lib9(),
-      Regex: require_lib10()
+// node_modules/@serialport/parser-slip-encoder/dist/decoder.js
+var require_decoder = __commonJS({
+  "node_modules/@serialport/parser-slip-encoder/dist/decoder.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.SlipDecoder = void 0;
+    var stream_1 = require("stream");
+    var SlipDecoder = class extends stream_1.Transform {
+      constructor(options = {}) {
+        super(options);
+        const { START, ESC = 219, END = 192, ESC_START, ESC_END = 220, ESC_ESC = 221 } = options;
+        this.opts = {
+          START,
+          ESC,
+          END,
+          ESC_START,
+          ESC_END,
+          ESC_ESC
+        };
+        this.buffer = Buffer.alloc(0);
+        this.escape = false;
+        this.start = false;
+      }
+      _transform(chunk, encoding, cb) {
+        for (let ndx = 0; ndx < chunk.length; ndx++) {
+          let byte = chunk[ndx];
+          if (byte === this.opts.START) {
+            this.start = true;
+            continue;
+          } else if (this.opts.START == void 0) {
+            this.start = true;
+          }
+          if (this.escape) {
+            if (byte === this.opts.ESC_START && this.opts.START) {
+              byte = this.opts.START;
+            } else if (byte === this.opts.ESC_ESC) {
+              byte = this.opts.ESC;
+            } else if (byte === this.opts.ESC_END) {
+              byte = this.opts.END;
+            } else {
+              this.escape = false;
+              this.push(this.buffer);
+              this.buffer = Buffer.alloc(0);
+            }
+          } else {
+            if (byte === this.opts.ESC) {
+              this.escape = true;
+              continue;
+            }
+            if (byte === this.opts.END) {
+              this.push(this.buffer);
+              this.buffer = Buffer.alloc(0);
+              this.escape = false;
+              this.start = false;
+              continue;
+            }
+          }
+          this.escape = false;
+          if (this.start) {
+            this.buffer = Buffer.concat([this.buffer, Buffer.from([byte])]);
+          }
+        }
+        cb();
+      }
+      _flush(cb) {
+        this.push(this.buffer);
+        this.buffer = Buffer.alloc(0);
+        cb();
+      }
+    };
+    exports.SlipDecoder = SlipDecoder;
+  }
+});
+
+// node_modules/@serialport/parser-slip-encoder/dist/encoder.js
+var require_encoder = __commonJS({
+  "node_modules/@serialport/parser-slip-encoder/dist/encoder.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.SlipEncoder = void 0;
+    var stream_1 = require("stream");
+    var SlipEncoder = class extends stream_1.Transform {
+      constructor(options = {}) {
+        super(options);
+        const { START, ESC = 219, END = 192, ESC_START, ESC_END = 220, ESC_ESC = 221, bluetoothQuirk = false } = options;
+        this.opts = {
+          START,
+          ESC,
+          END,
+          ESC_START,
+          ESC_END,
+          ESC_ESC,
+          bluetoothQuirk
+        };
+      }
+      _transform(chunk, encoding, cb) {
+        const chunkLength = chunk.length;
+        if (this.opts.bluetoothQuirk && chunkLength === 0) {
+          return cb();
+        }
+        const encoded = Buffer.alloc(chunkLength * 2 + 2);
+        let j = 0;
+        if (this.opts.bluetoothQuirk == true) {
+          encoded[j++] = this.opts.END;
+        }
+        if (this.opts.START !== void 0) {
+          encoded[j++] = this.opts.START;
+        }
+        for (let i = 0; i < chunkLength; i++) {
+          let byte = chunk[i];
+          if (byte === this.opts.START && this.opts.ESC_START) {
+            encoded[j++] = this.opts.ESC;
+            byte = this.opts.ESC_START;
+          } else if (byte === this.opts.END) {
+            encoded[j++] = this.opts.ESC;
+            byte = this.opts.ESC_END;
+          } else if (byte === this.opts.ESC) {
+            encoded[j++] = this.opts.ESC;
+            byte = this.opts.ESC_ESC;
+          }
+          encoded[j++] = byte;
+        }
+        encoded[j++] = this.opts.END;
+        cb(null, encoded.slice(0, j));
+      }
+    };
+    exports.SlipEncoder = SlipEncoder;
+  }
+});
+
+// node_modules/@serialport/parser-slip-encoder/dist/index.js
+var require_dist11 = __commonJS({
+  "node_modules/@serialport/parser-slip-encoder/dist/index.js"(exports) {
+    "use strict";
+    var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      Object.defineProperty(o, k2, { enumerable: true, get: function() {
+        return m[k];
+      } });
+    } : function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      o[k2] = m[k];
+    });
+    var __exportStar = exports && exports.__exportStar || function(m, exports2) {
+      for (var p in m)
+        if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports2, p))
+          __createBinding(exports2, m, p);
+    };
+    Object.defineProperty(exports, "__esModule", { value: true });
+    __exportStar(require_decoder(), exports);
+    __exportStar(require_encoder(), exports);
+  }
+});
+
+// node_modules/@serialport/parser-spacepacket/dist/utils.js
+var require_utils = __commonJS({
+  "node_modules/@serialport/parser-spacepacket/dist/utils.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.convertHeaderBufferToObj = exports.HEADER_LENGTH = void 0;
+    exports.HEADER_LENGTH = 6;
+    var toOctetStr = (num) => {
+      let str = Number(num).toString(2);
+      while (str.length < 8) {
+        str = `0${str}`;
+      }
+      return str;
+    };
+    var convertHeaderBufferToObj = (buf) => {
+      const headerStr = Array.from(buf.slice(0, exports.HEADER_LENGTH)).reduce((accum, curr) => `${accum}${toOctetStr(curr)}`, "");
+      const isVersion1 = headerStr.slice(0, 3) === "000";
+      const versionNumber = isVersion1 ? 1 : "UNKNOWN_VERSION";
+      const type = Number(headerStr[3]);
+      const secondaryHeader = Number(headerStr[4]);
+      const apid = parseInt(headerStr.slice(5, 16), 2);
+      const sequenceFlags = parseInt(headerStr.slice(16, 18), 2);
+      const packetName = parseInt(headerStr.slice(18, 32), 2);
+      const dataLength = parseInt(headerStr.slice(-16), 2) + 1;
+      return {
+        versionNumber,
+        identification: {
+          apid,
+          secondaryHeader,
+          type
+        },
+        sequenceControl: {
+          packetName,
+          sequenceFlags
+        },
+        dataLength
+      };
+    };
+    exports.convertHeaderBufferToObj = convertHeaderBufferToObj;
+  }
+});
+
+// node_modules/@serialport/parser-spacepacket/dist/index.js
+var require_dist12 = __commonJS({
+  "node_modules/@serialport/parser-spacepacket/dist/index.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.SpacePacketParser = void 0;
+    var stream_1 = require("stream");
+    var utils_1 = require_utils();
+    var SpacePacketParser = class extends stream_1.Transform {
+      constructor(options = {}) {
+        super({ ...options, objectMode: true });
+        this.timeCodeFieldLength = options.timeCodeFieldLength || 0;
+        this.ancillaryDataFieldLength = options.ancillaryDataFieldLength || 0;
+        this.dataSlice = this.timeCodeFieldLength + this.ancillaryDataFieldLength;
+        this.dataBuffer = Buffer.alloc(0);
+        this.headerBuffer = Buffer.alloc(0);
+        this.dataLength = 0;
+        this.expectingHeader = true;
+      }
+      pushCompletedPacket() {
+        if (!this.header) {
+          throw new Error("Missing header");
+        }
+        const timeCode = Buffer.from(this.dataBuffer.slice(0, this.timeCodeFieldLength));
+        const ancillaryData = Buffer.from(this.dataBuffer.slice(this.timeCodeFieldLength, this.timeCodeFieldLength + this.ancillaryDataFieldLength));
+        const data = Buffer.from(this.dataBuffer.slice(this.dataSlice, this.dataLength));
+        const completedPacket = {
+          header: { ...this.header },
+          data: data.toString()
+        };
+        if (timeCode.length > 0 || ancillaryData.length > 0) {
+          completedPacket.secondaryHeader = {};
+          if (timeCode.length) {
+            completedPacket.secondaryHeader.timeCode = timeCode.toString();
+          }
+          if (ancillaryData.length) {
+            completedPacket.secondaryHeader.ancillaryData = ancillaryData.toString();
+          }
+        }
+        this.push(completedPacket);
+        const nextChunk = Buffer.from(this.dataBuffer.slice(this.dataLength));
+        if (nextChunk.length >= utils_1.HEADER_LENGTH) {
+          this.extractHeader(nextChunk);
+        } else {
+          this.headerBuffer = nextChunk;
+          this.dataBuffer = Buffer.alloc(0);
+          this.expectingHeader = true;
+          this.dataLength = 0;
+          this.header = void 0;
+        }
+      }
+      extractHeader(chunk) {
+        const headerAsBuffer = Buffer.concat([this.headerBuffer, chunk]);
+        const startOfDataBuffer = headerAsBuffer.slice(utils_1.HEADER_LENGTH);
+        if (headerAsBuffer.length >= utils_1.HEADER_LENGTH) {
+          this.header = (0, utils_1.convertHeaderBufferToObj)(headerAsBuffer);
+          this.dataLength = this.header.dataLength;
+          this.headerBuffer = Buffer.alloc(0);
+          this.expectingHeader = false;
+        } else {
+          this.headerBuffer = headerAsBuffer;
+        }
+        if (startOfDataBuffer.length > 0) {
+          this.dataBuffer = Buffer.from(startOfDataBuffer);
+          if (this.dataBuffer.length >= this.dataLength) {
+            this.pushCompletedPacket();
+          }
+        }
+      }
+      _transform(chunk, encoding, cb) {
+        if (this.expectingHeader) {
+          this.extractHeader(chunk);
+        } else {
+          this.dataBuffer = Buffer.concat([this.dataBuffer, chunk]);
+          if (this.dataBuffer.length >= this.dataLength) {
+            this.pushCompletedPacket();
+          }
+        }
+        cb();
+      }
+      _flush(cb) {
+        const remaining = Buffer.concat([this.headerBuffer, this.dataBuffer]);
+        const remainingArray = Array.from(remaining);
+        this.push(remainingArray);
+        cb();
+      }
+    };
+    exports.SpacePacketParser = SpacePacketParser;
+  }
+});
+
+// node_modules/@serialport/stream/dist/index.js
+var require_dist13 = __commonJS({
+  "node_modules/@serialport/stream/dist/index.js"(exports) {
+    "use strict";
+    var __importDefault = exports && exports.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.SerialPortStream = exports.DisconnectedError = void 0;
+    var stream_1 = require("stream");
+    var debug_1 = __importDefault(require_src());
+    var debug = (0, debug_1.default)("serialport/stream");
+    var DisconnectedError = class extends Error {
+      constructor(message) {
+        super(message);
+        this.disconnected = true;
+      }
+    };
+    exports.DisconnectedError = DisconnectedError;
+    var defaultSetFlags = {
+      brk: false,
+      cts: false,
+      dtr: true,
+      rts: true
+    };
+    function allocNewReadPool(poolSize) {
+      const pool = Buffer.allocUnsafe(poolSize);
+      pool.used = 0;
+      return pool;
+    }
+    var SerialPortStream = class extends stream_1.Duplex {
+      constructor(options, openCallback) {
+        const settings = {
+          autoOpen: true,
+          endOnClose: false,
+          highWaterMark: 64 * 1024,
+          ...options
+        };
+        super({
+          highWaterMark: settings.highWaterMark
+        });
+        if (!settings.binding) {
+          throw new TypeError('"Bindings" is invalid pass it as `options.binding`');
+        }
+        if (!settings.path) {
+          throw new TypeError(`"path" is not defined: ${settings.path}`);
+        }
+        if (typeof settings.baudRate !== "number") {
+          throw new TypeError(`"baudRate" must be a number: ${settings.baudRate}`);
+        }
+        this.settings = settings;
+        this.opening = false;
+        this.closing = false;
+        this._pool = allocNewReadPool(this.settings.highWaterMark);
+        this._kMinPoolSpace = 128;
+        if (this.settings.autoOpen) {
+          this.open(openCallback);
+        }
+      }
+      get path() {
+        return this.settings.path;
+      }
+      get baudRate() {
+        return this.settings.baudRate;
+      }
+      get isOpen() {
+        var _a, _b;
+        return ((_b = (_a = this.port) === null || _a === void 0 ? void 0 : _a.isOpen) !== null && _b !== void 0 ? _b : false) && !this.closing;
+      }
+      _error(error, callback) {
+        if (callback) {
+          callback.call(this, error);
+        } else {
+          this.emit("error", error);
+        }
+      }
+      _asyncError(error, callback) {
+        process.nextTick(() => this._error(error, callback));
+      }
+      open(openCallback) {
+        if (this.isOpen) {
+          return this._asyncError(new Error("Port is already open"), openCallback);
+        }
+        if (this.opening) {
+          return this._asyncError(new Error("Port is opening"), openCallback);
+        }
+        const { highWaterMark, binding, autoOpen, endOnClose, ...openOptions } = this.settings;
+        this.opening = true;
+        debug("opening", `path: ${this.path}`);
+        this.settings.binding.open(openOptions).then((port) => {
+          debug("opened", `path: ${this.path}`);
+          this.port = port;
+          this.opening = false;
+          this.emit("open");
+          if (openCallback) {
+            openCallback.call(this, null);
+          }
+        }, (err) => {
+          this.opening = false;
+          debug("Binding #open had an error", err);
+          this._error(err, openCallback);
+        });
+      }
+      update(options, callback) {
+        if (!this.isOpen || !this.port) {
+          debug("update attempted, but port is not open");
+          return this._asyncError(new Error("Port is not open"), callback);
+        }
+        debug("update", `baudRate: ${options.baudRate}`);
+        this.port.update(options).then(() => {
+          debug("binding.update", "finished");
+          this.settings.baudRate = options.baudRate;
+          if (callback) {
+            callback.call(this, null);
+          }
+        }, (err) => {
+          debug("binding.update", "error", err);
+          return this._error(err, callback);
+        });
+      }
+      write(data, encoding, callback) {
+        if (Array.isArray(data)) {
+          data = Buffer.from(data);
+        }
+        if (typeof encoding === "function") {
+          return super.write(data, encoding);
+        }
+        return super.write(data, encoding, callback);
+      }
+      _write(data, encoding, callback) {
+        if (!this.isOpen || !this.port) {
+          this.once("open", () => {
+            this._write(data, encoding, callback);
+          });
+          return;
+        }
+        debug("_write", `${data.length} bytes of data`);
+        this.port.write(data).then(() => {
+          debug("binding.write", "write finished");
+          callback(null);
+        }, (err) => {
+          debug("binding.write", "error", err);
+          if (!err.canceled) {
+            this._disconnected(err);
+          }
+          callback(err);
+        });
+      }
+      _writev(data, callback) {
+        debug("_writev", `${data.length} chunks of data`);
+        const dataV = data.map((write) => write.chunk);
+        this._write(Buffer.concat(dataV), void 0, callback);
+      }
+      _read(bytesToRead) {
+        if (!this.isOpen || !this.port) {
+          debug("_read", "queueing _read for after open");
+          this.once("open", () => {
+            this._read(bytesToRead);
+          });
+          return;
+        }
+        if (!this._pool || this._pool.length - this._pool.used < this._kMinPoolSpace) {
+          debug("_read", "discarding the read buffer pool because it is below kMinPoolSpace");
+          this._pool = allocNewReadPool(this.settings.highWaterMark);
+        }
+        const pool = this._pool;
+        const toRead = Math.min(pool.length - pool.used, bytesToRead);
+        const start = pool.used;
+        debug("_read", `reading`, { start, toRead });
+        this.port.read(pool, start, toRead).then(({ bytesRead }) => {
+          debug("binding.read", `finished`, { bytesRead });
+          if (bytesRead === 0) {
+            debug("binding.read", "Zero bytes read closing readable stream");
+            this.push(null);
+            return;
+          }
+          pool.used += bytesRead;
+          this.push(pool.slice(start, start + bytesRead));
+        }, (err) => {
+          debug("binding.read", `error`, err);
+          if (!err.canceled) {
+            this._disconnected(err);
+          }
+          this._read(bytesToRead);
+        });
+      }
+      _disconnected(err) {
+        if (!this.isOpen) {
+          debug("disconnected aborted because already closed", err);
+          return;
+        }
+        debug("disconnected", err);
+        this.close(void 0, new DisconnectedError(err.message));
+      }
+      close(callback, disconnectError = null) {
+        if (!this.isOpen || !this.port) {
+          debug("close attempted, but port is not open");
+          return this._asyncError(new Error("Port is not open"), callback);
+        }
+        this.closing = true;
+        debug("#close");
+        this.port.close().then(() => {
+          this.closing = false;
+          debug("binding.close", "finished");
+          this.emit("close", disconnectError);
+          if (this.settings.endOnClose) {
+            this.emit("end");
+          }
+          if (callback) {
+            callback.call(this, disconnectError);
+          }
+        }, (err) => {
+          this.closing = false;
+          debug("binding.close", "had an error", err);
+          return this._error(err, callback);
+        });
+      }
+      set(options, callback) {
+        if (!this.isOpen || !this.port) {
+          debug("set attempted, but port is not open");
+          return this._asyncError(new Error("Port is not open"), callback);
+        }
+        const settings = { ...defaultSetFlags, ...options };
+        debug("#set", settings);
+        this.port.set(settings).then(() => {
+          debug("binding.set", "finished");
+          if (callback) {
+            callback.call(this, null);
+          }
+        }, (err) => {
+          debug("binding.set", "had an error", err);
+          return this._error(err, callback);
+        });
+      }
+      get(callback) {
+        if (!this.isOpen || !this.port) {
+          debug("get attempted, but port is not open");
+          return this._asyncError(new Error("Port is not open"), callback);
+        }
+        debug("#get");
+        this.port.get().then((status) => {
+          debug("binding.get", "finished");
+          callback.call(this, null, status);
+        }, (err) => {
+          debug("binding.get", "had an error", err);
+          return this._error(err, callback);
+        });
+      }
+      flush(callback) {
+        if (!this.isOpen || !this.port) {
+          debug("flush attempted, but port is not open");
+          return this._asyncError(new Error("Port is not open"), callback);
+        }
+        debug("#flush");
+        this.port.flush().then(() => {
+          debug("binding.flush", "finished");
+          if (callback) {
+            callback.call(this, null);
+          }
+        }, (err) => {
+          debug("binding.flush", "had an error", err);
+          return this._error(err, callback);
+        });
+      }
+      drain(callback) {
+        debug("drain");
+        if (!this.isOpen || !this.port) {
+          debug("drain queuing on port open");
+          this.once("open", () => {
+            this.drain(callback);
+          });
+          return;
+        }
+        this.port.drain().then(() => {
+          debug("binding.drain", "finished");
+          if (callback) {
+            callback.call(this, null);
+          }
+        }, (err) => {
+          debug("binding.drain", "had an error", err);
+          return this._error(err, callback);
+        });
+      }
+    };
+    exports.SerialPortStream = SerialPortStream;
+  }
+});
+
+// node_modules/@serialport/binding-mock/dist/index.js
+var require_dist14 = __commonJS({
+  "node_modules/@serialport/binding-mock/dist/index.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var debugFactory = require_src();
+    function _interopDefaultLegacy(e) {
+      return e && typeof e === "object" && "default" in e ? e : { "default": e };
+    }
+    var debugFactory__default = /* @__PURE__ */ _interopDefaultLegacy(debugFactory);
+    var debug = debugFactory__default["default"]("serialport/binding-mock");
+    var ports = {};
+    var serialNumber = 0;
+    function resolveNextTick() {
+      return new Promise((resolve) => process.nextTick(() => resolve()));
+    }
+    var CanceledError = class extends Error {
+      constructor(message) {
+        super(message);
+        this.canceled = true;
+      }
+    };
+    var MockBinding = {
+      reset() {
+        ports = {};
+        serialNumber = 0;
+      },
+      createPort(path, options = {}) {
+        serialNumber++;
+        const optWithDefaults = Object.assign({ echo: false, record: false, manufacturer: "The J5 Robotics Company", vendorId: void 0, productId: void 0, maxReadSize: 1024 }, options);
+        ports[path] = {
+          data: Buffer.alloc(0),
+          echo: optWithDefaults.echo,
+          record: optWithDefaults.record,
+          readyData: optWithDefaults.readyData,
+          maxReadSize: optWithDefaults.maxReadSize,
+          info: {
+            path,
+            manufacturer: optWithDefaults.manufacturer,
+            serialNumber: `${serialNumber}`,
+            pnpId: void 0,
+            locationId: void 0,
+            vendorId: optWithDefaults.vendorId,
+            productId: optWithDefaults.productId
+          }
+        };
+        debug(serialNumber, "created port", JSON.stringify({ path, opt: options }));
+      },
+      async list() {
+        debug(null, "list");
+        return Object.values(ports).map((port) => port.info);
+      },
+      async open(options) {
+        var _a;
+        if (!options || typeof options !== "object" || Array.isArray(options)) {
+          throw new TypeError('"options" is not an object');
+        }
+        if (!options.path) {
+          throw new TypeError('"path" is not a valid port');
+        }
+        if (!options.baudRate) {
+          throw new TypeError('"baudRate" is not a valid baudRate');
+        }
+        const openOptions = Object.assign({ dataBits: 8, lock: true, stopBits: 1, parity: "none", rtscts: false, xon: false, xoff: false, xany: false, hupcl: true }, options);
+        const { path } = openOptions;
+        debug(null, `open: opening path ${path}`);
+        const port = ports[path];
+        await resolveNextTick();
+        if (!port) {
+          throw new Error(`Port does not exist - please call MockBinding.createPort('${path}') first`);
+        }
+        const serialNumber2 = port.info.serialNumber;
+        if ((_a = port.openOpt) === null || _a === void 0 ? void 0 : _a.lock) {
+          debug(serialNumber2, "open: Port is locked cannot open");
+          throw new Error("Port is locked cannot open");
+        }
+        debug(serialNumber2, `open: opened path ${path}`);
+        port.openOpt = Object.assign({}, openOptions);
+        return new MockPortBinding(port, openOptions);
+      }
+    };
+    var MockPortBinding = class {
+      constructor(port, openOptions) {
+        this.port = port;
+        this.openOptions = openOptions;
+        this.pendingRead = null;
+        this.isOpen = true;
+        this.lastWrite = null;
+        this.recording = Buffer.alloc(0);
+        this.writeOperation = null;
+        this.serialNumber = port.info.serialNumber;
+        if (port.readyData) {
+          const data = port.readyData;
+          process.nextTick(() => {
+            if (this.isOpen) {
+              debug(this.serialNumber, "emitting ready data");
+              this.emitData(data);
+            }
+          });
+        }
+      }
+      emitData(data) {
+        if (!this.isOpen || !this.port) {
+          throw new Error("Port must be open to pretend to receive data");
+        }
+        const bufferData = Buffer.isBuffer(data) ? data : Buffer.from(data);
+        debug(this.serialNumber, "emitting data - pending read:", Boolean(this.pendingRead));
+        this.port.data = Buffer.concat([this.port.data, bufferData]);
+        if (this.pendingRead) {
+          process.nextTick(this.pendingRead);
+          this.pendingRead = null;
+        }
+      }
+      async close() {
+        debug(this.serialNumber, "close");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        const port = this.port;
+        if (!port) {
+          throw new Error("already closed");
+        }
+        port.openOpt = void 0;
+        port.data = Buffer.alloc(0);
+        debug(this.serialNumber, "port is closed");
+        this.serialNumber = void 0;
+        this.isOpen = false;
+        if (this.pendingRead) {
+          this.pendingRead(new CanceledError("port is closed"));
+        }
+      }
+      async read(buffer, offset, length) {
+        if (!Buffer.isBuffer(buffer)) {
+          throw new TypeError('"buffer" is not a Buffer');
+        }
+        if (typeof offset !== "number" || isNaN(offset)) {
+          throw new TypeError(`"offset" is not an integer got "${isNaN(offset) ? "NaN" : typeof offset}"`);
+        }
+        if (typeof length !== "number" || isNaN(length)) {
+          throw new TypeError(`"length" is not an integer got "${isNaN(length) ? "NaN" : typeof length}"`);
+        }
+        if (buffer.length < offset + length) {
+          throw new Error("buffer is too small");
+        }
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        debug(this.serialNumber, "read", length, "bytes");
+        await resolveNextTick();
+        if (!this.isOpen || !this.port) {
+          throw new CanceledError("Read canceled");
+        }
+        if (this.port.data.length <= 0) {
+          return new Promise((resolve, reject) => {
+            this.pendingRead = (err) => {
+              if (err) {
+                return reject(err);
+              }
+              this.read(buffer, offset, length).then(resolve, reject);
+            };
+          });
+        }
+        const lengthToRead = this.port.maxReadSize > length ? length : this.port.maxReadSize;
+        const data = this.port.data.slice(0, lengthToRead);
+        const bytesRead = data.copy(buffer, offset);
+        this.port.data = this.port.data.slice(lengthToRead);
+        debug(this.serialNumber, "read", bytesRead, "bytes");
+        return { bytesRead, buffer };
+      }
+      async write(buffer) {
+        if (!Buffer.isBuffer(buffer)) {
+          throw new TypeError('"buffer" is not a Buffer');
+        }
+        if (!this.isOpen || !this.port) {
+          debug("write", "error port is not open");
+          throw new Error("Port is not open");
+        }
+        debug(this.serialNumber, "write", buffer.length, "bytes");
+        if (this.writeOperation) {
+          throw new Error("Overlapping writes are not supported and should be queued by the serialport object");
+        }
+        this.writeOperation = (async () => {
+          await resolveNextTick();
+          if (!this.isOpen || !this.port) {
+            throw new Error("Write canceled");
+          }
+          const data = this.lastWrite = Buffer.from(buffer);
+          if (this.port.record) {
+            this.recording = Buffer.concat([this.recording, data]);
+          }
+          if (this.port.echo) {
+            process.nextTick(() => {
+              if (this.isOpen) {
+                this.emitData(data);
+              }
+            });
+          }
+          this.writeOperation = null;
+          debug(this.serialNumber, "writing finished");
+        })();
+        return this.writeOperation;
+      }
+      async update(options) {
+        if (typeof options !== "object") {
+          throw TypeError('"options" is not an object');
+        }
+        if (typeof options.baudRate !== "number") {
+          throw new TypeError('"options.baudRate" is not a number');
+        }
+        debug(this.serialNumber, "update");
+        if (!this.isOpen || !this.port) {
+          throw new Error("Port is not open");
+        }
+        await resolveNextTick();
+        if (this.port.openOpt) {
+          this.port.openOpt.baudRate = options.baudRate;
+        }
+      }
+      async set(options) {
+        if (typeof options !== "object") {
+          throw new TypeError('"options" is not an object');
+        }
+        debug(this.serialNumber, "set");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        await resolveNextTick();
+      }
+      async get() {
+        debug(this.serialNumber, "get");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        await resolveNextTick();
+        return {
+          cts: true,
+          dsr: false,
+          dcd: false
+        };
+      }
+      async getBaudRate() {
+        var _a;
+        debug(this.serialNumber, "getBaudRate");
+        if (!this.isOpen || !this.port) {
+          throw new Error("Port is not open");
+        }
+        await resolveNextTick();
+        if (!((_a = this.port.openOpt) === null || _a === void 0 ? void 0 : _a.baudRate)) {
+          throw new Error("Internal Error");
+        }
+        return {
+          baudRate: this.port.openOpt.baudRate
+        };
+      }
+      async flush() {
+        debug(this.serialNumber, "flush");
+        if (!this.isOpen || !this.port) {
+          throw new Error("Port is not open");
+        }
+        await resolveNextTick();
+        this.port.data = Buffer.alloc(0);
+      }
+      async drain() {
+        debug(this.serialNumber, "drain");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        await this.writeOperation;
+        await resolveNextTick();
+      }
+    };
+    exports.CanceledError = CanceledError;
+    exports.MockBinding = MockBinding;
+    exports.MockPortBinding = MockPortBinding;
+  }
+});
+
+// node_modules/serialport/dist/serialport-mock.js
+var require_serialport_mock = __commonJS({
+  "node_modules/serialport/dist/serialport-mock.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.SerialPortMock = void 0;
+    var stream_1 = require_dist13();
+    var binding_mock_1 = require_dist14();
+    var SerialPortMock = class extends stream_1.SerialPortStream {
+      constructor(options, openCallback) {
+        const opts = {
+          binding: binding_mock_1.MockBinding,
+          ...options
+        };
+        super(opts, openCallback);
+      }
+    };
+    exports.SerialPortMock = SerialPortMock;
+    SerialPortMock.list = binding_mock_1.MockBinding.list;
+    SerialPortMock.binding = binding_mock_1.MockBinding;
+  }
+});
+
+// node_modules/node-gyp-build/node-gyp-build.js
+var require_node_gyp_build = __commonJS({
+  "node_modules/node-gyp-build/node-gyp-build.js"(exports, module2) {
+    var fs = require("fs");
+    var path = require("path");
+    var os = require("os");
+    var runtimeRequire = typeof __webpack_require__ === "function" ? __non_webpack_require__ : require;
+    var vars = process.config && process.config.variables || {};
+    var prebuildsOnly = !!process.env.PREBUILDS_ONLY;
+    var abi = process.versions.modules;
+    var runtime = isElectron() ? "electron" : isNwjs() ? "node-webkit" : "node";
+    var arch = process.env.npm_config_arch || os.arch();
+    var platform = process.env.npm_config_platform || os.platform();
+    var libc = process.env.LIBC || (isAlpine(platform) ? "musl" : "glibc");
+    var armv = process.env.ARM_VERSION || (arch === "arm64" ? "8" : vars.arm_version) || "";
+    var uv = (process.versions.uv || "").split(".")[0];
+    module2.exports = load;
+    function load(dir) {
+      return runtimeRequire(load.resolve(dir));
+    }
+    load.resolve = load.path = function(dir) {
+      dir = path.resolve(dir || ".");
+      try {
+        var name = runtimeRequire(path.join(dir, "package.json")).name.toUpperCase().replace(/-/g, "_");
+        if (process.env[name + "_PREBUILD"])
+          dir = process.env[name + "_PREBUILD"];
+      } catch (err) {
+      }
+      if (!prebuildsOnly) {
+        var release = getFirst(path.join(dir, "build/Release"), matchBuild);
+        if (release)
+          return release;
+        var debug = getFirst(path.join(dir, "build/Debug"), matchBuild);
+        if (debug)
+          return debug;
+      }
+      var prebuild = resolve(dir);
+      if (prebuild)
+        return prebuild;
+      var nearby = resolve(path.dirname(process.execPath));
+      if (nearby)
+        return nearby;
+      var target = [
+        "platform=" + platform,
+        "arch=" + arch,
+        "runtime=" + runtime,
+        "abi=" + abi,
+        "uv=" + uv,
+        armv ? "armv=" + armv : "",
+        "libc=" + libc,
+        "node=" + process.versions.node,
+        process.versions.electron ? "electron=" + process.versions.electron : "",
+        typeof __webpack_require__ === "function" ? "webpack=true" : ""
+      ].filter(Boolean).join(" ");
+      throw new Error("No native build was found for " + target + "\n    loaded from: " + dir + "\n");
+      function resolve(dir2) {
+        var tuples = readdirSync(path.join(dir2, "prebuilds")).map(parseTuple);
+        var tuple = tuples.filter(matchTuple(platform, arch)).sort(compareTuples)[0];
+        if (!tuple)
+          return;
+        var prebuilds = path.join(dir2, "prebuilds", tuple.name);
+        var parsed = readdirSync(prebuilds).map(parseTags);
+        var candidates = parsed.filter(matchTags(runtime, abi));
+        var winner = candidates.sort(compareTags(runtime))[0];
+        if (winner)
+          return path.join(prebuilds, winner.file);
+      }
+    };
+    function readdirSync(dir) {
+      try {
+        return fs.readdirSync(dir);
+      } catch (err) {
+        return [];
+      }
+    }
+    function getFirst(dir, filter) {
+      var files = readdirSync(dir).filter(filter);
+      return files[0] && path.join(dir, files[0]);
+    }
+    function matchBuild(name) {
+      return /\.node$/.test(name);
+    }
+    function parseTuple(name) {
+      var arr = name.split("-");
+      if (arr.length !== 2)
+        return;
+      var platform2 = arr[0];
+      var architectures = arr[1].split("+");
+      if (!platform2)
+        return;
+      if (!architectures.length)
+        return;
+      if (!architectures.every(Boolean))
+        return;
+      return { name, platform: platform2, architectures };
+    }
+    function matchTuple(platform2, arch2) {
+      return function(tuple) {
+        if (tuple == null)
+          return false;
+        if (tuple.platform !== platform2)
+          return false;
+        return tuple.architectures.includes(arch2);
+      };
+    }
+    function compareTuples(a, b) {
+      return a.architectures.length - b.architectures.length;
+    }
+    function parseTags(file) {
+      var arr = file.split(".");
+      var extension = arr.pop();
+      var tags = { file, specificity: 0 };
+      if (extension !== "node")
+        return;
+      for (var i = 0; i < arr.length; i++) {
+        var tag = arr[i];
+        if (tag === "node" || tag === "electron" || tag === "node-webkit") {
+          tags.runtime = tag;
+        } else if (tag === "napi") {
+          tags.napi = true;
+        } else if (tag.slice(0, 3) === "abi") {
+          tags.abi = tag.slice(3);
+        } else if (tag.slice(0, 2) === "uv") {
+          tags.uv = tag.slice(2);
+        } else if (tag.slice(0, 4) === "armv") {
+          tags.armv = tag.slice(4);
+        } else if (tag === "glibc" || tag === "musl") {
+          tags.libc = tag;
+        } else {
+          continue;
+        }
+        tags.specificity++;
+      }
+      return tags;
+    }
+    function matchTags(runtime2, abi2) {
+      return function(tags) {
+        if (tags == null)
+          return false;
+        if (tags.runtime !== runtime2 && !runtimeAgnostic(tags))
+          return false;
+        if (tags.abi !== abi2 && !tags.napi)
+          return false;
+        if (tags.uv && tags.uv !== uv)
+          return false;
+        if (tags.armv && tags.armv !== armv)
+          return false;
+        if (tags.libc && tags.libc !== libc)
+          return false;
+        return true;
+      };
+    }
+    function runtimeAgnostic(tags) {
+      return tags.runtime === "node" && tags.napi;
+    }
+    function compareTags(runtime2) {
+      return function(a, b) {
+        if (a.runtime !== b.runtime) {
+          return a.runtime === runtime2 ? -1 : 1;
+        } else if (a.abi !== b.abi) {
+          return a.abi ? -1 : 1;
+        } else if (a.specificity !== b.specificity) {
+          return a.specificity > b.specificity ? -1 : 1;
+        } else {
+          return 0;
+        }
+      };
+    }
+    function isNwjs() {
+      return !!(process.versions && process.versions.nw);
+    }
+    function isElectron() {
+      if (process.versions && process.versions.electron)
+        return true;
+      if (process.env.ELECTRON_RUN_AS_NODE)
+        return true;
+      return typeof window !== "undefined" && window.process && window.process.type === "renderer";
+    }
+    function isAlpine(platform2) {
+      return platform2 === "linux" && fs.existsSync("/etc/alpine-release");
+    }
+    load.parseTags = parseTags;
+    load.matchTags = matchTags;
+    load.compareTags = compareTags;
+    load.parseTuple = parseTuple;
+    load.matchTuple = matchTuple;
+    load.compareTuples = compareTuples;
+  }
+});
+
+// node_modules/node-gyp-build/index.js
+var require_node_gyp_build2 = __commonJS({
+  "node_modules/node-gyp-build/index.js"(exports, module2) {
+    if (typeof process.addon === "function") {
+      module2.exports = process.addon.bind(process);
+    } else {
+      module2.exports = require_node_gyp_build();
+    }
+  }
+});
+
+// node_modules/@serialport/bindings-cpp/dist/load-bindings.js
+var require_load_bindings = __commonJS({
+  "node_modules/@serialport/bindings-cpp/dist/load-bindings.js"(exports) {
+    "use strict";
+    var __importDefault = exports && exports.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.asyncWrite = exports.asyncRead = exports.asyncUpdate = exports.asyncSet = exports.asyncOpen = exports.asyncList = exports.asyncGetBaudRate = exports.asyncGet = exports.asyncFlush = exports.asyncDrain = exports.asyncClose = void 0;
+    var node_gyp_build_1 = __importDefault(require_node_gyp_build2());
+    var util_1 = require("util");
+    var path_1 = require("path");
+    var binding = (0, node_gyp_build_1.default)((0, path_1.join)(__dirname, "../"));
+    exports.asyncClose = binding.close ? (0, util_1.promisify)(binding.close) : async () => {
+      throw new Error('"binding.close" Method not implemented');
+    };
+    exports.asyncDrain = binding.drain ? (0, util_1.promisify)(binding.drain) : async () => {
+      throw new Error('"binding.drain" Method not implemented');
+    };
+    exports.asyncFlush = binding.flush ? (0, util_1.promisify)(binding.flush) : async () => {
+      throw new Error('"binding.flush" Method not implemented');
+    };
+    exports.asyncGet = binding.get ? (0, util_1.promisify)(binding.get) : async () => {
+      throw new Error('"binding.get" Method not implemented');
+    };
+    exports.asyncGetBaudRate = binding.getBaudRate ? (0, util_1.promisify)(binding.getBaudRate) : async () => {
+      throw new Error('"binding.getBaudRate" Method not implemented');
+    };
+    exports.asyncList = binding.list ? (0, util_1.promisify)(binding.list) : async () => {
+      throw new Error('"binding.list" Method not implemented');
+    };
+    exports.asyncOpen = binding.open ? (0, util_1.promisify)(binding.open) : async () => {
+      throw new Error('"binding.open" Method not implemented');
+    };
+    exports.asyncSet = binding.set ? (0, util_1.promisify)(binding.set) : async () => {
+      throw new Error('"binding.set" Method not implemented');
+    };
+    exports.asyncUpdate = binding.update ? (0, util_1.promisify)(binding.update) : async () => {
+      throw new Error('"binding.update" Method not implemented');
+    };
+    exports.asyncRead = binding.read ? (0, util_1.promisify)(binding.read) : async () => {
+      throw new Error('"binding.read" Method not implemented');
+    };
+    exports.asyncWrite = binding.read ? (0, util_1.promisify)(binding.write) : async () => {
+      throw new Error('"binding.write" Method not implemented');
     };
   }
 });
 
-// node_modules/serialport/lib/index.js
-var require_lib11 = __commonJS({
-  "node_modules/serialport/lib/index.js"(exports, module2) {
-    var SerialPort = require_lib2();
-    var Binding = require_lib6();
-    var parsers = require_parsers();
-    SerialPort.Binding = Binding;
-    SerialPort.parsers = parsers;
-    module2.exports = SerialPort;
+// node_modules/@serialport/bindings-cpp/dist/errors.js
+var require_errors = __commonJS({
+  "node_modules/@serialport/bindings-cpp/dist/errors.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.BindingsError = void 0;
+    var BindingsError = class extends Error {
+      constructor(message, { canceled = false } = {}) {
+        super(message);
+        this.canceled = canceled;
+      }
+    };
+    exports.BindingsError = BindingsError;
   }
 });
 
-// node_modules/firmata-io/lib/encoder7bit.js
+// node_modules/@serialport/bindings-cpp/dist/poller.js
+var require_poller = __commonJS({
+  "node_modules/@serialport/bindings-cpp/dist/poller.js"(exports) {
+    "use strict";
+    var __importDefault = exports && exports.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.Poller = exports.EVENTS = void 0;
+    var debug_1 = __importDefault(require_src());
+    var events_1 = require("events");
+    var path_1 = require("path");
+    var node_gyp_build_1 = __importDefault(require_node_gyp_build2());
+    var errors_1 = require_errors();
+    var { Poller: PollerBindings } = (0, node_gyp_build_1.default)((0, path_1.join)(__dirname, "../"));
+    var logger = (0, debug_1.default)("serialport/bindings-cpp/poller");
+    exports.EVENTS = {
+      UV_READABLE: 1,
+      UV_WRITABLE: 2,
+      UV_DISCONNECT: 4
+    };
+    function handleEvent(error, eventFlag) {
+      if (error) {
+        logger("error", error);
+        this.emit("readable", error);
+        this.emit("writable", error);
+        this.emit("disconnect", error);
+        return;
+      }
+      if (eventFlag & exports.EVENTS.UV_READABLE) {
+        logger('received "readable"');
+        this.emit("readable", null);
+      }
+      if (eventFlag & exports.EVENTS.UV_WRITABLE) {
+        logger('received "writable"');
+        this.emit("writable", null);
+      }
+      if (eventFlag & exports.EVENTS.UV_DISCONNECT) {
+        logger('received "disconnect"');
+        this.emit("disconnect", null);
+      }
+    }
+    var Poller = class extends events_1.EventEmitter {
+      constructor(fd, FDPoller = PollerBindings) {
+        logger("Creating poller");
+        super();
+        this.poller = new FDPoller(fd, handleEvent.bind(this));
+      }
+      once(event, callback) {
+        switch (event) {
+          case "readable":
+            this.poll(exports.EVENTS.UV_READABLE);
+            break;
+          case "writable":
+            this.poll(exports.EVENTS.UV_WRITABLE);
+            break;
+          case "disconnect":
+            this.poll(exports.EVENTS.UV_DISCONNECT);
+            break;
+        }
+        return super.once(event, callback);
+      }
+      poll(eventFlag = 0) {
+        if (eventFlag & exports.EVENTS.UV_READABLE) {
+          logger('Polling for "readable"');
+        }
+        if (eventFlag & exports.EVENTS.UV_WRITABLE) {
+          logger('Polling for "writable"');
+        }
+        if (eventFlag & exports.EVENTS.UV_DISCONNECT) {
+          logger('Polling for "disconnect"');
+        }
+        this.poller.poll(eventFlag);
+      }
+      stop() {
+        logger("Stopping poller");
+        this.poller.stop();
+        this.emitCanceled();
+      }
+      destroy() {
+        logger("Destroying poller");
+        this.poller.destroy();
+        this.emitCanceled();
+      }
+      emitCanceled() {
+        const err = new errors_1.BindingsError("Canceled", { canceled: true });
+        this.emit("readable", err);
+        this.emit("writable", err);
+        this.emit("disconnect", err);
+      }
+    };
+    exports.Poller = Poller;
+  }
+});
+
+// node_modules/@serialport/bindings-cpp/dist/unix-read.js
+var require_unix_read = __commonJS({
+  "node_modules/@serialport/bindings-cpp/dist/unix-read.js"(exports) {
+    "use strict";
+    var __importDefault = exports && exports.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.unixRead = void 0;
+    var util_1 = require("util");
+    var fs_1 = require("fs");
+    var errors_1 = require_errors();
+    var debug_1 = __importDefault(require_src());
+    var logger = (0, debug_1.default)("serialport/bindings-cpp/unixRead");
+    var readAsync = (0, util_1.promisify)(fs_1.read);
+    var readable = (binding) => {
+      return new Promise((resolve, reject) => {
+        if (!binding.poller) {
+          throw new Error("No poller on bindings");
+        }
+        binding.poller.once("readable", (err) => err ? reject(err) : resolve());
+      });
+    };
+    var unixRead = async ({ binding, buffer, offset, length, fsReadAsync = readAsync }) => {
+      logger("Starting read");
+      if (!binding.isOpen || !binding.fd) {
+        throw new errors_1.BindingsError("Port is not open", { canceled: true });
+      }
+      try {
+        const { bytesRead } = await fsReadAsync(binding.fd, buffer, offset, length, null);
+        if (bytesRead === 0) {
+          return (0, exports.unixRead)({ binding, buffer, offset, length, fsReadAsync });
+        }
+        logger("Finished read", bytesRead, "bytes");
+        return { bytesRead, buffer };
+      } catch (err) {
+        logger("read error", err);
+        if (err.code === "EAGAIN" || err.code === "EWOULDBLOCK" || err.code === "EINTR") {
+          if (!binding.isOpen) {
+            throw new errors_1.BindingsError("Port is not open", { canceled: true });
+          }
+          logger("waiting for readable because of code:", err.code);
+          await readable(binding);
+          return (0, exports.unixRead)({ binding, buffer, offset, length, fsReadAsync });
+        }
+        const disconnectError = err.code === "EBADF" || err.code === "ENXIO" || err.code === "UNKNOWN" || err.errno === -1;
+        if (disconnectError) {
+          err.disconnect = true;
+          logger("disconnecting", err);
+        }
+        throw err;
+      }
+    };
+    exports.unixRead = unixRead;
+  }
+});
+
+// node_modules/@serialport/bindings-cpp/dist/unix-write.js
+var require_unix_write = __commonJS({
+  "node_modules/@serialport/bindings-cpp/dist/unix-write.js"(exports) {
+    "use strict";
+    var __importDefault = exports && exports.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.unixWrite = void 0;
+    var fs_1 = require("fs");
+    var debug_1 = __importDefault(require_src());
+    var util_1 = require("util");
+    var logger = (0, debug_1.default)("serialport/bindings-cpp/unixWrite");
+    var writeAsync = (0, util_1.promisify)(fs_1.write);
+    var writable = (binding) => {
+      return new Promise((resolve, reject) => {
+        binding.poller.once("writable", (err) => err ? reject(err) : resolve());
+      });
+    };
+    var unixWrite = async ({ binding, buffer, offset = 0, fsWriteAsync = writeAsync }) => {
+      const bytesToWrite = buffer.length - offset;
+      logger("Starting write", buffer.length, "bytes offset", offset, "bytesToWrite", bytesToWrite);
+      if (!binding.isOpen || !binding.fd) {
+        throw new Error("Port is not open");
+      }
+      try {
+        const { bytesWritten } = await fsWriteAsync(binding.fd, buffer, offset, bytesToWrite);
+        logger("write returned: wrote", bytesWritten, "bytes");
+        if (bytesWritten + offset < buffer.length) {
+          if (!binding.isOpen) {
+            throw new Error("Port is not open");
+          }
+          return (0, exports.unixWrite)({ binding, buffer, offset: bytesWritten + offset, fsWriteAsync });
+        }
+        logger("Finished writing", bytesWritten + offset, "bytes");
+      } catch (err) {
+        logger("write errored", err);
+        if (err.code === "EAGAIN" || err.code === "EWOULDBLOCK" || err.code === "EINTR") {
+          if (!binding.isOpen) {
+            throw new Error("Port is not open");
+          }
+          logger("waiting for writable because of code:", err.code);
+          await writable(binding);
+          return (0, exports.unixWrite)({ binding, buffer, offset, fsWriteAsync });
+        }
+        const disconnectError = err.code === "EBADF" || err.code === "ENXIO" || err.code === "UNKNOWN" || err.errno === -1;
+        if (disconnectError) {
+          err.disconnect = true;
+          logger("disconnecting", err);
+        }
+        logger("error", err);
+        throw err;
+      }
+    };
+    exports.unixWrite = unixWrite;
+  }
+});
+
+// node_modules/@serialport/bindings-cpp/dist/darwin.js
+var require_darwin = __commonJS({
+  "node_modules/@serialport/bindings-cpp/dist/darwin.js"(exports) {
+    "use strict";
+    var __importDefault = exports && exports.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.DarwinPortBinding = exports.DarwinBinding = void 0;
+    var debug_1 = __importDefault(require_src());
+    var load_bindings_1 = require_load_bindings();
+    var poller_1 = require_poller();
+    var unix_read_1 = require_unix_read();
+    var unix_write_1 = require_unix_write();
+    var debug = (0, debug_1.default)("serialport/bindings-cpp");
+    exports.DarwinBinding = {
+      list() {
+        debug("list");
+        return (0, load_bindings_1.asyncList)();
+      },
+      async open(options) {
+        if (!options || typeof options !== "object" || Array.isArray(options)) {
+          throw new TypeError('"options" is not an object');
+        }
+        if (!options.path) {
+          throw new TypeError('"path" is not a valid port');
+        }
+        if (!options.baudRate) {
+          throw new TypeError('"baudRate" is not a valid baudRate');
+        }
+        debug("open");
+        const openOptions = Object.assign({ vmin: 1, vtime: 0, dataBits: 8, lock: true, stopBits: 1, parity: "none", rtscts: false, xon: false, xoff: false, xany: false, hupcl: true }, options);
+        const fd = await (0, load_bindings_1.asyncOpen)(openOptions.path, openOptions);
+        return new DarwinPortBinding(fd, openOptions);
+      }
+    };
+    var DarwinPortBinding = class {
+      constructor(fd, options) {
+        this.fd = fd;
+        this.openOptions = options;
+        this.poller = new poller_1.Poller(fd);
+        this.writeOperation = null;
+      }
+      get isOpen() {
+        return this.fd !== null;
+      }
+      async close() {
+        debug("close");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        const fd = this.fd;
+        this.poller.stop();
+        this.poller.destroy();
+        this.fd = null;
+        await (0, load_bindings_1.asyncClose)(fd);
+      }
+      async read(buffer, offset, length) {
+        if (!Buffer.isBuffer(buffer)) {
+          throw new TypeError('"buffer" is not a Buffer');
+        }
+        if (typeof offset !== "number" || isNaN(offset)) {
+          throw new TypeError(`"offset" is not an integer got "${isNaN(offset) ? "NaN" : typeof offset}"`);
+        }
+        if (typeof length !== "number" || isNaN(length)) {
+          throw new TypeError(`"length" is not an integer got "${isNaN(length) ? "NaN" : typeof length}"`);
+        }
+        debug("read");
+        if (buffer.length < offset + length) {
+          throw new Error("buffer is too small");
+        }
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        return (0, unix_read_1.unixRead)({ binding: this, buffer, offset, length });
+      }
+      async write(buffer) {
+        if (!Buffer.isBuffer(buffer)) {
+          throw new TypeError('"buffer" is not a Buffer');
+        }
+        debug("write", buffer.length, "bytes");
+        if (!this.isOpen) {
+          debug("write", "error port is not open");
+          throw new Error("Port is not open");
+        }
+        this.writeOperation = (async () => {
+          if (buffer.length === 0) {
+            return;
+          }
+          await (0, unix_write_1.unixWrite)({ binding: this, buffer });
+          this.writeOperation = null;
+        })();
+        return this.writeOperation;
+      }
+      async update(options) {
+        if (!options || typeof options !== "object" || Array.isArray(options)) {
+          throw TypeError('"options" is not an object');
+        }
+        if (typeof options.baudRate !== "number") {
+          throw new TypeError('"options.baudRate" is not a number');
+        }
+        debug("update");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        await (0, load_bindings_1.asyncUpdate)(this.fd, options);
+      }
+      async set(options) {
+        if (!options || typeof options !== "object" || Array.isArray(options)) {
+          throw new TypeError('"options" is not an object');
+        }
+        debug("set", options);
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        await (0, load_bindings_1.asyncSet)(this.fd, options);
+      }
+      async get() {
+        debug("get");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        return (0, load_bindings_1.asyncGet)(this.fd);
+      }
+      async getBaudRate() {
+        debug("getBaudRate");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        throw new Error("getBaudRate is not implemented on darwin");
+      }
+      async flush() {
+        debug("flush");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        await (0, load_bindings_1.asyncFlush)(this.fd);
+      }
+      async drain() {
+        debug("drain");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        await this.writeOperation;
+        await (0, load_bindings_1.asyncDrain)(this.fd);
+      }
+    };
+    exports.DarwinPortBinding = DarwinPortBinding;
+  }
+});
+
+// node_modules/@serialport/bindings-cpp/dist/linux-list.js
+var require_linux_list = __commonJS({
+  "node_modules/@serialport/bindings-cpp/dist/linux-list.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.linuxList = void 0;
+    var child_process_1 = require("child_process");
+    var parser_readline_1 = require_dist8();
+    function checkPathOfDevice(path) {
+      return /(tty(S|WCH|ACM|USB|AMA|MFD|O|XRUSB)|rfcomm)/.test(path) && path;
+    }
+    function propName(name) {
+      return {
+        DEVNAME: "path",
+        ID_VENDOR_ENC: "manufacturer",
+        ID_SERIAL_SHORT: "serialNumber",
+        ID_VENDOR_ID: "vendorId",
+        ID_MODEL_ID: "productId",
+        DEVLINKS: "pnpId"
+      }[name.toUpperCase()];
+    }
+    function decodeHexEscape(str) {
+      return str.replace(/\\x([a-fA-F0-9]{2})/g, (a, b) => {
+        return String.fromCharCode(parseInt(b, 16));
+      });
+    }
+    function propVal(name, val) {
+      if (name === "pnpId") {
+        const match = val.match(/\/by-id\/([^\s]+)/);
+        return (match === null || match === void 0 ? void 0 : match[1]) || void 0;
+      }
+      if (name === "manufacturer") {
+        return decodeHexEscape(val);
+      }
+      if (/^0x/.test(val)) {
+        return val.substr(2);
+      }
+      return val;
+    }
+    function linuxList(spawnCmd = child_process_1.spawn) {
+      const ports = [];
+      const udevadm = spawnCmd("udevadm", ["info", "-e"]);
+      const lines = udevadm.stdout.pipe(new parser_readline_1.ReadlineParser());
+      let skipPort = false;
+      let port = {
+        path: "",
+        manufacturer: void 0,
+        serialNumber: void 0,
+        pnpId: void 0,
+        locationId: void 0,
+        vendorId: void 0,
+        productId: void 0
+      };
+      lines.on("data", (line) => {
+        const lineType = line.slice(0, 1);
+        const data = line.slice(3);
+        if (lineType === "P") {
+          port = {
+            path: "",
+            manufacturer: void 0,
+            serialNumber: void 0,
+            pnpId: void 0,
+            locationId: void 0,
+            vendorId: void 0,
+            productId: void 0
+          };
+          skipPort = false;
+          return;
+        }
+        if (skipPort) {
+          return;
+        }
+        if (lineType === "N") {
+          if (checkPathOfDevice(data)) {
+            ports.push(port);
+          } else {
+            skipPort = true;
+          }
+          return;
+        }
+        if (lineType === "E") {
+          const keyValue = data.match(/^(.+)=(.*)/);
+          if (!keyValue) {
+            return;
+          }
+          const key = propName(keyValue[1]);
+          if (!key) {
+            return;
+          }
+          port[key] = propVal(key, keyValue[2]);
+        }
+      });
+      return new Promise((resolve, reject) => {
+        udevadm.on("close", (code) => {
+          if (code) {
+            reject(new Error(`Error listing ports udevadm exited with error code: ${code}`));
+          }
+        });
+        udevadm.on("error", reject);
+        lines.on("error", reject);
+        lines.on("finish", () => resolve(ports));
+      });
+    }
+    exports.linuxList = linuxList;
+  }
+});
+
+// node_modules/@serialport/bindings-cpp/dist/linux.js
+var require_linux = __commonJS({
+  "node_modules/@serialport/bindings-cpp/dist/linux.js"(exports) {
+    "use strict";
+    var __importDefault = exports && exports.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.LinuxPortBinding = exports.LinuxBinding = void 0;
+    var debug_1 = __importDefault(require_src());
+    var linux_list_1 = require_linux_list();
+    var poller_1 = require_poller();
+    var unix_read_1 = require_unix_read();
+    var unix_write_1 = require_unix_write();
+    var load_bindings_1 = require_load_bindings();
+    var debug = (0, debug_1.default)("serialport/bindings-cpp");
+    exports.LinuxBinding = {
+      list() {
+        debug("list");
+        return (0, linux_list_1.linuxList)();
+      },
+      async open(options) {
+        if (!options || typeof options !== "object" || Array.isArray(options)) {
+          throw new TypeError('"options" is not an object');
+        }
+        if (!options.path) {
+          throw new TypeError('"path" is not a valid port');
+        }
+        if (!options.baudRate) {
+          throw new TypeError('"baudRate" is not a valid baudRate');
+        }
+        debug("open");
+        const openOptions = Object.assign({ vmin: 1, vtime: 0, dataBits: 8, lock: true, stopBits: 1, parity: "none", rtscts: false, xon: false, xoff: false, xany: false, hupcl: true }, options);
+        const fd = await (0, load_bindings_1.asyncOpen)(openOptions.path, openOptions);
+        this.fd = fd;
+        return new LinuxPortBinding(fd, openOptions);
+      }
+    };
+    var LinuxPortBinding = class {
+      constructor(fd, openOptions) {
+        this.fd = fd;
+        this.openOptions = openOptions;
+        this.poller = new poller_1.Poller(fd);
+        this.writeOperation = null;
+      }
+      get isOpen() {
+        return this.fd !== null;
+      }
+      async close() {
+        debug("close");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        const fd = this.fd;
+        this.poller.stop();
+        this.poller.destroy();
+        this.fd = null;
+        await (0, load_bindings_1.asyncClose)(fd);
+      }
+      async read(buffer, offset, length) {
+        if (!Buffer.isBuffer(buffer)) {
+          throw new TypeError('"buffer" is not a Buffer');
+        }
+        if (typeof offset !== "number" || isNaN(offset)) {
+          throw new TypeError(`"offset" is not an integer got "${isNaN(offset) ? "NaN" : typeof offset}"`);
+        }
+        if (typeof length !== "number" || isNaN(length)) {
+          throw new TypeError(`"length" is not an integer got "${isNaN(length) ? "NaN" : typeof length}"`);
+        }
+        debug("read");
+        if (buffer.length < offset + length) {
+          throw new Error("buffer is too small");
+        }
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        return (0, unix_read_1.unixRead)({ binding: this, buffer, offset, length });
+      }
+      async write(buffer) {
+        if (!Buffer.isBuffer(buffer)) {
+          throw new TypeError('"buffer" is not a Buffer');
+        }
+        debug("write", buffer.length, "bytes");
+        if (!this.isOpen) {
+          debug("write", "error port is not open");
+          throw new Error("Port is not open");
+        }
+        this.writeOperation = (async () => {
+          if (buffer.length === 0) {
+            return;
+          }
+          await (0, unix_write_1.unixWrite)({ binding: this, buffer });
+          this.writeOperation = null;
+        })();
+        return this.writeOperation;
+      }
+      async update(options) {
+        if (!options || typeof options !== "object" || Array.isArray(options)) {
+          throw TypeError('"options" is not an object');
+        }
+        if (typeof options.baudRate !== "number") {
+          throw new TypeError('"options.baudRate" is not a number');
+        }
+        debug("update");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        await (0, load_bindings_1.asyncUpdate)(this.fd, options);
+      }
+      async set(options) {
+        if (!options || typeof options !== "object" || Array.isArray(options)) {
+          throw new TypeError('"options" is not an object');
+        }
+        debug("set");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        await (0, load_bindings_1.asyncSet)(this.fd, options);
+      }
+      async get() {
+        debug("get");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        return (0, load_bindings_1.asyncGet)(this.fd);
+      }
+      async getBaudRate() {
+        debug("getBaudRate");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        return (0, load_bindings_1.asyncGetBaudRate)(this.fd);
+      }
+      async flush() {
+        debug("flush");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        await (0, load_bindings_1.asyncFlush)(this.fd);
+      }
+      async drain() {
+        debug("drain");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        await this.writeOperation;
+        await (0, load_bindings_1.asyncDrain)(this.fd);
+      }
+    };
+    exports.LinuxPortBinding = LinuxPortBinding;
+  }
+});
+
+// node_modules/@serialport/bindings-cpp/dist/win32-sn-parser.js
+var require_win32_sn_parser = __commonJS({
+  "node_modules/@serialport/bindings-cpp/dist/win32-sn-parser.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.serialNumParser = void 0;
+    var PARSERS = [/USB\\(?:.+)\\(.+)/, /FTDIBUS\\(?:.+)\+(.+?)A?\\.+/];
+    var serialNumParser = (pnpId) => {
+      if (!pnpId) {
+        return null;
+      }
+      for (const parser of PARSERS) {
+        const sn = pnpId.match(parser);
+        if (sn) {
+          return sn[1];
+        }
+      }
+      return null;
+    };
+    exports.serialNumParser = serialNumParser;
+  }
+});
+
+// node_modules/@serialport/bindings-cpp/dist/win32.js
+var require_win32 = __commonJS({
+  "node_modules/@serialport/bindings-cpp/dist/win32.js"(exports) {
+    "use strict";
+    var __importDefault = exports && exports.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.WindowsPortBinding = exports.WindowsBinding = void 0;
+    var debug_1 = __importDefault(require_src());
+    var _1 = require_dist16();
+    var load_bindings_1 = require_load_bindings();
+    var win32_sn_parser_1 = require_win32_sn_parser();
+    var debug = (0, debug_1.default)("serialport/bindings-cpp");
+    exports.WindowsBinding = {
+      async list() {
+        const ports = await (0, load_bindings_1.asyncList)();
+        return ports.map((port) => {
+          if (port.pnpId && !port.serialNumber) {
+            const serialNumber = (0, win32_sn_parser_1.serialNumParser)(port.pnpId);
+            if (serialNumber) {
+              return Object.assign(Object.assign({}, port), { serialNumber });
+            }
+          }
+          return port;
+        });
+      },
+      async open(options) {
+        if (!options || typeof options !== "object" || Array.isArray(options)) {
+          throw new TypeError('"options" is not an object');
+        }
+        if (!options.path) {
+          throw new TypeError('"path" is not a valid port');
+        }
+        if (!options.baudRate) {
+          throw new TypeError('"baudRate" is not a valid baudRate');
+        }
+        debug("open");
+        const openOptions = Object.assign({ dataBits: 8, lock: true, stopBits: 1, parity: "none", rtscts: false, rtsMode: "handshake", xon: false, xoff: false, xany: false, hupcl: true }, options);
+        const fd = await (0, load_bindings_1.asyncOpen)(openOptions.path, openOptions);
+        return new WindowsPortBinding(fd, openOptions);
+      }
+    };
+    var WindowsPortBinding = class {
+      constructor(fd, options) {
+        this.fd = fd;
+        this.openOptions = options;
+        this.writeOperation = null;
+      }
+      get isOpen() {
+        return this.fd !== null;
+      }
+      async close() {
+        debug("close");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        const fd = this.fd;
+        this.fd = null;
+        await (0, load_bindings_1.asyncClose)(fd);
+      }
+      async read(buffer, offset, length) {
+        if (!Buffer.isBuffer(buffer)) {
+          throw new TypeError('"buffer" is not a Buffer');
+        }
+        if (typeof offset !== "number" || isNaN(offset)) {
+          throw new TypeError(`"offset" is not an integer got "${isNaN(offset) ? "NaN" : typeof offset}"`);
+        }
+        if (typeof length !== "number" || isNaN(length)) {
+          throw new TypeError(`"length" is not an integer got "${isNaN(length) ? "NaN" : typeof length}"`);
+        }
+        debug("read");
+        if (buffer.length < offset + length) {
+          throw new Error("buffer is too small");
+        }
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        try {
+          const bytesRead = await (0, load_bindings_1.asyncRead)(this.fd, buffer, offset, length);
+          return { bytesRead, buffer };
+        } catch (err) {
+          if (!this.isOpen) {
+            throw new _1.BindingsError(err.message, { canceled: true });
+          }
+          throw err;
+        }
+      }
+      async write(buffer) {
+        if (!Buffer.isBuffer(buffer)) {
+          throw new TypeError('"buffer" is not a Buffer');
+        }
+        debug("write", buffer.length, "bytes");
+        if (!this.isOpen) {
+          debug("write", "error port is not open");
+          throw new Error("Port is not open");
+        }
+        this.writeOperation = (async () => {
+          if (buffer.length === 0) {
+            return;
+          }
+          await (0, load_bindings_1.asyncWrite)(this.fd, buffer);
+          this.writeOperation = null;
+        })();
+        return this.writeOperation;
+      }
+      async update(options) {
+        if (!options || typeof options !== "object" || Array.isArray(options)) {
+          throw TypeError('"options" is not an object');
+        }
+        if (typeof options.baudRate !== "number") {
+          throw new TypeError('"options.baudRate" is not a number');
+        }
+        debug("update");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        await (0, load_bindings_1.asyncUpdate)(this.fd, options);
+      }
+      async set(options) {
+        if (!options || typeof options !== "object" || Array.isArray(options)) {
+          throw new TypeError('"options" is not an object');
+        }
+        debug("set", options);
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        await (0, load_bindings_1.asyncSet)(this.fd, options);
+      }
+      async get() {
+        debug("get");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        return (0, load_bindings_1.asyncGet)(this.fd);
+      }
+      async getBaudRate() {
+        debug("getBaudRate");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        return (0, load_bindings_1.asyncGetBaudRate)(this.fd);
+      }
+      async flush() {
+        debug("flush");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        await (0, load_bindings_1.asyncFlush)(this.fd);
+      }
+      async drain() {
+        debug("drain");
+        if (!this.isOpen) {
+          throw new Error("Port is not open");
+        }
+        await this.writeOperation;
+        await (0, load_bindings_1.asyncDrain)(this.fd);
+      }
+    };
+    exports.WindowsPortBinding = WindowsPortBinding;
+  }
+});
+
+// node_modules/@serialport/bindings-interface/dist/index.js
+var require_dist15 = __commonJS({
+  "node_modules/@serialport/bindings-interface/dist/index.js"() {
+    "use strict";
+  }
+});
+
+// node_modules/@serialport/bindings-cpp/dist/index.js
+var require_dist16 = __commonJS({
+  "node_modules/@serialport/bindings-cpp/dist/index.js"(exports) {
+    "use strict";
+    var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    } : function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      o[k2] = m[k];
+    });
+    var __exportStar = exports && exports.__exportStar || function(m, exports2) {
+      for (var p in m)
+        if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports2, p))
+          __createBinding(exports2, m, p);
+    };
+    var __importDefault = exports && exports.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.autoDetect = void 0;
+    var debug_1 = __importDefault(require_src());
+    var darwin_1 = require_darwin();
+    var linux_1 = require_linux();
+    var win32_1 = require_win32();
+    var debug = (0, debug_1.default)("serialport/bindings-cpp");
+    __exportStar(require_dist15(), exports);
+    __exportStar(require_darwin(), exports);
+    __exportStar(require_linux(), exports);
+    __exportStar(require_win32(), exports);
+    __exportStar(require_errors(), exports);
+    function autoDetect() {
+      switch (process.platform) {
+        case "win32":
+          debug("loading WindowsBinding");
+          return win32_1.WindowsBinding;
+        case "darwin":
+          debug("loading DarwinBinding");
+          return darwin_1.DarwinBinding;
+        default:
+          debug("loading LinuxBinding");
+          return linux_1.LinuxBinding;
+      }
+    }
+    exports.autoDetect = autoDetect;
+  }
+});
+
+// node_modules/serialport/dist/serialport.js
+var require_serialport = __commonJS({
+  "node_modules/serialport/dist/serialport.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.SerialPort = void 0;
+    var stream_1 = require_dist13();
+    var bindings_cpp_1 = require_dist16();
+    var DetectedBinding = (0, bindings_cpp_1.autoDetect)();
+    var SerialPort = class extends stream_1.SerialPortStream {
+      constructor(options, openCallback) {
+        const opts = {
+          binding: DetectedBinding,
+          ...options
+        };
+        super(opts, openCallback);
+      }
+    };
+    exports.SerialPort = SerialPort;
+    SerialPort.list = DetectedBinding.list;
+    SerialPort.binding = DetectedBinding;
+  }
+});
+
+// node_modules/serialport/dist/index.js
+var require_dist17 = __commonJS({
+  "node_modules/serialport/dist/index.js"(exports) {
+    "use strict";
+    var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      Object.defineProperty(o, k2, { enumerable: true, get: function() {
+        return m[k];
+      } });
+    } : function(o, m, k, k2) {
+      if (k2 === void 0)
+        k2 = k;
+      o[k2] = m[k];
+    });
+    var __exportStar = exports && exports.__exportStar || function(m, exports2) {
+      for (var p in m)
+        if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports2, p))
+          __createBinding(exports2, m, p);
+    };
+    Object.defineProperty(exports, "__esModule", { value: true });
+    __exportStar(require_dist3(), exports);
+    __exportStar(require_dist4(), exports);
+    __exportStar(require_dist5(), exports);
+    __exportStar(require_dist6(), exports);
+    __exportStar(require_dist7(), exports);
+    __exportStar(require_dist8(), exports);
+    __exportStar(require_dist9(), exports);
+    __exportStar(require_dist10(), exports);
+    __exportStar(require_dist11(), exports);
+    __exportStar(require_dist12(), exports);
+    __exportStar(require_serialport_mock(), exports);
+    __exportStar(require_serialport(), exports);
+  }
+});
+
+// node_modules/firmata/lib/encoder7bit.js
 var require_encoder7bit = __commonJS({
-  "node_modules/firmata-io/lib/encoder7bit.js"(exports, module2) {
+  "node_modules/firmata/lib/encoder7bit.js"(exports, module2) {
     "use strict";
     module2.exports = {
       to7BitArray(data) {
@@ -26282,9 +25892,9 @@ var require_encoder7bit = __commonJS({
   }
 });
 
-// node_modules/firmata-io/lib/onewireutils.js
+// node_modules/firmata/lib/onewireutils.js
 var require_onewireutils = __commonJS({
-  "node_modules/firmata-io/lib/onewireutils.js"(exports, module2) {
+  "node_modules/firmata/lib/onewireutils.js"(exports, module2) {
     "use strict";
     var Encoder7Bit = require_encoder7bit();
     var OneWireUtils = {
@@ -26323,9 +25933,9 @@ var require_onewireutils = __commonJS({
   }
 });
 
-// node_modules/firmata-io/lib/firmata.js
-var require_firmata = __commonJS({
-  "node_modules/firmata-io/lib/firmata.js"(exports, module2) {
+// node_modules/firmata/lib/firmata-io.js
+var require_firmata_io = __commonJS({
+  "node_modules/firmata/lib/firmata-io.js"(exports, module2) {
     "use strict";
     var Emitter = require("events");
     var Encoder7Bit = require_encoder7bit();
@@ -26597,7 +26207,8 @@ var require_firmata = __commonJS({
           samplingInterval: 19,
           serialport: {
             baudRate: 57600,
-            highWaterMark: 256
+            highWaterMark: 256,
+            path: port
           }
         };
         const settings = Object.assign({}, defaults, options);
@@ -26695,10 +26306,10 @@ var require_firmata = __commonJS({
           if (!Transport) {
             throw new Error("Missing Default Transport");
           }
-          this.transport = new Transport(port, settings.serialport);
+          this.transport = new Transport(settings.serialport);
         }
         this.transport.on("close", (event) => {
-          if (event && event.disconnect && event.disconnected) {
+          if (event && event.disconnected) {
             this.emit("disconnect");
             return;
           }
@@ -26811,11 +26422,7 @@ var require_firmata = __commonJS({
       }
       queryFirmware(callback) {
         this.once("queryfirmware", callback);
-        writeToTransport(this, [
-          START_SYSEX,
-          QUERY_FIRMWARE,
-          END_SYSEX
-        ]);
+        writeToTransport(this, [START_SYSEX, QUERY_FIRMWARE, END_SYSEX]);
       }
       analogRead(pin, callback) {
         this.reportAnalogPin(pin, 1);
@@ -26843,11 +26450,7 @@ var require_firmata = __commonJS({
           }
           data[data.length] = END_SYSEX;
         } else {
-          data = [
-            ANALOG_MESSAGE | pin,
-            value & 127,
-            value >> 7 & 127
-          ];
+          data = [ANALOG_MESSAGE | pin, value & 127, value >> 7 & 127];
         }
         writeToTransport(this, data);
       }
@@ -26887,11 +26490,7 @@ var require_firmata = __commonJS({
           this.pins[this.analogPins[pin]].mode = mode;
         } else {
           this.pins[pin].mode = mode;
-          writeToTransport(this, [
-            PIN_MODE,
-            pin,
-            mode
-          ]);
+          writeToTransport(this, [PIN_MODE, pin, mode]);
         }
       }
       digitalWrite(pin, value, enqueue) {
@@ -26934,28 +26533,15 @@ var require_firmata = __commonJS({
       }
       queryCapabilities(callback) {
         this.once("capability-query", callback);
-        writeToTransport(this, [
-          START_SYSEX,
-          CAPABILITY_QUERY,
-          END_SYSEX
-        ]);
+        writeToTransport(this, [START_SYSEX, CAPABILITY_QUERY, END_SYSEX]);
       }
       queryAnalogMapping(callback) {
         this.once("analog-mapping-query", callback);
-        writeToTransport(this, [
-          START_SYSEX,
-          ANALOG_MAPPING_QUERY,
-          END_SYSEX
-        ]);
+        writeToTransport(this, [START_SYSEX, ANALOG_MAPPING_QUERY, END_SYSEX]);
       }
       queryPinState(pin, callback) {
         this.once(`pin-state-${pin}`, callback);
-        writeToTransport(this, [
-          START_SYSEX,
-          PIN_STATE_QUERY,
-          pin,
-          END_SYSEX
-        ]);
+        writeToTransport(this, [START_SYSEX, PIN_STATE_QUERY, pin, END_SYSEX]);
       }
       sendString(string) {
         const bytes = Buffer.from(`${string}\0`, "utf8");
@@ -27015,12 +26601,7 @@ var require_firmata = __commonJS({
         i2cRequest(this, data);
       }
       i2cWrite(address, registerOrData, inBytes) {
-        const data = [
-          START_SYSEX,
-          I2C_REQUEST,
-          address,
-          this.I2C_MODES.WRITE << 3
-        ];
+        const data = [START_SYSEX, I2C_REQUEST, address, this.I2C_MODES.WRITE << 3];
         if (arguments.length === 3 && !Array.isArray(registerOrData) && !Array.isArray(inBytes)) {
           return this.i2cWriteReg(address, registerOrData, inBytes);
         }
@@ -27118,12 +26699,7 @@ var require_firmata = __commonJS({
           bytesToRead = register;
           register = null;
         }
-        const data = [
-          START_SYSEX,
-          I2C_REQUEST,
-          address,
-          this.I2C_MODES.READ << 3
-        ];
+        const data = [START_SYSEX, I2C_REQUEST, address, this.I2C_MODES.READ << 3];
         let event = `I2C-reply-${address}-`;
         if (register !== null) {
           data.push(register & 127, register >> 7 & 127);
@@ -27153,13 +26729,7 @@ var require_firmata = __commonJS({
         this[SYM_sendOneWireSearch](ONEWIRE_SEARCH_ALARMS_REQUEST, `1-wire-search-alarms-reply-${pin}`, pin, callback);
       }
       [SYM_sendOneWireSearch](type, event, pin, callback) {
-        writeToTransport(this, [
-          START_SYSEX,
-          ONEWIRE_DATA,
-          type,
-          pin,
-          END_SYSEX
-        ]);
+        writeToTransport(this, [START_SYSEX, ONEWIRE_DATA, type, pin, END_SYSEX]);
         const timeout = setTimeout(() => {
           callback(new Error("1-Wire device search timeout - are you running ConfigurableFirmata?"));
         }, 5e3);
@@ -27252,32 +26822,21 @@ var require_firmata = __commonJS({
       reportAnalogPin(pin, value) {
         if (value === 0 || value === 1) {
           this.pins[this.analogPins[pin]].report = value;
-          writeToTransport(this, [
-            REPORT_ANALOG | pin,
-            value
-          ]);
+          writeToTransport(this, [REPORT_ANALOG | pin, value]);
         }
       }
       reportDigitalPin(pin, value) {
         const port = pin >> 3;
         if (value === 0 || value === 1) {
           this.pins[pin].report = value;
-          writeToTransport(this, [
-            REPORT_DIGITAL | port,
-            value
-          ]);
+          writeToTransport(this, [REPORT_DIGITAL | port, value]);
         }
       }
       pingRead(options, callback) {
         if (!this.pins[options.pin].supportedModes.includes(PING_READ)) {
           throw new Error("Please upload PingFirmata to the board");
         }
-        const {
-          pin,
-          value,
-          pulseOut = 0,
-          timeout = 1e6
-        } = options;
+        const { pin, value, pulseOut = 0, timeout = 1e6 } = options;
         writeToTransport(this, [
           START_SYSEX,
           PING_READ,
@@ -27551,11 +27110,7 @@ var require_firmata = __commonJS({
         writeToTransport(this, data);
       }
       serialWrite(portId, bytes) {
-        const data = [
-          START_SYSEX,
-          SERIAL_MESSAGE,
-          SERIAL_WRITE | portId
-        ];
+        const data = [START_SYSEX, SERIAL_MESSAGE, SERIAL_WRITE | portId];
         for (let i = 0, len = bytes.length; i < len; i++) {
           data.push(bytes[i] & 127, bytes[i] >> 7 & 127);
         }
@@ -27633,11 +27188,7 @@ var require_firmata = __commonJS({
         if (!message || !message.length) {
           throw new Error("Sysex Command cannot be empty");
         }
-        writeToTransport(this, [
-          START_SYSEX,
-          ...message.slice(),
-          END_SYSEX
-        ]);
+        writeToTransport(this, [START_SYSEX, ...message.slice(), END_SYSEX]);
         return this;
       }
       reset() {
@@ -27838,7 +27389,7 @@ var require_com = __commonJS({
       if (process.env.IS_TEST_MODE) {
         com = TransportStub;
       } else {
-        SerialPort = require_lib11();
+        SerialPort = require_dist17().SerialPort;
         com = SerialPort;
       }
     } catch (err) {
@@ -27860,10 +27411,10 @@ var require_com = __commonJS({
 });
 
 // node_modules/firmata/lib/firmata.js
-var require_firmata2 = __commonJS({
+var require_firmata = __commonJS({
   "node_modules/firmata/lib/firmata.js"(exports, module2) {
     "use strict";
-    module2.exports = require_firmata()(require_com());
+    module2.exports = require_firmata_io()(require_com());
   }
 });
 
@@ -29448,11 +28999,10 @@ var require_board = __commonJS({
       detect(callback) {
         const maxAttempts = 10;
         const retryDelay = 400;
-        let serialport;
         if (parseFloat(process.versions.nw) >= 0.13) {
           serialport = require_browser_serialport();
         } else {
-          serialport = require_lib11();
+          serialport = require_dist17().SerialPort;
         }
         serialport.list().then((results) => {
           const portPaths = results.reduce((accum, result) => {
@@ -29491,7 +29041,7 @@ var require_board = __commonJS({
         });
       },
       connect(portOrPath, callback) {
-        const IO = require_firmata2().Board;
+        const IO = require_firmata().Board;
         let caught = null;
         let io2;
         let isConnected;
@@ -29775,12 +29325,7 @@ var require_board = __commonJS({
       }
     };
     var logging = {
-      specials: [
-        "error",
-        "fail",
-        "warn",
-        "info"
-      ],
+      specials: ["error", "fail", "warn", "info"],
       colors: {
         log: "white",
         error: "red",
@@ -38069,11 +37614,12 @@ var require_conversions2 = __commonJS({
   "node_modules/color-convert/conversions.js"(exports, module2) {
     var cssKeywords = require_css_keywords();
     var reverseKeywords = {};
-    for (var key in cssKeywords) {
+    for (key in cssKeywords) {
       if (cssKeywords.hasOwnProperty(key)) {
         reverseKeywords[cssKeywords[key].join()] = key;
       }
     }
+    var key;
     var convert = module2.exports = {
       rgb: { channels: 3 },
       hsl: { channels: 3 },
@@ -38089,7 +37635,7 @@ var require_conversions2 = __commonJS({
       ansi256: { channels: 1 },
       hcg: { channels: 3 }
     };
-    for (var model in convert) {
+    for (model in convert) {
       if (convert.hasOwnProperty(model)) {
         if (!("channels" in convert[model])) {
           throw new Error("missing channels property: " + model);
@@ -38100,6 +37646,7 @@ var require_conversions2 = __commonJS({
       }
     }
     var channels;
+    var model;
     convert.rgb.hsl = function(rgb) {
       var r = rgb[0] / 255;
       var g = rgb[1] / 255;
@@ -46359,16 +45906,18 @@ var require_errorcode = __commonJS({
     var GF256_BASE = 285;
     var EXP_TABLE = [1];
     var LOG_TABLE = [];
-    for (var i = 1; i < 256; i++) {
+    for (i = 1; i < 256; i++) {
       n = EXP_TABLE[i - 1] << 1;
       if (n > 255)
         n = n ^ GF256_BASE;
       EXP_TABLE[i] = n;
     }
     var n;
-    for (var i = 0; i < 255; i++) {
+    var i;
+    for (i = 0; i < 255; i++) {
       LOG_TABLE[EXP_TABLE[i]] = i;
     }
+    var i;
     function exp(k) {
       while (k < 0)
         k += 255;
@@ -46934,7 +46483,7 @@ var require_crc32buffer = __commonJS({
   "node_modules/qr-image/lib/crc32buffer.js"(exports, module2) {
     "use strict";
     var crc_table = [];
-    for (var n = 0; n < 256; n++) {
+    for (n = 0; n < 256; n++) {
       c = crc_table[n] = new Buffer(4);
       c.writeUInt32BE(n, 0);
       for (k = 0; k < 8; k++) {
@@ -46954,6 +46503,7 @@ var require_crc32buffer = __commonJS({
     var b2;
     var b3;
     var k;
+    var n;
     function update(c2, buf) {
       var l = buf.length;
       for (var n2 = 0; n2 < l; n2++) {
@@ -48064,7 +47614,7 @@ __export(exports, {
 });
 
 // node_modules/socket.io/wrapper.mjs
-var import_dist = __toModule(require_dist3());
+var import_dist = __toModule(require_dist2());
 var { Server, Namespace, Socket } = import_dist.default;
 
 // src/BlokdotsSocketIOServer/BlokdotsSocketIOServer.js
@@ -48979,6 +48529,7 @@ object-assign
 /*!
  * mime-db
  * Copyright(c) 2014 Jonathan Ong
+ * Copyright(c) 2015-2022 Douglas Christopher Wilson
  * MIT Licensed
  */
 /*!
