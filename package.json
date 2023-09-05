@@ -1,6 +1,6 @@
 {
   "name": "@blokdots/components",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "blokdots Virtual Components to use in your projects.",
   "main": "dist/index.js",
   "scripts": {
