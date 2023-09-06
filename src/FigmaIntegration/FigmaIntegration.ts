@@ -58,7 +58,7 @@ class FigmaIntegration extends EventEmitter {
     this.sendReaction({
       target: parameters.layer,
       reaction: "rotate",
-      parameters: { value: parameters.value, relation: parameters.relation },
+      parameters: { value: parameters.value, relation: parameters.relation, origin: "center" },
       timestamp: Date.now(),
     });
   }
