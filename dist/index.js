@@ -4001,6 +4001,9 @@ var Encoder_default = Encoder;
 // src/FigmaIntegration/FigmaIntegration.ts
 var EventEmitter3 = require("events");
 var INTEGRATION_NAME = "figma";
+var toRadians = (degrees) => {
+  return degrees * Math.PI / 180;
+};
 var FigmaIntegration = class extends EventEmitter3 {
   constructor() {
     super();
@@ -4078,6 +4081,18 @@ var FigmaIntegration = class extends EventEmitter3 {
       target: parameters.layer,
       reaction: "setColor",
       parameters: { value: parameters.value },
+      timestamp: Date.now()
+    });
+  }
+  setArc(parameters) {
+    this.sendReaction({
+      target: parameters.layer,
+      reaction: "setArc",
+      parameters: {
+        startingAngle: parameters.startingAngle && toRadians(parameters.startingAngle),
+        endingAngle: parameters.endingAngle && toRadians(parameters.endingAngle),
+        relation: parameters.relation
+      },
       timestamp: Date.now()
     });
   }
