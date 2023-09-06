@@ -1,7 +1,7 @@
 declare const EventEmitter: any;
 export type ReactionMessage = {
     target: string;
-    reaction: "rotate" | "setText" | "setPosition" | "setRotation" | "setSize" | "setOpacity" | "setColor";
+    reaction: "rotate" | "setText" | "setPosition" | "setRotation" | "setSize" | "setOpacity" | "setColor" | "setArc";
     parameters: any;
     timestamp: number;
 };
@@ -37,6 +37,12 @@ declare class FigmaIntegration extends EventEmitter {
     setColor(parameters: {
         layer: string;
         value: string;
+    }): void;
+    setArc(parameters: {
+        layer: string;
+        startingAngle: number;
+        endingAngle: number;
+        relation: string;
     }): void;
 }
 export default FigmaIntegration;

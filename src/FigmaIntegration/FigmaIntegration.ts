@@ -13,9 +13,14 @@ export type ReactionMessage = {
     | "setRotation"
     | "setSize"
     | "setOpacity"
-    | "setColor";
+    | "setColor"
+    | "setArc";
   parameters: any;
   timestamp: number;
+};
+
+const toRadians = (degrees: number) => {
+  return (degrees * Math.PI) / 180;
 };
 
 class FigmaIntegration extends EventEmitter {
@@ -53,7 +58,7 @@ class FigmaIntegration extends EventEmitter {
     this.sendReaction({
       target: parameters.layer,
       reaction: "rotate",
-      parameters: { value: parameters.value, relation: parameters.relation },
+      parameters: { value: parameters.value, relation: parameters.relation, origin: "center" },
       timestamp: Date.now(),
     });
   }
@@ -117,6 +122,26 @@ class FigmaIntegration extends EventEmitter {
       target: parameters.layer,
       reaction: "setColor",
       parameters: { value: parameters.value },
+      timestamp: Date.now(),
+    });
+  }
+
+  setArc(parameters: {
+    layer: string;
+    startingAngle: number;
+    endingAngle: number;
+    relation: string;
+  }) {
+    this.sendReaction({
+      target: parameters.layer,
+      reaction: "setArc",
+      parameters: {
+        startingAngle:
+          parameters.startingAngle && toRadians(parameters.startingAngle),
+        endingAngle:
+          parameters.endingAngle && toRadians(parameters.endingAngle),
+        relation: parameters.relation,
+      },
       timestamp: Date.now(),
     });
   }
