@@ -1,4 +1,6 @@
-declare const EventEmitter: any;
+/// <reference types="node" />
+import EventEmitter from "events";
+import { BlokdotsSocketIOServer, Integration } from "../BlokdotsSocketIOServer";
 export type ReactionMessage = {
     target: string;
     reaction: "rotate" | "setText" | "setPosition" | "setRotation" | "setSize" | "setOpacity" | "setColor";
@@ -6,6 +8,8 @@ export type ReactionMessage = {
     timestamp: number;
 };
 declare class FigmaIntegration extends EventEmitter {
+    server?: BlokdotsSocketIOServer;
+    integration?: Integration;
     constructor();
     sendReaction(message: ReactionMessage, shouldEmitSentReaction?: boolean): void;
     cleanUp(): void;

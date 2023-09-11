@@ -1,7 +1,6 @@
 /// <reference types="node" />
-import * as socket_io_dist_typed_events from 'socket.io/dist/typed-events';
 import { Namespace, Server, Socket, DisconnectReason } from 'socket.io';
-import EventEmitter$1 from 'events';
+import EventEmitter from 'events';
 import five, { Board } from 'johnny-five';
 import pixel from 'node-pixel';
 import Oled, { Color, Pixel } from 'oled-js';
@@ -45,15 +44,7 @@ declare class BlokdotsSocketIOServer {
         handlers?: Array<Handler>;
         onClientConnect?: OnClientConnectListener;
         onClientDisconnect?: OnClientDisconnectListener;
-    }): {
-        connections: number;
-        id: string;
-        url: string;
-        handlers: Handler[];
-        onClientConnect: OnClientConnectListener[];
-        onClientDisconnect: OnClientDisconnectListener[];
-        ioNamespace: Namespace<socket_io_dist_typed_events.DefaultEventsMap, socket_io_dist_typed_events.DefaultEventsMap, socket_io_dist_typed_events.DefaultEventsMap, any>;
-    } | undefined;
+    }): Integration | undefined;
     unregisterIntegration({ integrationName, handlers, onClientConnect, onClientDisconnect, }: {
         integrationName: string;
         handlers?: Array<Handler>;
@@ -63,7 +54,7 @@ declare class BlokdotsSocketIOServer {
 }
 declare const getBlokdotsSocketIOServer: () => Promise<BlokdotsSocketIOServer>;
 
-declare class Counter extends EventEmitter$1 {
+declare class Counter extends EventEmitter {
     value: number;
     constructor(initialValue?: number);
     countUp(): void;
@@ -71,7 +62,7 @@ declare class Counter extends EventEmitter$1 {
     setCountTo(value: number): void;
 }
 
-declare class Encoder extends EventEmitter$1 {
+declare class Encoder extends EventEmitter {
     value: number;
     waveform: string;
     waveformTimeout?: NodeJS.Timeout;
@@ -87,7 +78,6 @@ declare class Encoder extends EventEmitter$1 {
     cleanUp(): void;
 }
 
-declare const EventEmitter: any;
 type ReactionMessage = {
     target: string;
     reaction: "rotate" | "setText" | "setPosition" | "setRotation" | "setSize" | "setOpacity" | "setColor";
@@ -95,6 +85,8 @@ type ReactionMessage = {
     timestamp: number;
 };
 declare class FigmaIntegration extends EventEmitter {
+    server?: BlokdotsSocketIOServer;
+    integration?: Integration;
     constructor();
     sendReaction(message: ReactionMessage, shouldEmitSentReaction?: boolean): void;
     cleanUp(): void;
@@ -140,7 +132,7 @@ declare class HapticLabs {
     });
 }
 
-declare class InvertableSensor extends EventEmitter$1 {
+declare class InvertableSensor extends EventEmitter {
     j5Object: five.Sensor;
     invert: boolean;
     constructor({ invert, pin, board, threshold, ...componentProps }: {
@@ -158,7 +150,7 @@ type JoystickValue = {
     y: number;
     pressed: boolean;
 };
-declare class Joystick extends EventEmitter$1 {
+declare class Joystick extends EventEmitter {
     j5Object: five.Joystick;
     invertX: boolean;
     invertY: boolean;
@@ -184,7 +176,7 @@ declare class LEDStrip extends pixel.Strip {
     });
 }
 
-declare class Metronome extends EventEmitter$1 {
+declare class Metronome extends EventEmitter {
     frequency: number;
     interval?: NodeJS.Timeout;
     constructor(frequency?: number);
@@ -219,13 +211,13 @@ declare const addTextToBuffer: (text: {
     string: string;
 }[], buffer?: Color[]) => Color[];
 
-declare class SignalTower extends EventEmitter$1 {
+declare class SignalTower extends EventEmitter {
     value: any;
     constructor();
     send(message: any): void;
 }
 
-declare class SocketIOIntegration extends EventEmitter$1 {
+declare class SocketIOIntegration extends EventEmitter {
     integrationName: string;
     messageEventName: string;
     format: {
@@ -249,10 +241,11 @@ declare class SocketIOIntegration extends EventEmitter$1 {
     cleanUp(): void;
 }
 
-declare class Timer extends EventEmitter$1 {
+declare class Timer extends EventEmitter {
     value: number;
     interval?: NodeJS.Timeout;
     constructor(value?: number);
+    startInterval(): void;
     start(): void;
     stop(): void;
     reset(): void;

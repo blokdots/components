@@ -1,6 +1,9 @@
-import { default as getBlokdotsSocketIOServer } from "../BlokdotsSocketIOServer";
-
-const EventEmitter = require("events");
+import EventEmitter from "events";
+import {
+  BlokdotsSocketIOServer,
+  Integration,
+  default as getBlokdotsSocketIOServer,
+} from "../BlokdotsSocketIOServer";
 
 const INTEGRATION_NAME = "figma";
 
@@ -19,11 +22,14 @@ export type ReactionMessage = {
 };
 
 class FigmaIntegration extends EventEmitter {
+  server?: BlokdotsSocketIOServer;
+  integration?: Integration;
+
   constructor() {
     super();
 
-    this.server = null;
-    this.integration = null;
+    this.server;
+    this.integration;
 
     getBlokdotsSocketIOServer().then((server) => {
       this.server = server;
@@ -36,6 +42,11 @@ class FigmaIntegration extends EventEmitter {
   sendReaction(message: ReactionMessage, shouldEmitSentReaction = true) {
     this.emit("reaction", message);
 
+    if (!this.integration) {
+      console.error("Integration not initialized");
+      return;
+    }
+
     this.integration.ioNamespace.emit("reaction", message);
 
     if (shouldEmitSentReaction) {
@@ -44,7 +55,7 @@ class FigmaIntegration extends EventEmitter {
   }
 
   cleanUp() {
-    this.server.unregisterIntegration({
+    this.server?.unregisterIntegration({
       integrationName: INTEGRATION_NAME,
     });
   }
