@@ -38,15 +38,7 @@ export declare class BlokdotsSocketIOServer {
         handlers?: Array<Handler>;
         onClientConnect?: OnClientConnectListener;
         onClientDisconnect?: OnClientDisconnectListener;
-    }): {
-        connections: number;
-        id: string;
-        url: string;
-        handlers: Handler[];
-        onClientConnect: OnClientConnectListener[];
-        onClientDisconnect: OnClientDisconnectListener[];
-        ioNamespace: Namespace<import("socket.io/dist/typed-events").DefaultEventsMap, import("socket.io/dist/typed-events").DefaultEventsMap, import("socket.io/dist/typed-events").DefaultEventsMap, any>;
-    } | undefined;
+    }): Integration | undefined;
     unregisterIntegration({ integrationName, handlers, onClientConnect, onClientDisconnect, }: {
         integrationName: string;
         handlers?: Array<Handler>;

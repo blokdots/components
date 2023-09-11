@@ -3999,13 +3999,13 @@ var Encoder = class extends import_events2.default {
 var Encoder_default = Encoder;
 
 // src/FigmaIntegration/FigmaIntegration.ts
-var EventEmitter3 = require("events");
+var import_events3 = __toESM(require("events"));
 var INTEGRATION_NAME = "figma";
-var FigmaIntegration = class extends EventEmitter3 {
+var FigmaIntegration = class extends import_events3.default {
   constructor() {
     super();
-    this.server = null;
-    this.integration = null;
+    this.server;
+    this.integration;
     BlokdotsSocketIOServer_default().then((server) => {
       this.server = server;
       this.integration = server.registerIntegration({
@@ -4015,13 +4015,18 @@ var FigmaIntegration = class extends EventEmitter3 {
   }
   sendReaction(message, shouldEmitSentReaction = true) {
     this.emit("reaction", message);
+    if (!this.integration) {
+      console.error("Integration not initialized");
+      return;
+    }
     this.integration.ioNamespace.emit("reaction", message);
     if (shouldEmitSentReaction) {
       this.emit("sentReaction", message);
     }
   }
   cleanUp() {
-    this.server.unregisterIntegration({
+    var _a;
+    (_a = this.server) == null ? void 0 : _a.unregisterIntegration({
       integrationName: INTEGRATION_NAME
     });
   }
@@ -4110,9 +4115,9 @@ var HapticLabs = class {
 var HapticLabs_default = HapticLabs;
 
 // src/InvertableSensor/InvertableSensor.ts
-var import_events3 = __toESM(require("events"));
+var import_events4 = __toESM(require("events"));
 var import_johnny_five3 = __toESM(require("johnny-five"));
-var InvertableSensor = class extends import_events3.default {
+var InvertableSensor = class extends import_events4.default {
   constructor(_a) {
     var _b = _a, {
       invert = false,
@@ -4150,9 +4155,9 @@ var InvertableSensor = class extends import_events3.default {
 var InvertableSensor_default = InvertableSensor;
 
 // src/Joystick/Joystick.ts
-var import_events4 = __toESM(require("events"));
+var import_events5 = __toESM(require("events"));
 var import_johnny_five4 = __toESM(require("johnny-five"));
-var Joystick = class extends import_events4.default {
+var Joystick = class extends import_events5.default {
   constructor({
     slot,
     board,
@@ -4217,8 +4222,8 @@ var LEDStrip = class extends import_node_pixel.default.Strip {
 var LEDStrip_default = LEDStrip;
 
 // src/Metronome/Metronome.ts
-var import_events5 = __toESM(require("events"));
-var Metronome = class extends import_events5.default {
+var import_events6 = __toESM(require("events"));
+var Metronome = class extends import_events6.default {
   constructor(frequency = 1e3) {
     super();
     this.frequency = frequency;
@@ -4477,8 +4482,8 @@ var coordsToIndex = (col, row) => {
 var OLED_default = OLED;
 
 // src/SignalTower/SignalTower.ts
-var import_events6 = __toESM(require("events"));
-var SignalTower = class extends import_events6.default {
+var import_events7 = __toESM(require("events"));
+var SignalTower = class extends import_events7.default {
   constructor() {
     super();
     this.value = void 0;
@@ -4491,8 +4496,8 @@ var SignalTower = class extends import_events6.default {
 var SignalTower_default = SignalTower;
 
 // src/SocketIOIntegration/SocketIOIntegration.ts
-var import_events7 = __toESM(require("events"));
-var SocketIOIntegration = class extends import_events7.default {
+var import_events8 = __toESM(require("events"));
+var SocketIOIntegration = class extends import_events8.default {
   constructor(integrationName = "blokdots", messageEventName = "blokdots", format = { message: "msg", value: "val" }) {
     super();
     this.integrationName = integrationName;
@@ -4552,8 +4557,8 @@ var SocketIOIntegration = class extends import_events7.default {
 var SocketIOIntegration_default = SocketIOIntegration;
 
 // src/Timer/Timer.ts
-var import_events8 = __toESM(require("events"));
-var Timer = class extends import_events8.default {
+var import_events9 = __toESM(require("events"));
+var Timer = class extends import_events9.default {
   constructor(value = 0) {
     super();
     this.value = value;

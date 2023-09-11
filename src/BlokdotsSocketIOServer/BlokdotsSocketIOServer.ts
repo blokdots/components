@@ -163,7 +163,7 @@ export class BlokdotsSocketIOServer {
     handlers?: Array<Handler>;
     onClientConnect?: OnClientConnectListener;
     onClientDisconnect?: OnClientDisconnectListener;
-  }) {
+  }): Integration | undefined {
     if (!this.io) return;
 
     let integration = this.activeIntegrations[integrationName];
