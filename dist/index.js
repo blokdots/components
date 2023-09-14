@@ -3810,15 +3810,20 @@ var BlokdotsSocketIOServer = class {
       return;
     let integration = this.activeIntegrations[integrationName];
     if (integration) {
+      console.log("adding handlers to existing namespace", integrationName);
       integration.handlers = integration.handlers.concat(handlers);
       onClientConnect && integration.onClientConnect.push(onClientConnect);
       onClientDisconnect && integration.onClientDisconnect.push(onClientDisconnect);
       for (let [, socket] of integration.ioNamespace.sockets) {
         handlers.forEach(({ eventName, callback }) => {
           socket.on(eventName, callback);
+          socket.onAny((eventName2, ...args) => {
+            console.log("onAny", eventName2, args);
+          });
         });
       }
     } else {
+      console.log("creating new namespace", integrationName);
       this.activeIntegrations[integrationName] = {
         id: integrationName,
         url: `${getBlokdotsSocketIOServerAddress()}/${integrationName}`,
@@ -4013,16 +4018,14 @@ var FigmaIntegration = class extends import_events3.default {
       });
     });
   }
-  sendReaction(message, shouldEmitSentReaction = true) {
+  sendReaction(message) {
+    console.log("sendReaction", message);
     this.emit("reaction", message);
     if (!this.integration) {
       console.error("Integration not initialized");
       return;
     }
     this.integration.ioNamespace.emit("reaction", message);
-    if (shouldEmitSentReaction) {
-      this.emit("sentReaction", message);
-    }
   }
   cleanUp() {
     var _a;
@@ -4031,6 +4034,7 @@ var FigmaIntegration = class extends import_events3.default {
     });
   }
   rotate(parameters) {
+    console.log("rotate", parameters);
     this.sendReaction({
       target: parameters.layer,
       reaction: "rotate",
