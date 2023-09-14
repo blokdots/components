@@ -1,14 +1,14 @@
 import EventEmitter from "events";
 
 class SignalTower extends EventEmitter {
-  value: any;
+  value?: string;
 
   constructor() {
     super();
     this.value = undefined;
   }
 
-  send(message: any) {
+  send(message: string) {
     this.value = message;
     this.emit("send", this.value);
   }

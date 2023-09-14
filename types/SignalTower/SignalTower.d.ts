@@ -1,8 +1,8 @@
 /// <reference types="node" />
 import EventEmitter from "events";
 declare class SignalTower extends EventEmitter {
-    value: any;
+    value?: string;
     constructor();
-    send(message: any): void;
+    send(message: string): void;
 }
 export default SignalTower;
