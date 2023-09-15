@@ -120,7 +120,7 @@ class FigmaIntegration extends EventEmitter {
       return;
     }
 
-    this.integration.ioNamespace.emit("reaction", message);
+    this.integration.emit("reaction", message);
   }
 
   cleanUp() {
