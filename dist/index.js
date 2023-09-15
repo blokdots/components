@@ -3810,25 +3810,31 @@ var BlokdotsSocketIOServer = class {
       return;
     let integration = this.activeIntegrations[integrationName];
     if (integration) {
-      console.log("adding handlers to existing namespace", integrationName);
       integration.handlers = integration.handlers.concat(handlers);
       onClientConnect && integration.onClientConnect.push(onClientConnect);
       onClientDisconnect && integration.onClientDisconnect.push(onClientDisconnect);
       for (let [, socket] of integration.ioNamespace.sockets) {
         handlers.forEach(({ eventName, callback }) => {
           socket.on(eventName, callback);
-          socket.onAny((eventName2, ...args) => {
-            console.log("onAny", eventName2, args);
-          });
         });
       }
     } else {
-      console.log("creating new namespace", integrationName);
       this.activeIntegrations[integrationName] = {
         id: integrationName,
         url: `${getBlokdotsSocketIOServerAddress()}/${integrationName}`,
         handlers: [...handlers],
         ioNamespace: this.io.of("/" + integrationName),
+        emit: (event, data) => {
+          var _a;
+          (_a = this.io) == null ? void 0 : _a.of("/" + integrationName).emit(event, data);
+          this.activeIntegrations[integrationName].handlers.forEach(
+            ({ eventName, callback }) => {
+              if (eventName === event) {
+                callback(data);
+              }
+            }
+          );
+        },
         onClientConnect: onClientConnect ? [onClientConnect] : [],
         onClientDisconnect: onClientDisconnect ? [onClientDisconnect] : [],
         connections: 0
@@ -4025,7 +4031,7 @@ var FigmaIntegration = class extends import_events3.default {
       console.error("Integration not initialized");
       return;
     }
-    this.integration.ioNamespace.emit("reaction", message);
+    this.integration.emit("reaction", message);
   }
   cleanUp() {
     var _a;
@@ -4537,7 +4543,7 @@ var SocketIOIntegration = class extends import_events8.default {
     if (!message.direction)
       message.direction = "out";
     this.emit("send", message);
-    (_a = this.integration) == null ? void 0 : _a.ioNamespace.emit(this.messageEventName, {
+    (_a = this.integration) == null ? void 0 : _a.emit(this.messageEventName, {
       [this.format.message]: message.message,
       [this.format.value]: message.value
     });

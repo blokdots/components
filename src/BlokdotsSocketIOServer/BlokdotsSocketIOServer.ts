@@ -47,6 +47,7 @@ export interface Integration {
   onClientConnect: Array<OnClientConnectListener>;
   onClientDisconnect: Array<OnClientDisconnectListener>;
   ioNamespace: Namespace;
+  emit: (event: string, data: any) => void;
 }
 
 type IntegrationInfo = Omit<
@@ -189,6 +190,16 @@ export class BlokdotsSocketIOServer {
         url: `${getBlokdotsSocketIOServerAddress()}/${integrationName}`,
         handlers: [...handlers],
         ioNamespace: this.io.of("/" + integrationName),
+        emit: (event: string, data: any) => {
+          this.io?.of("/" + integrationName).emit(event, data);
+          this.activeIntegrations[integrationName].handlers.forEach(
+            ({ eventName, callback }) => {
+              if (eventName === event) {
+                callback(data);
+              }
+            }
+          );
+        },
         onClientConnect: onClientConnect ? [onClientConnect] : [],
         onClientDisconnect: onClientDisconnect ? [onClientDisconnect] : [],
         connections: 0,
