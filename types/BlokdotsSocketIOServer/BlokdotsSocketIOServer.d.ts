@@ -22,6 +22,7 @@ export interface Integration {
     onClientConnect: Array<OnClientConnectListener>;
     onClientDisconnect: Array<OnClientDisconnectListener>;
     ioNamespace: Namespace;
+    emit: (event: string, data: any) => void;
 }
 export declare class BlokdotsSocketIOServer {
     io: Server | null;

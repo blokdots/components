@@ -1,39 +1,10 @@
 "use strict";
 var __create = Object.create;
 var __defProp = Object.defineProperty;
-var __defProps = Object.defineProperties;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
 var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __propIsEnum = Object.prototype.propertyIsEnumerable;
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __spreadValues = (a, b) => {
-  for (var prop in b ||= {})
-    if (__hasOwnProp.call(b, prop))
-      __defNormalProp(a, prop, b[prop]);
-  if (__getOwnPropSymbols)
-    for (var prop of __getOwnPropSymbols(b)) {
-      if (__propIsEnum.call(b, prop))
-        __defNormalProp(a, prop, b[prop]);
-    }
-  return a;
-};
-var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
-var __objRest = (source, exclude) => {
-  var target = {};
-  for (var prop in source)
-    if (__hasOwnProp.call(source, prop) && exclude.indexOf(prop) < 0)
-      target[prop] = source[prop];
-  if (source != null && __getOwnPropSymbols)
-    for (var prop of __getOwnPropSymbols(source)) {
-      if (exclude.indexOf(prop) < 0 && __propIsEnum.call(source, prop))
-        target[prop] = source[prop];
-    }
-  return target;
-};
 var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
@@ -58,26 +29,6 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
-var __async = (__this, __arguments, generator) => {
-  return new Promise((resolve, reject) => {
-    var fulfilled = (value) => {
-      try {
-        step(generator.next(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var rejected = (value) => {
-      try {
-        step(generator.throw(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
-    step((generator = generator.apply(__this, __arguments)).next());
-  });
-};
 
 // node_modules/color-name/index.js
 var require_color_name = __commonJS({
@@ -3735,8 +3686,7 @@ var setupHttpServer_default = setupHttpServer;
 // src/BlokdotsSocketIOServer/BlokdotsSocketIOServer.ts
 var BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT = 8777;
 var getBlokdotsSocketIOServerAddress = () => {
-  var _a;
-  const currentIP = (_a = Object.values((0, import_os.networkInterfaces)()).flat().find((i) => (i == null ? void 0 : i.family) === "IPv4" && !i.internal)) == null ? void 0 : _a.address;
+  const currentIP = Object.values((0, import_os.networkInterfaces)()).flat().find((i) => i?.family === "IPv4" && !i.internal)?.address;
   if (!currentIP)
     return null;
   return `http://${currentIP}:${BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT}`;
@@ -3748,12 +3698,10 @@ var BlokdotsSocketIOServer = class {
   }
   // Init is a separate function, because the constructor can
   // not be async
-  init() {
-    return __async(this, null, function* () {
-      return new Promise((resolve) => {
-        this.start();
-        resolve(null);
-      });
+  async init() {
+    return new Promise((resolve) => {
+      this.start();
+      resolve(null);
     });
   }
   start() {
@@ -3825,8 +3773,7 @@ var BlokdotsSocketIOServer = class {
         handlers: [...handlers],
         ioNamespace: this.io.of("/" + integrationName),
         emit: (event, data) => {
-          var _a;
-          (_a = this.io) == null ? void 0 : _a.of("/" + integrationName).emit(event, data);
+          this.io?.of("/" + integrationName).emit(event, data);
           this.activeIntegrations[integrationName].handlers.forEach(
             ({ eventName, callback }) => {
               if (eventName === event) {
@@ -3873,9 +3820,10 @@ var BlokdotsSocketIOServer = class {
       });
       this.emitInfo();
     }
-    return __spreadProps(__spreadValues({}, integration), {
+    return {
+      ...integration,
       connections: integration.ioNamespace.sockets.size
-    });
+    };
   }
   unregisterIntegration({
     integrationName,
@@ -3911,7 +3859,7 @@ var BlokdotsSocketIOServer = class {
   }
 };
 var blokdotsSocketIOServer = null;
-var getBlokdotsSocketIOServer = () => __async(void 0, null, function* () {
+var getBlokdotsSocketIOServer = async () => {
   return new Promise((resolve) => {
     if (blokdotsSocketIOServer === null) {
       blokdotsSocketIOServer = new BlokdotsSocketIOServer();
@@ -3922,7 +3870,7 @@ var getBlokdotsSocketIOServer = () => __async(void 0, null, function* () {
       resolve(blokdotsSocketIOServer);
     }
   });
-});
+};
 var BlokdotsSocketIOServer_default = getBlokdotsSocketIOServer;
 
 // src/Counter/Counter.ts
@@ -4002,9 +3950,8 @@ var Encoder = class extends import_events2.default {
     this.waveform = "";
   }
   cleanUp() {
-    var _a, _b, _c, _d;
-    (_b = (_a = this.upButton).removeAllListeners) == null ? void 0 : _b.call(_a);
-    (_d = (_c = this.downButton).removeAllListeners) == null ? void 0 : _d.call(_c);
+    this.upButton.removeAllListeners?.();
+    this.downButton.removeAllListeners?.();
   }
 };
 var Encoder_default = Encoder;
@@ -4034,8 +3981,7 @@ var FigmaIntegration = class extends import_events3.default {
     this.integration.emit("reaction", message);
   }
   cleanUp() {
-    var _a;
-    (_a = this.server) == null ? void 0 : _a.unregisterIntegration({
+    this.server?.unregisterIntegration({
       integrationName: INTEGRATION_NAME
     });
   }
@@ -4105,7 +4051,10 @@ var HapticLabs = class {
   constructor({
     slot,
     board,
-    initialValue = 0
+    initialValue = {
+      track1: 0,
+      track2: 0
+    }
   }) {
     this.value = initialValue;
     this.track1 = new import_johnny_five2.default.Pin({
@@ -4121,6 +4070,22 @@ var HapticLabs = class {
       board
     });
   }
+  playTrack1() {
+    this.track1.high();
+    this.value.track1 = 1;
+  }
+  stopTrack1() {
+    this.track1.low();
+    this.value.track1 = 0;
+  }
+  playTrack2() {
+    this.track2.high();
+    this.value.track2 = 1;
+  }
+  stopTrack2() {
+    this.track2.low();
+    this.value.track2 = 0;
+  }
 };
 var HapticLabs_default = HapticLabs;
 
@@ -4128,18 +4093,11 @@ var HapticLabs_default = HapticLabs;
 var import_events4 = __toESM(require("events"));
 var import_johnny_five3 = __toESM(require("johnny-five"));
 var InvertableSensor = class extends import_events4.default {
-  constructor(_a) {
-    var _b = _a, {
-      invert = false,
-      pin,
-      board,
-      threshold
-    } = _b, componentProps = __objRest(_b, [
-      "invert",
-      "pin",
-      "board",
-      "threshold"
-    ]);
+  constructor({
+    invert = false,
+    board,
+    ...sensorOptions
+  }) {
     super();
     this.transformValue = (value) => {
       if (this.invert) {
@@ -4147,19 +4105,17 @@ var InvertableSensor = class extends import_events4.default {
       }
       return value;
     };
-    this.j5Object = new import_johnny_five3.default.Sensor(__spreadValues({
-      pin,
+    this.j5Object = new import_johnny_five3.default.Sensor({
       board,
-      threshold
-    }, componentProps));
+      ...sensorOptions
+    });
     this.invert = invert;
     this.j5Object.on("change", () => {
       this.emit("change", this.transformValue(this.j5Object.value));
     });
   }
   cleanUp() {
-    var _a, _b;
-    (_b = (_a = this.j5Object).removeAllListeners) == null ? void 0 : _b.call(_a);
+    this.j5Object.removeAllListeners?.();
   }
 };
 var InvertableSensor_default = InvertableSensor;
@@ -4205,8 +4161,7 @@ var Joystick = class extends import_events5.default {
     });
   }
   cleanUp() {
-    var _a, _b;
-    (_b = (_a = this.j5Object).removeAllListeners) == null ? void 0 : _b.call(_a);
+    this.j5Object.removeAllListeners?.();
   }
 };
 var Joystick_default = Joystick;
@@ -4539,11 +4494,10 @@ var SocketIOIntegration = class extends import_events8.default {
     this.emit("updateState", message);
   }
   send(message, shouldUpdateState = true) {
-    var _a;
     if (!message.direction)
       message.direction = "out";
     this.emit("send", message);
-    (_a = this.integration) == null ? void 0 : _a.emit(this.messageEventName, {
+    this.integration?.emit(this.messageEventName, {
       [this.format.message]: message.message,
       [this.format.value]: message.value
     });
@@ -4552,8 +4506,7 @@ var SocketIOIntegration = class extends import_events8.default {
     }
   }
   cleanUp() {
-    var _a;
-    (_a = this.server) == null ? void 0 : _a.unregisterIntegration({
+    this.server?.unregisterIntegration({
       integrationName: this.integrationName,
       handlers: [
         {
