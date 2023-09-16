@@ -4,12 +4,10 @@ import five from "johnny-five";
 declare class InvertableSensor extends EventEmitter {
     j5Object: five.Sensor;
     invert: boolean;
-    constructor({ invert, pin, board, threshold, ...componentProps }: {
+    constructor({ invert, board, ...sensorOptions }: {
         invert?: boolean;
-        threshold?: number;
-        pin: string | number;
         board: five.Board;
-    });
+    } & five.SensorOption);
     transformValue: (value: number) => number;
     cleanUp(): void;
 }

@@ -28,6 +28,7 @@ interface Integration {
     onClientConnect: Array<OnClientConnectListener>;
     onClientDisconnect: Array<OnClientDisconnectListener>;
     ioNamespace: Namespace;
+    emit: (event: string, data: any) => void;
 }
 declare class BlokdotsSocketIOServer {
     io: Server | null;
@@ -158,25 +159,33 @@ declare class FigmaIntegration extends EventEmitter {
 }
 
 declare class HapticLabs {
-    value: number;
+    value: {
+        track1: 1 | 0;
+        track2: 1 | 0;
+    };
     track1: five.Pin;
     track2: five.Pin;
     constructor({ slot, board, initialValue, }: {
         slot: number;
         board: five.Board;
-        initialValue?: number;
+        initialValue?: {
+            track1: 1 | 0;
+            track2: 1 | 0;
+        };
     });
+    playTrack1(): void;
+    stopTrack1(): void;
+    playTrack2(): void;
+    stopTrack2(): void;
 }
 
 declare class InvertableSensor extends EventEmitter {
     j5Object: five.Sensor;
     invert: boolean;
-    constructor({ invert, pin, board, threshold, ...componentProps }: {
+    constructor({ invert, board, ...sensorOptions }: {
         invert?: boolean;
-        threshold?: number;
-        pin: string | number;
         board: five.Board;
-    });
+    } & five.SensorOption);
     transformValue: (value: number) => number;
     cleanUp(): void;
 }
@@ -293,4 +302,4 @@ declare const utils: {
     hexToRgb: (hex: string) => [number, number, number] | null;
 };
 
-export { BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT, Counter, Encoder, FigmaIntegration, ReactionMessage as FigmaReactionMessage, HapticLabs, InvertableSensor, Joystick, LEDStrip, Metronome, OLED_HEIGHT, OLED_WIDTH, OLED as Oled, SignalTower, SocketIOIntegration, Timer, addTextToBuffer, getBlokdotsSocketIOServer, getBlokdotsSocketIOServerAddress, utils };
+export { BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT, Counter, Encoder, FigmaIntegration, type ReactionMessage as FigmaReactionMessage, HapticLabs, InvertableSensor, Joystick, LEDStrip, Metronome, OLED_HEIGHT, OLED_WIDTH, OLED as Oled, SignalTower, SocketIOIntegration, Timer, addTextToBuffer, getBlokdotsSocketIOServer, getBlokdotsSocketIOServerAddress, utils };
