@@ -1,18 +1,27 @@
 import five from "johnny-five";
 
 class HapticLabs {
-  value: number;
+  value: {
+    track1: 1 | 0;
+    track2: 1 | 0;
+  };
   track1: five.Pin;
   track2: five.Pin;
 
   constructor({
     slot,
     board,
-    initialValue = 0,
+    initialValue = {
+      track1: 0,
+      track2: 0,
+    },
   }: {
     slot: number;
     board: five.Board;
-    initialValue?: number;
+    initialValue?: {
+      track1: 1 | 0;
+      track2: 1 | 0;
+    };
   }) {
     this.value = initialValue;
 
@@ -28,6 +37,26 @@ class HapticLabs {
       // @ts-ignore — There is an issue with the types for the johnny-five library
       board,
     });
+  }
+
+  playTrack1() {
+    this.track1.high();
+    this.value.track1 = 1;
+  }
+
+  stopTrack1() {
+    this.track1.low();
+    this.value.track1 = 0;
+  }
+
+  playTrack2() {
+    this.track2.high();
+    this.value.track2 = 1;
+  }
+
+  stopTrack2() {
+    this.track2.low();
+    this.value.track2 = 0;
   }
 }
 
