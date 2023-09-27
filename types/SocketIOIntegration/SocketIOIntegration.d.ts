@@ -20,8 +20,7 @@ declare class SocketIOIntegration extends EventEmitter {
     send(message: {
         message: string;
         value?: any;
-        direction: "in" | "out";
-    }, shouldUpdateState?: boolean): void;
+    }): void;
     cleanUp(): void;
 }
 export default SocketIOIntegration;

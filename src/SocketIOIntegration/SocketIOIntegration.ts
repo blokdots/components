@@ -47,29 +47,20 @@ class SocketIOIntegration extends EventEmitter {
     const message = {
       message: data[this.format.message],
       value: data[this.format.value],
-      direction: "in",
     };
 
     this.emit("received", message);
-    this.emit("updateState", message);
   }
 
   send(
-    message: { message: string; value?: any; direction: "in" | "out" },
-    shouldUpdateState = true
+    message: { message: string; value?: any; },
   ) {
-    if (!message.direction) message.direction = "out";
-
     this.emit("send", message);
 
     this.integration?.emit(this.messageEventName, {
       [this.format.message]: message.message,
       [this.format.value]: message.value,
     });
-
-    if (shouldUpdateState) {
-      this.emit("updateState", message);
-    }
   }
 
   cleanUp() {
