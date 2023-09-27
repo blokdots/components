@@ -111,7 +111,7 @@ const setupHttpServer = () => {
                 file = index;
         }
         res.writeHead(200, headers);
-        const buffer = new Buffer(file, "base64");
+        const buffer = Buffer.from(file, "base64");
         const stream = new require$$0.Readable();
         stream.push(buffer);
         stream.push(null);
