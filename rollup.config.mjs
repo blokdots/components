@@ -2,7 +2,7 @@ import commonjs from "@rollup/plugin-commonjs";
 import resolve from "@rollup/plugin-node-resolve";
 import dts from "rollup-plugin-dts";
 import typescript from "@rollup/plugin-typescript";
-import url from "@rollup/plugin-url";
+import { base64 } from "rollup-plugin-base64";
 
 const config = [
   {
@@ -16,9 +16,8 @@ const config = [
     plugins: [
       resolve(),
       commonjs(),
-      url({
-        emitFiles: true,
-        include: ["src/BlokdotsSocketIOServer/webserver/**/*"],
+      base64({
+        include: "src/BlokdotsSocketIOServer/webserver/**/*",
       }),
       typescript({
         tsconfig: "./tsconfig.json",

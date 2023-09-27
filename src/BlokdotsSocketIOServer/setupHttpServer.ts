@@ -55,7 +55,7 @@ const setupHttpServer = () => {
 
     res.writeHead(200, headers);
 
-    const buffer = Buffer.from(file.split(",").slice(1).join(","), "base64");
+    const buffer = new Buffer(file, "base64");
     const stream = new Readable();
     stream.push(buffer);
     stream.push(null);
