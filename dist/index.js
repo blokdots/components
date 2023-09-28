@@ -42837,11 +42837,13 @@ class SocketIOIntegration extends EventEmitter$2 {
             message: data[this.format.message],
             value: data[this.format.value],
         };
+        console.log("onMessage", message);
         this.emit("received", message);
     }
     send(message) {
         var _a;
         this.emit("send", message);
+        console.log("send", message);
         (_a = this.integration) === null || _a === void 0 ? void 0 : _a.emit(this.messageEventName, {
             [this.format.message]: message.message,
             [this.format.value]: message.value,
