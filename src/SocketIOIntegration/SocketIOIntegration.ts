@@ -55,7 +55,7 @@ class SocketIOIntegration extends EventEmitter {
   send(message: { message: string; value?: any }) {
     this.emit("send", message);
 
-    this.integration?.emit(this.messageEventName, {
+    this.integration?.ioNamespace.emit(this.messageEventName, {
       [this.format.message]: message.message,
       [this.format.value]: message.value,
     });
