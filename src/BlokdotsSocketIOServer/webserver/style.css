@@ -17,34 +17,35 @@
   --max-width: 640px;
 
   /* Colors */
+  --color-gray-0: hsl(0 0% 100%); /* white */
+  --color-gray-1: hsl(0 0% 97%);
+  --color-gray-2: hsl(0 0% 96%);
+  --color-gray-3: hsl(0 0% 95%);
+  --color-gray-4: hsl(0 0% 94%);
+  --color-gray-5: hsl(0 0% 92%);
+  --color-gray-6: hsl(0 0% 88%);
+  --color-gray-7: hsl(0 0% 76%);
+  --color-gray-8: hsl(0 0% 46%);
+  --color-gray-9: hsl(0 0% 20%);
+  --color-gray-10: hsl(0 0% 0%); /* black */
 
-  --color-white: #ffffff;
-  --color-black: #000000;
+  --color-white: var(--color-gray-0);
+  --color-black: var(--color-gray-10);
 
-  --color-font-reg: var(--color-black);
-  --color-font-med: #808080;
-  --color-font-dis: #b3b3b3;
+  --color-font-reg: var(--color-gray-10);
+  --color-font-med: var(--color-gray-9);
+  --color-font-dis: var(--color-gray-8);
 
-  --color-gray-1: #f8f8f8;
-  --color-gray-2: #f5f5f5;
-  --color-gray-3: #f2f2f2;
-  --color-gray-4: #f0f0f0;
-  --color-gray-5: #eaeaea;
-  --color-gray-6: #dcdcdc;
-  --color-gray-7: #c1c1c1;
-  --color-gray-8: #a8a8a8;
-  --color-gray-9: #606060;
+  --color-brand: hsl(54 96% 62%); /* #fbe941; */
+  --color-brand-medium: hsl(49 96% 62%); /* #fbd841; */
+  --color-brand-dark: hsl(47 94% 52%); /* #f7c510; */
 
-  --color-brand: #fbe941;
-  --color-brand-medium: #fbd841;
-  --color-brand-dark: #f7c510;
-
-  --color-red: #e74c3c;
-  --color-green: #1abc9c;
-  --color-green-dark: #17a387;
-  --color-blue: #5d9bc5;
-  --color-violet: #9f63b7;
-  --color-orange: #f39c12;
+  --color-red: hsl(6 78% 57%); /* #e74c3c; */
+  --color-green: hsl(168 76% 42%); /* #1abc9c; */
+  --color-green-dark: hsl(168 76% 36%); /* #17a387; */
+  --color-blue: hsl(204 47% 57%); /* #5d9bc5; */
+  --color-violet: hsl(283 37% 55%); /* #9f63b7; */
+  --color-orange: hsl(37 90% 51%); /* #f39c12; */
   --color-yellow: var(--color-brand-medium);
 
   --color-alert-high: var(--color-red);
@@ -59,22 +60,33 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-white: #39393a;
-    --color-black: #ffffff;
+    /* Colors */
+    --color-gray-0: hsl(204 6% 20%); /* black */
+    --color-gray-1: hsl(204 6% 21%);
+    --color-gray-2: hsl(204 6% 23%);
+    --color-gray-3: hsl(204 6% 24%);
+    --color-gray-4: hsl(204 6% 27%);
+    --color-gray-5: hsl(204 6% 31%);
+    --color-gray-6: hsl(204 6% 37%);
+    --color-gray-7: hsl(204 6% 46%);
+    --color-gray-8: hsl(204 6% 59%);
+    --color-gray-9: hsl(204 6% 75%);
+    --color-gray-10: hsl(204 6% 92%); /* white */
 
-    --color-gray-1: #424243;
-    --color-gray-2: #4d4d4d;
-    --color-gray-3: #808080;
-    --color-gray-4: #3d3d3e;
-    --color-gray-5: #2d2d2e;
-    --color-gray-6: #505051;
-    --color-gray-7: #565657;
-    --color-gray-8: #6f6f74;
-    --color-gray-9: #78787c;
+    /* Those two should stay in the same range */
+    --color-white-STAY: var(--color-gray-10);
+    --color-black-STAY: var(--color-gray-0);
 
-    --color-font-reg: var(--color-black);
-    --color-font-med: #909090;
-    --color-font-dis: var(--color-gray-6);
+    /* Adjust colors to be a little less bright and saturated */
+    --color-red: hsl(6 73% 50%); /* light value: hsl(6 78% 57%); */
+    --color-green: hsl(168 70% 36%); /* light value: hsl(168 76% 42%); */
+    --color-green-dark: hsl(168 70% 30%); /* light value: hsl(168 76% 36%); */
+    --color-blue: hsl(204 45% 48%); /* light value: hsl(204 47% 57%);  */
+    --color-violet: hsl(283 32% 52%); /* light value: hsl(283 37% 55%);  */
+    --color-orange: hsl(37 86% 48%); /* light value: hsl(37 90% 51%); */
+    --color-yellow: hsl(
+      49 85% 50%
+    ); /* light value: var(--color-brand-medium); // hsl(49 96% 62%); */
   }
 }
 
@@ -254,7 +266,7 @@ button {
   flex: 1;
 }
 #testInput input::placeholder {
-  color: var(--color-font-dis);
+  color: var(--color-gray-7);
 }
 #testInput button {
   cursor: pointer;
@@ -263,6 +275,12 @@ button {
   padding: 0.3em 0.6em;
   color: #fff;
   flex-grow: 0;
+}
+#testInput button:hover {
+  background: var(--color-green-dark);
+}
+#testInput button:active {
+  transform: scale(0.95);
 }
 @media (max-width: 600px) {
   #testInput {
@@ -311,7 +329,7 @@ button {
 }
 
 .messageTime {
-  color: var(--color-gray-8);
+  color: var(--color-font-dis);
   font-family: var(--font-family-mono);
   margin-right: 8px;
 }
@@ -336,4 +354,8 @@ button {
 }
 .messageValueDisplay-is-number {
   color: var(--color-violet);
+  font-variant-numeric: tabular-nums;
+}
+.messageValueDisplay-is-string {
+  color: var(--color-orange);
 }
