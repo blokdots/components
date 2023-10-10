@@ -26,7 +26,7 @@ const config = [
     external: ["events", "socket.io", "ws"],
   },
   {
-    input: "types/index.d.ts",
+    input: "dist/types/index.d.ts",
     output: [{ file: "dist/index.d.ts", format: "cjs" }],
     external: [/\.s?css$/],
     plugins: [dts.default()],

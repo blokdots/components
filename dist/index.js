@@ -38992,6 +38992,10 @@ class Encoder extends EventEmitter$2 {
             this.handleWaveform();
         });
     }
+    setCountTo(value) {
+        this.value = value;
+        this.emit("change", this.value);
+    }
     handleWaveform() {
         if (this.waveform.length < 2) {
             this.waveformTimeout = setTimeout(() => {
