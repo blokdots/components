@@ -47,6 +47,23 @@ class Encoder extends EventEmitter {
     });
   }
 
+  countUp() {
+    this.value++;
+    this.emit("change", this.value);
+    this.emit("up", this.value);
+  }
+
+  countDown() {
+    this.value--;
+    this.emit("change", this.value);
+    this.emit("down", this.value);
+  }
+
+  setCountTo(value: number) {
+    this.value = value;
+    this.emit("change", this.value);
+  }
+
   handleWaveform() {
     if (this.waveform.length < 2) {
       this.waveformTimeout = setTimeout(() => {

@@ -75,6 +75,8 @@ declare class Encoder extends EventEmitter {
         initialValue?: number;
         debounce?: number;
     });
+    countUp(): void;
+    countDown(): void;
     setCountTo(value: number): void;
     handleWaveform(): void;
     cleanUp(): void;
