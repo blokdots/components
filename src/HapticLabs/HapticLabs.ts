@@ -2,36 +2,36 @@ import five from "johnny-five";
 
 class HapticLabs {
   value: {
-    track1: 1 | 0;
-    track2: 1 | 0;
+    pin1: 1 | 0;
+    pin2: 1 | 0;
   };
-  track1: five.Pin;
-  track2: five.Pin;
+  pin1: five.Pin;
+  pin2: five.Pin;
 
   constructor({
     slot,
     board,
     initialValue = {
-      track1: 0,
-      track2: 0,
+      pin1: 0,
+      pin2: 0,
     },
   }: {
     slot: number;
     board: five.Board;
     initialValue?: {
-      track1: 1 | 0;
-      track2: 1 | 0;
+      pin1: 1 | 0;
+      pin2: 1 | 0;
     };
   }) {
     this.value = initialValue;
 
-    this.track1 = new five.Pin({
+    this.pin1 = new five.Pin({
       pin: slot,
       type: "digital",
       // @ts-ignore — There is an issue with the types for the johnny-five library
       board,
     });
-    this.track2 = new five.Pin({
+    this.pin2 = new five.Pin({
       pin: slot + 1,
       type: "digital",
       // @ts-ignore — There is an issue with the types for the johnny-five library
@@ -40,23 +40,23 @@ class HapticLabs {
   }
 
   playTrack1() {
-    this.track1.high();
-    this.value.track1 = 1;
+    this.pin1.high();
+    this.value.pin1 = 1;
   }
 
   stopTrack1() {
-    this.track1.low();
-    this.value.track1 = 0;
+    this.pin1.low();
+    this.value.pin1 = 0;
   }
 
   playTrack2() {
-    this.track2.high();
-    this.value.track2 = 1;
+    this.pin2.high();
+    this.value.pin2 = 1;
   }
 
   stopTrack2() {
-    this.track2.low();
-    this.value.track2 = 0;
+    this.pin2.low();
+    this.value.pin2 = 0;
   }
 }
 

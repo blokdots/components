@@ -1,17 +1,17 @@
 import five from "johnny-five";
 declare class HapticLabs {
     value: {
-        track1: 1 | 0;
-        track2: 1 | 0;
+        pin1: 1 | 0;
+        pin2: 1 | 0;
     };
-    track1: five.Pin;
-    track2: five.Pin;
+    pin1: five.Pin;
+    pin2: five.Pin;
     constructor({ slot, board, initialValue, }: {
         slot: number;
         board: five.Board;
         initialValue?: {
-            track1: 1 | 0;
-            track2: 1 | 0;
+            pin1: 1 | 0;
+            pin2: 1 | 0;
         };
     });
     playTrack1(): void;
