@@ -235,6 +235,7 @@ declare class Metronome extends EventEmitter {
 
 declare const OLED_WIDTH = 128;
 declare const OLED_HEIGHT = 64;
+declare const dataToQRCodeBuffer: (data: string) => Color[];
 declare class OLED extends Oled {
     previousBitmap: Color[] | null;
     drawingIsBlocked: boolean;
@@ -244,7 +245,7 @@ declare class OLED extends Oled {
         five: any;
     });
     drawString(string: string): void;
-    drawQRCodeNew(data: string, apply?: boolean): Color[];
+    drawQRCodeNew(data: string): void;
     drawValue(label: string, value: string, apply?: boolean): Color[];
     drawBitmapOptimized(bitmap: Color[]): void;
     updatePixelsBlocking(pixels: Pixel[]): void;
@@ -304,4 +305,4 @@ declare const utils: {
     hexToRgb: (hex: string) => [number, number, number] | null;
 };
 
-export { BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT, Counter, Encoder, FigmaIntegration, type ReactionMessage as FigmaReactionMessage, HapticLabs, InvertableSensor, Joystick, LEDStrip, Metronome, OLED_HEIGHT, OLED_WIDTH, OLED as Oled, SignalTower, SocketIOIntegration, Timer, addTextToBuffer, getBlokdotsSocketIOServer, getBlokdotsSocketIOServerAddress, utils };
+export { BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT, Counter, Encoder, FigmaIntegration, type ReactionMessage as FigmaReactionMessage, HapticLabs, InvertableSensor, Joystick, LEDStrip, Metronome, OLED_HEIGHT, OLED_WIDTH, OLED as Oled, SignalTower, SocketIOIntegration, Timer, addTextToBuffer, dataToQRCodeBuffer, getBlokdotsSocketIOServer, getBlokdotsSocketIOServerAddress, utils };

@@ -5,6 +5,10 @@ import qr from "qr-image";
 export const OLED_WIDTH = 128;
 export const OLED_HEIGHT = 64;
 
+export const dataToQRCodeBuffer = (data: string) => {
+  return addQrCodeToBuffer(1, 1, data, 4);
+};
+
 class OLED extends Oled {
   previousBitmap: Color[] | null;
   drawingIsBlocked: boolean;
@@ -32,14 +36,9 @@ class OLED extends Oled {
     this.drawBitmapOptimized(buffer);
   }
 
-  drawQRCodeNew(data: string, apply: boolean = true) {
+  drawQRCodeNew(data: string) {
     const buffer = addQrCodeToBuffer(1, 1, data, 4);
-
-    if (apply) {
-      this.drawBitmapOptimized(buffer);
-    }
-
-    return buffer;
+    this.drawBitmapOptimized(buffer);
   }
 
   drawValue(label: string, value: string, apply: boolean = true) {

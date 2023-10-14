@@ -46,7 +46,9 @@ class SocketIOIntegration extends EventEmitter {
   onMessage(data: { [key: string]: any }) {
     const message = {
       message: data[this.format.message],
-      value: data[this.format.value],
+      value: +data[this.format.value]
+        ? +data[this.format.value]
+        : data[this.format.value],
     };
 
     this.emit("received", message);

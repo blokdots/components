@@ -42552,6 +42552,9 @@ var _default = oled.default = Oled;
 
 const OLED_WIDTH = 128;
 const OLED_HEIGHT = 64;
+const dataToQRCodeBuffer = (data) => {
+    return addQrCodeToBuffer(1, 1, data, 4);
+};
 class OLED extends _default {
     constructor({ board, five }) {
         super(board, five, {
@@ -42571,12 +42574,9 @@ class OLED extends _default {
         const buffer = addStringToBuffer(1, 1, string, 1);
         this.drawBitmapOptimized(buffer);
     }
-    drawQRCodeNew(data, apply = true) {
+    drawQRCodeNew(data) {
         const buffer = addQrCodeToBuffer(1, 1, data, 4);
-        if (apply) {
-            this.drawBitmapOptimized(buffer);
-        }
-        return buffer;
+        this.drawBitmapOptimized(buffer);
     }
     drawValue(label, value, apply = true) {
         const buffer = addTextToBuffer([
@@ -42849,7 +42849,9 @@ class SocketIOIntegration extends EventEmitter$2 {
     onMessage(data) {
         const message = {
             message: data[this.format.message],
-            value: data[this.format.value],
+            value: +data[this.format.value]
+                ? +data[this.format.value]
+                : data[this.format.value],
         };
         this.emit("received", message);
     }
@@ -42946,6 +42948,7 @@ exports.SignalTower = SignalTower;
 exports.SocketIOIntegration = SocketIOIntegration;
 exports.Timer = Timer;
 exports.addTextToBuffer = addTextToBuffer;
+exports.dataToQRCodeBuffer = dataToQRCodeBuffer;
 exports.getBlokdotsSocketIOServer = getBlokdotsSocketIOServer;
 exports.getBlokdotsSocketIOServerAddress = getBlokdotsSocketIOServerAddress;
 exports.utils = utils;

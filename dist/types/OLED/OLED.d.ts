@@ -1,6 +1,7 @@
 import Oled, { Pixel, Color } from "oled-js";
 export declare const OLED_WIDTH = 128;
 export declare const OLED_HEIGHT = 64;
+export declare const dataToQRCodeBuffer: (data: string) => Color[];
 declare class OLED extends Oled {
     previousBitmap: Color[] | null;
     drawingIsBlocked: boolean;
@@ -10,7 +11,7 @@ declare class OLED extends Oled {
         five: any;
     });
     drawString(string: string): void;
-    drawQRCodeNew(data: string, apply?: boolean): Color[];
+    drawQRCodeNew(data: string): void;
     drawValue(label: string, value: string, apply?: boolean): Color[];
     drawBitmapOptimized(bitmap: Color[]): void;
     updatePixelsBlocking(pixels: Pixel[]): void;

@@ -8,7 +8,7 @@ export { default as InvertableSensor } from "./InvertableSensor";
 export { default as Joystick } from "./Joystick";
 export { default as LEDStrip } from "./LEDStrip";
 export { default as Metronome } from "./Metronome";
-export { default as Oled, OLED_WIDTH, OLED_HEIGHT, addTextToBuffer, } from "./OLED";
+export { default as Oled, OLED_WIDTH, OLED_HEIGHT, addTextToBuffer, dataToQRCodeBuffer, } from "./OLED";
 export { default as SignalTower } from "./SignalTower";
 export { default as SocketIOIntegration } from "./SocketIOIntegration";
 export { default as Timer } from "./Timer";

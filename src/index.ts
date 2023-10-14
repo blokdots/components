@@ -17,6 +17,7 @@ export {
   OLED_WIDTH,
   OLED_HEIGHT,
   addTextToBuffer,
+  dataToQRCodeBuffer,
 } from "./OLED";
 export { default as SignalTower } from "./SignalTower";
 export { default as SocketIOIntegration } from "./SocketIOIntegration";
