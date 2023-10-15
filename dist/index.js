@@ -42849,7 +42849,7 @@ class SocketIOIntegration extends EventEmitter$2 {
     onMessage(data) {
         const message = {
             message: data[this.format.message],
-            value: +data[this.format.value]
+            value: !isNaN(+data[this.format.value])
                 ? +data[this.format.value]
                 : data[this.format.value],
         };
