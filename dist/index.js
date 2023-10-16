@@ -39064,11 +39064,14 @@ class FigmaIntegration extends EventEmitter$2 {
         });
     }
     rotate(parameters) {
-        console.log("rotate", parameters);
         this.sendReaction({
             target: parameters.layer,
             reaction: "rotate",
-            parameters: { value: parameters.value, relation: parameters.relation },
+            parameters: {
+                value: parameters.value,
+                relation: parameters.relation,
+                origin: parameters.origin,
+            },
             timestamp: Date.now(),
         });
     }

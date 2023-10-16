@@ -91,6 +91,7 @@ type RotationReactionMessage = ReactionMessageBase & {
     parameters: {
         value: number;
         relation: "by" | "to";
+        origin: "center" | "top left";
     };
 };
 type TextReactionMessage = ReactionMessageBase & {
@@ -102,16 +103,16 @@ type TextReactionMessage = ReactionMessageBase & {
 type PositionReactionMessage = ReactionMessageBase & {
     reaction: "setPosition";
     parameters: {
-        x: number;
-        y: number;
+        x?: number;
+        y?: number;
         relation: "by" | "to";
     };
 };
 type SizeReactionMessage = ReactionMessageBase & {
     reaction: "setSize";
     parameters: {
-        width: number;
-        height: number;
+        width?: number;
+        height?: number;
         relation: "by" | "to";
     };
 };

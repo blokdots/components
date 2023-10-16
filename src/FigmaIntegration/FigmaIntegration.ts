@@ -17,6 +17,7 @@ type RotationReactionMessage = ReactionMessageBase & {
   parameters: {
     value: number;
     relation: "by" | "to";
+    origin: "center" | "top left";
   };
 };
 
@@ -30,8 +31,8 @@ type TextReactionMessage = ReactionMessageBase & {
 type PositionReactionMessage = ReactionMessageBase & {
   reaction: "setPosition";
   parameters: {
-    x: number;
-    y: number;
+    x?: number;
+    y?: number;
     relation: "by" | "to";
   };
 };
@@ -39,8 +40,8 @@ type PositionReactionMessage = ReactionMessageBase & {
 type SizeReactionMessage = ReactionMessageBase & {
   reaction: "setSize";
   parameters: {
-    width: number;
-    height: number;
+    width?: number;
+    height?: number;
     relation: "by" | "to";
   };
 };
@@ -132,11 +133,14 @@ class FigmaIntegration extends EventEmitter {
   rotate(
     parameters: { layer: string } & RotationReactionMessage["parameters"]
   ) {
-    console.log("rotate", parameters);
     this.sendReaction({
       target: parameters.layer,
       reaction: "rotate",
-      parameters: { value: parameters.value, relation: parameters.relation },
+      parameters: {
+        value: parameters.value,
+        relation: parameters.relation,
+        origin: parameters.origin,
+      },
       timestamp: Date.now(),
     });
   }
