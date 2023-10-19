@@ -40464,6 +40464,10 @@ class Metronome extends EventEmitter$2 {
             timestamp: Date.now(),
             frequency: this.frequency,
         });
+        this.emit("tick", {
+            timestamp: Date.now(),
+            frequency: this.frequency,
+        });
         this.interval = setInterval(() => {
             this.emit("tick", {
                 timestamp: Date.now(),
