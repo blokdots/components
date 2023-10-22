@@ -69,9 +69,10 @@ declare class Encoder extends EventEmitter {
     waveformTimeout?: NodeJS.Timeout;
     upButton: five.Button;
     downButton: five.Button;
-    constructor({ slot, board, initialValue, debounce, }: {
-        slot: number;
-        board: Board;
+    constructor({ pin1, pin2, board, initialValue, debounce, }: {
+        pin1: number | string;
+        pin2: number | string;
+        board?: Board;
         initialValue?: number;
         debounce?: number;
     });
@@ -169,9 +170,10 @@ declare class HapticLabs {
     };
     pin1: five.Pin;
     pin2: five.Pin;
-    constructor({ slot, board, initialValue, }: {
-        slot: number;
-        board: five.Board;
+    constructor({ pin1, pin2, board, initialValue, }: {
+        pin1: number;
+        pin2: number;
+        board?: five.Board;
         initialValue?: {
             pin1: 1 | 0;
             pin2: 1 | 0;
@@ -204,9 +206,10 @@ declare class Joystick extends EventEmitter {
     invertX: boolean;
     invertY: boolean;
     previousX?: number;
-    constructor({ slot, board, invertX, invertY, }: {
-        slot: string;
-        board: five.Board;
+    constructor({ pin1, pin2, board, invertX, invertY, }: {
+        pin1: `A${number}`;
+        pin2: `A${number}`;
+        board?: five.Board;
         invertX?: boolean;
         invertY?: boolean;
     });
@@ -242,7 +245,7 @@ declare class OLED extends Oled {
     drawingIsBlocked: boolean;
     drawingBuffer: Array<Color | null>;
     constructor({ board, five }: {
-        board: any;
+        board: five.Board;
         five: any;
     });
     drawString(string: string): void;

@@ -14,20 +14,22 @@ class Joystick extends EventEmitter {
   previousX?: number;
 
   constructor({
-    slot,
+    pin1,
+    pin2,
     board,
     invertX = false,
     invertY = false,
   }: {
-    slot: string;
-    board: five.Board;
+    pin1: `A${number}`;
+    pin2: `A${number}`;
+    board?: five.Board;
     invertX?: boolean;
     invertY?: boolean;
   }) {
     super();
 
     this.j5Object = new five.Joystick({
-      pins: [slot, `A${parseInt(slot.substring(1)) + 1}`],
+      pins: [pin1, pin2],
       board: board,
     });
 

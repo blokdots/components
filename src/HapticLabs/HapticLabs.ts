@@ -9,15 +9,17 @@ class HapticLabs {
   pin2: five.Pin;
 
   constructor({
-    slot,
+    pin1,
+    pin2,
     board,
     initialValue = {
       pin1: 0,
       pin2: 0,
     },
   }: {
-    slot: number;
-    board: five.Board;
+    pin1: number;
+    pin2: number;
+    board?: five.Board;
     initialValue?: {
       pin1: 1 | 0;
       pin2: 1 | 0;
@@ -26,15 +28,13 @@ class HapticLabs {
     this.value = initialValue;
 
     this.pin1 = new five.Pin({
-      pin: slot,
+      pin: pin1,
       type: "digital",
-      // @ts-ignore — There is an issue with the types for the johnny-five library
       board,
     });
     this.pin2 = new five.Pin({
-      pin: slot + 1,
+      pin: pin2,
       type: "digital",
-      // @ts-ignore — There is an issue with the types for the johnny-five library
       board,
     });
   }

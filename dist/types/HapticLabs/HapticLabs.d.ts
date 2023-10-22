@@ -6,9 +6,10 @@ declare class HapticLabs {
     };
     pin1: five.Pin;
     pin2: five.Pin;
-    constructor({ slot, board, initialValue, }: {
-        slot: number;
-        board: five.Board;
+    constructor({ pin1, pin2, board, initialValue, }: {
+        pin1: number;
+        pin2: number;
+        board?: five.Board;
         initialValue?: {
             pin1: 1 | 0;
             pin2: 1 | 0;

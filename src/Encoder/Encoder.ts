@@ -9,13 +9,15 @@ class Encoder extends EventEmitter {
   downButton: five.Button;
 
   constructor({
-    slot,
+    pin1,
+    pin2,
     board,
     initialValue = 0,
     debounce = 7,
   }: {
-    slot: number;
-    board: Board;
+    pin1: number | string;
+    pin2: number | string;
+    board?: Board;
     initialValue?: number;
     debounce?: number;
   }) {
@@ -26,12 +28,12 @@ class Encoder extends EventEmitter {
     this.waveformTimeout;
 
     this.upButton = new five.Button({
-      pin: slot,
+      pin: pin1,
       debounce,
       board,
     });
     this.downButton = new five.Button({
-      pin: slot + 1,
+      pin: pin2,
       debounce,
       board,
     });

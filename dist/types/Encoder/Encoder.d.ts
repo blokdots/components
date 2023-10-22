@@ -8,9 +8,10 @@ declare class Encoder extends EventEmitter {
     waveformTimeout?: NodeJS.Timeout;
     upButton: five.Button;
     downButton: five.Button;
-    constructor({ slot, board, initialValue, debounce, }: {
-        slot: number;
-        board: Board;
+    constructor({ pin1, pin2, board, initialValue, debounce, }: {
+        pin1: number | string;
+        pin2: number | string;
+        board?: Board;
         initialValue?: number;
         debounce?: number;
     });

@@ -1,3 +1,4 @@
+import five from "johnny-five";
 import font from "oled-font-5x7";
 import Oled, { Pixel, Color } from "oled-js";
 import qr from "qr-image";
@@ -14,7 +15,7 @@ class OLED extends Oled {
   drawingIsBlocked: boolean;
   drawingBuffer: Array<Color | null>;
 
-  constructor({ board, five }: { board: any; five: any }) {
+  constructor({ board, five }: { board: five.Board; five: any }) {
     super(board, five, {
       width: 128,
       height: 64,

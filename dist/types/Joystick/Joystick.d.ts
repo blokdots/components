@@ -11,9 +11,10 @@ declare class Joystick extends EventEmitter {
     invertX: boolean;
     invertY: boolean;
     previousX?: number;
-    constructor({ slot, board, invertX, invertY, }: {
-        slot: string;
-        board: five.Board;
+    constructor({ pin1, pin2, board, invertX, invertY, }: {
+        pin1: `A${number}`;
+        pin2: `A${number}`;
+        board?: five.Board;
         invertX?: boolean;
         invertY?: boolean;
     });

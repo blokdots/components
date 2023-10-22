@@ -38968,18 +38968,18 @@ var johnnyFiveExports = johnnyFive.exports;
 var five = /*@__PURE__*/getDefaultExportFromCjs(johnnyFiveExports);
 
 class Encoder extends EventEmitter$2 {
-    constructor({ slot, board, initialValue = 0, debounce = 7, }) {
+    constructor({ pin1, pin2, board, initialValue = 0, debounce = 7, }) {
         super();
         this.value = initialValue;
         this.waveform = "";
         this.waveformTimeout;
         this.upButton = new five.Button({
-            pin: slot,
+            pin: pin1,
             debounce,
             board,
         });
         this.downButton = new five.Button({
-            pin: slot + 1,
+            pin: pin2,
             debounce,
             board,
         });
@@ -39126,21 +39126,19 @@ class FigmaIntegration extends EventEmitter$2 {
 }
 
 class HapticLabs {
-    constructor({ slot, board, initialValue = {
+    constructor({ pin1, pin2, board, initialValue = {
         pin1: 0,
         pin2: 0,
     }, }) {
         this.value = initialValue;
         this.pin1 = new five.Pin({
-            pin: slot,
+            pin: pin1,
             type: "digital",
-            // @ts-ignore — There is an issue with the types for the johnny-five library
             board,
         });
         this.pin2 = new five.Pin({
-            pin: slot + 1,
+            pin: pin2,
             type: "digital",
-            // @ts-ignore — There is an issue with the types for the johnny-five library
             board,
         });
     }
@@ -39185,7 +39183,7 @@ class InvertableSensor extends EventEmitter$2 {
 }
 
 class Joystick extends EventEmitter$2 {
-    constructor({ slot, board, invertX = false, invertY = false, }) {
+    constructor({ pin1, pin2, board, invertX = false, invertY = false, }) {
         super();
         this.transformValue = (value) => {
             let pressed = false;
@@ -39207,7 +39205,7 @@ class Joystick extends EventEmitter$2 {
             return { x, y, pressed };
         };
         this.j5Object = new five.Joystick({
-            pins: [slot, `A${parseInt(slot.substring(1)) + 1}`],
+            pins: [pin1, pin2],
             board: board,
         });
         this.invertX = invertX;

@@ -1,3 +1,4 @@
+import five from "johnny-five";
 import Oled, { Pixel, Color } from "oled-js";
 export declare const OLED_WIDTH = 128;
 export declare const OLED_HEIGHT = 64;
@@ -7,7 +8,7 @@ declare class OLED extends Oled {
     drawingIsBlocked: boolean;
     drawingBuffer: Array<Color | null>;
     constructor({ board, five }: {
-        board: any;
+        board: five.Board;
         five: any;
     });
     drawString(string: string): void;
