@@ -1,1 +1,1 @@
-export { default } from "./SignalTower.js";
+export { default } from "./SignalTower";

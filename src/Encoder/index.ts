@@ -1,1 +1,1 @@
-export { default } from "./Encoder.js";
+export { default } from "./Encoder";

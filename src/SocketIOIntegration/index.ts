@@ -1,1 +1,1 @@
-export { default } from "./SocketIOIntegration.js";
+export { default } from "./SocketIOIntegration";

@@ -1,5 +1,5 @@
 import five from "johnny-five";
-declare class HapticLabs {
+declare class Hapticlabs {
     value: {
         pin1: 1 | 0;
         pin2: 1 | 0;
@@ -20,4 +20,4 @@ declare class HapticLabs {
     playTrack2(): void;
     stopTrack2(): void;
 }
-export default HapticLabs;
+export default Hapticlabs;

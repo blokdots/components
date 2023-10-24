@@ -1,1 +1,1 @@
-export { default } from "./InvertableSensor.js";
+export { default } from "./InvertableSensor";

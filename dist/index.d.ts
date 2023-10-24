@@ -163,7 +163,7 @@ declare class FigmaIntegration extends EventEmitter {
     } & ColorReactionMessage["parameters"]): void;
 }
 
-declare class HapticLabs {
+declare class Hapticlabs {
     value: {
         pin1: 1 | 0;
         pin2: 1 | 0;
@@ -309,4 +309,4 @@ declare const utils: {
     hexToRgb: (hex: string) => [number, number, number] | null;
 };
 
-export { BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT, Counter, Encoder, FigmaIntegration, type ReactionMessage as FigmaReactionMessage, HapticLabs, InvertableSensor, Joystick, LEDStrip, Metronome, OLED_HEIGHT, OLED_WIDTH, OLED as Oled, SignalTower, SocketIOIntegration, Timer, addTextToBuffer, dataToQRCodeBuffer, getBlokdotsSocketIOServer, getBlokdotsSocketIOServerAddress, utils };
+export { BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT, Counter, Encoder, FigmaIntegration, type ReactionMessage as FigmaReactionMessage, Hapticlabs, InvertableSensor, Joystick, LEDStrip, Metronome, OLED_HEIGHT, OLED_WIDTH, OLED as Oled, SignalTower, SocketIOIntegration, Timer, addTextToBuffer, dataToQRCodeBuffer, getBlokdotsSocketIOServer, getBlokdotsSocketIOServerAddress, utils };

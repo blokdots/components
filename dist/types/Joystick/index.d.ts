@@ -1,1 +1,1 @@
-export { default } from "./Joystick.js";
+export { default } from "./Joystick";

@@ -39125,7 +39125,7 @@ class FigmaIntegration extends EventEmitter$2 {
     }
 }
 
-class HapticLabs {
+class Hapticlabs {
     constructor({ pin1, pin2, board, initialValue = {
         pin1: 0,
         pin2: 0,
@@ -42941,7 +42941,7 @@ exports.BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT = BLOKDOTS_SOCKET_IO_SERVER_DEFAU
 exports.Counter = Counter;
 exports.Encoder = Encoder;
 exports.FigmaIntegration = FigmaIntegration;
-exports.HapticLabs = HapticLabs;
+exports.Hapticlabs = Hapticlabs;
 exports.InvertableSensor = InvertableSensor;
 exports.Joystick = Joystick;
 exports.LEDStrip = LEDStrip;

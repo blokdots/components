@@ -4,4 +4,4 @@ export {
   BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT,
   BlokdotsSocketIOServer,
   Integration,
-} from "./BlokdotsSocketIOServer.js";
+} from "./BlokdotsSocketIOServer";

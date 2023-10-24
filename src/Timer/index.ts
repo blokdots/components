@@ -1,1 +1,1 @@
-export { default } from "./Timer.js";
+export { default } from "./Timer";

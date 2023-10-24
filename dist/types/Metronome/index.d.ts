@@ -1,1 +1,1 @@
-export { default } from "./Metronome.js";
+export { default } from "./Metronome";

@@ -1,6 +1,6 @@
 import five from "johnny-five";
 
-class HapticLabs {
+class Hapticlabs {
   value: {
     pin1: 1 | 0;
     pin2: 1 | 0;
@@ -60,4 +60,4 @@ class HapticLabs {
   }
 }
 
-export default HapticLabs;
+export default Hapticlabs;
