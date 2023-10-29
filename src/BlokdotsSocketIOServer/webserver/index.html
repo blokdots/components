@@ -81,10 +81,6 @@
     <script type="text/javascript">
       const generalSocket = io(window.location.origin);
 
-      generalSocket.on("info", (data) => {
-        console.log(data);
-      });
-
       const socket = io(window.location.origin + window.location.pathname);
       const integration = window.location.pathname.substring(1);
 
@@ -102,13 +98,17 @@
         document.querySelector("#connectionStatus").classList.remove("ok");
       });
 
-      socket.on("info", (val) => {
-        if (val.activeIntegrations) {
-          const integrationsHtml = val.activeIntegrations
-            .map((integrationName) => {
+      generalSocket.on("info", (val) => {
+        if (val.integrations) {
+          const integrationsHtml = val.integrations
+            .map((integrationData) => {
               return `<span class="code ${
-                integrationName === integration ? "ok" : ""
-              }">${integrationName}</span>`;
+                integrationData === integration ? "ok" : ""
+              }">${
+                integrationData.id === "blokdots"
+                  ? "socket.io"
+                  : integrationData.id
+              }</span>`;
             })
             .join(" ");
           document.querySelector("#activeIntegrations").innerHTML =
