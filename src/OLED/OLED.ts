@@ -1,3 +1,4 @@
+import five from "johnny-five";
 import font from "oled-font-5x7";
 import Oled, { Pixel, Color } from "oled-js";
 import qr from "qr-image";
@@ -5,12 +6,16 @@ import qr from "qr-image";
 export const OLED_WIDTH = 128;
 export const OLED_HEIGHT = 64;
 
+export const dataToQRCodeBuffer = (data: string) => {
+  return addQrCodeToBuffer(1, 1, data, 4);
+};
+
 class OLED extends Oled {
   previousBitmap: Color[] | null;
   drawingIsBlocked: boolean;
   drawingBuffer: Array<Color | null>;
 
-  constructor({ board, five }: { board: any; five: any }) {
+  constructor({ board, five }: { board: five.Board; five: any }) {
     super(board, five, {
       width: 128,
       height: 64,
@@ -32,14 +37,9 @@ class OLED extends Oled {
     this.drawBitmapOptimized(buffer);
   }
 
-  drawQRCodeNew(data: string, apply: boolean = true) {
+  drawQRCodeNew(data: string) {
     const buffer = addQrCodeToBuffer(1, 1, data, 4);
-
-    if (apply) {
-      this.drawBitmapOptimized(buffer);
-    }
-
-    return buffer;
+    this.drawBitmapOptimized(buffer);
   }
 
   drawValue(label: string, value: string, apply: boolean = true) {
