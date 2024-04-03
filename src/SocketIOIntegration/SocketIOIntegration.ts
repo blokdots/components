@@ -46,9 +46,14 @@ class SocketIOIntegration extends EventEmitter {
   onMessage(data: { [key: string]: any }) {
     const message = {
       message: data[this.format.message],
-      value: !isNaN(+data[this.format.value])
-        ? +data[this.format.value]
-        : data[this.format.value],
+      value:
+        data[this.format.value] === undefined ||
+        data[this.format.value] === null ||
+        data[this.format.value] === ""
+          ? undefined
+          : !isNaN(+data[this.format.value])
+            ? +data[this.format.value]
+            : data[this.format.value],
     };
 
     this.emit("received", message);

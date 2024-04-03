@@ -6,7 +6,8 @@ class Timer extends EventEmitter {
 
   constructor(value = 0) {
     super();
-    this.value = value;
+    // this.value is in milliseconds
+    this.value = value * 1000;
 
     this.interval;
   }
@@ -16,36 +17,39 @@ class Timer extends EventEmitter {
       clearInterval(this.interval);
     }
     this.interval = setInterval(() => {
-      this.value++;
-      this.emit("change", this.value);
-    }, 1000);
+      this.value += 50;
+      this.emit("change", this.value / 1000);
+      this.emit("tick", this.value / 1000);
+    }, 50);
   }
 
   start() {
+    this.emit("start", this.value / 1000);
+
     if (this.interval) {
       return;
     }
 
     this.startInterval();
-    this.emit("start");
   }
 
   stop() {
     clearInterval(this.interval);
     this.interval = undefined;
-    this.emit("stop");
+    this.emit("stop", this.value / 1000);
   }
 
   reset() {
     this.startInterval();
     this.value = 0;
-    this.emit("change", this.value);
-    this.emit("reset");
+    this.emit("change", this.value / 1000);
+    this.emit("reset", 0);
   }
 
   setTo(value: number) {
-    this.value = value;
-    this.emit("change", this.value);
+    this.value = value * 1000;
+    this.emit("change", this.value / 1000);
+    this.emit("set", this.value / 1000);
   }
 }
 

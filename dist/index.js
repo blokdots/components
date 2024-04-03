@@ -7,11 +7,11 @@ var http = require('http');
 var EventEmitter$2 = require('events');
 var require$$1 = require('repl');
 var require$$1$1 = require('util');
-var require$$0$2 = require('tty');
-var require$$0$3 = require('fs');
+var require$$1$2 = require('tty');
+var require$$0$2 = require('fs');
 var require$$2 = require('path');
-var require$$0$4 = require('child_process');
-var require$$0$5 = require('zlib');
+var require$$0$3 = require('child_process');
+var require$$0$4 = require('zlib');
 
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -74,7 +74,7 @@ const setupHttpServer = () => {
         const headers = {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "OPTIONS, POST, GET",
-            "Access-Control-Max-Age": 2592000,
+            "Access-Control-Max-Age": 2592000, // 30 days
             "Cache-Control": "max-age=86400",
             /** add other headers as per requirement */
         };
@@ -151,7 +151,7 @@ class BlokdotsSocketIOServer {
             // wsEngine: WebSocket.Server,
             pingInterval: 5000,
             pingTimeout: 5000,
-            allowEIO3: true,
+            allowEIO3: true, // support older websocket clients
             cors: {
                 origin: "*",
                 methods: ["GET", "POST"],
@@ -7626,12 +7626,12 @@ var hasRequiredHasFlag;
 function requireHasFlag () {
 	if (hasRequiredHasFlag) return hasFlag;
 	hasRequiredHasFlag = 1;
-	hasFlag = (flag, argv) => {
-		argv = argv || process.argv;
+
+	hasFlag = (flag, argv = process.argv) => {
 		const prefix = flag.startsWith('-') ? '' : (flag.length === 1 ? '-' : '--');
-		const pos = argv.indexOf(prefix + flag);
-		const terminatorPos = argv.indexOf('--');
-		return pos !== -1 && (terminatorPos === -1 ? true : pos < terminatorPos);
+		const position = argv.indexOf(prefix + flag);
+		const terminatorPosition = argv.indexOf('--');
+		return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
 	};
 	return hasFlag;
 }
@@ -7643,23 +7643,32 @@ function requireSupportsColor () {
 	if (hasRequiredSupportsColor) return supportsColor_1;
 	hasRequiredSupportsColor = 1;
 	const os = require$$0$1;
+	const tty = require$$1$2;
 	const hasFlag = requireHasFlag();
 
-	const env = process.env;
+	const {env} = process;
 
 	let forceColor;
 	if (hasFlag('no-color') ||
 		hasFlag('no-colors') ||
-		hasFlag('color=false')) {
-		forceColor = false;
+		hasFlag('color=false') ||
+		hasFlag('color=never')) {
+		forceColor = 0;
 	} else if (hasFlag('color') ||
 		hasFlag('colors') ||
 		hasFlag('color=true') ||
 		hasFlag('color=always')) {
-		forceColor = true;
+		forceColor = 1;
 	}
+
 	if ('FORCE_COLOR' in env) {
-		forceColor = env.FORCE_COLOR.length === 0 || parseInt(env.FORCE_COLOR, 10) !== 0;
+		if (env.FORCE_COLOR === 'true') {
+			forceColor = 1;
+		} else if (env.FORCE_COLOR === 'false') {
+			forceColor = 0;
+		} else {
+			forceColor = env.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env.FORCE_COLOR, 10), 3);
+		}
 	}
 
 	function translateLevel(level) {
@@ -7675,8 +7684,8 @@ function requireSupportsColor () {
 		};
 	}
 
-	function supportsColor(stream) {
-		if (forceColor === false) {
+	function supportsColor(haveStream, streamIsTTY) {
+		if (forceColor === 0) {
 			return 0;
 		}
 
@@ -7690,22 +7699,21 @@ function requireSupportsColor () {
 			return 2;
 		}
 
-		if (stream && !stream.isTTY && forceColor !== true) {
+		if (haveStream && !streamIsTTY && forceColor === undefined) {
 			return 0;
 		}
 
-		const min = forceColor ? 1 : 0;
+		const min = forceColor || 0;
+
+		if (env.TERM === 'dumb') {
+			return min;
+		}
 
 		if (process.platform === 'win32') {
-			// Node.js 7.5.0 is the first version of Node.js to include a patch to
-			// libuv that enables 256 color output on Windows. Anything earlier and it
-			// won't work. However, here we target Node.js 8 at minimum as it is an LTS
-			// release, and Node.js 7 is not. Windows 10 build 10586 is the first Windows
-			// release that supports 256 colors. Windows 10 build 14931 is the first release
-			// that supports 16m/TrueColor.
+			// Windows 10 build 10586 is the first Windows release that supports 256 colors.
+			// Windows 10 build 14931 is the first release that supports 16m/TrueColor.
 			const osRelease = os.release().split('.');
 			if (
-				Number(process.versions.node.split('.')[0]) >= 8 &&
 				Number(osRelease[0]) >= 10 &&
 				Number(osRelease[2]) >= 10586
 			) {
@@ -7716,7 +7724,7 @@ function requireSupportsColor () {
 		}
 
 		if ('CI' in env) {
-			if (['TRAVIS', 'CIRCLECI', 'APPVEYOR', 'GITLAB_CI'].some(sign => sign in env) || env.CI_NAME === 'codeship') {
+			if (['TRAVIS', 'CIRCLECI', 'APPVEYOR', 'GITLAB_CI', 'GITHUB_ACTIONS', 'BUILDKITE'].some(sign => sign in env) || env.CI_NAME === 'codeship') {
 				return 1;
 			}
 
@@ -7755,22 +7763,18 @@ function requireSupportsColor () {
 			return 1;
 		}
 
-		if (env.TERM === 'dumb') {
-			return min;
-		}
-
 		return min;
 	}
 
 	function getSupportLevel(stream) {
-		const level = supportsColor(stream);
+		const level = supportsColor(stream, stream && stream.isTTY);
 		return translateLevel(level);
 	}
 
 	supportsColor_1 = {
 		supportsColor: getSupportLevel,
-		stdout: getSupportLevel(process.stdout),
-		stderr: getSupportLevel(process.stderr)
+		stdout: translateLevel(supportsColor(true, tty.isatty(1))),
+		stderr: translateLevel(supportsColor(true, tty.isatty(2)))
 	};
 	return supportsColor_1;
 }
@@ -7785,7 +7789,7 @@ function requireNode () {
 	if (hasRequiredNode) return node.exports;
 	hasRequiredNode = 1;
 	(function (module, exports) {
-		const tty = require$$0$2;
+		const tty = require$$1$2;
 		const util = require$$1$1;
 
 		/**
@@ -8761,19 +8765,19 @@ function requireSerialportMock () {
 	return serialportMock;
 }
 
-var serialport$1 = {};
+var serialport = {};
 
 var dist$1 = {};
 
-var darwin = {};
+var darwin$1 = {};
 
 var loadBindings = {};
-
-var nodeGypBuild$1 = {exports: {}};
 
 function commonjsRequire(path) {
 	throw new Error('Could not dynamically require "' + path + '". Please configure the dynamicRequireTargets or/and ignoreDynamicRequires option of @rollup/plugin-commonjs appropriately for this require call to work.');
 }
+
+var nodeGypBuild$1 = {exports: {}};
 
 var nodeGypBuild;
 var hasRequiredNodeGypBuild$1;
@@ -8781,7 +8785,7 @@ var hasRequiredNodeGypBuild$1;
 function requireNodeGypBuild$1 () {
 	if (hasRequiredNodeGypBuild$1) return nodeGypBuild;
 	hasRequiredNodeGypBuild$1 = 1;
-	var fs = require$$0$3;
+	var fs = require$$0$2;
 	var path = require$$2;
 	var os = require$$0$1;
 
@@ -8937,8 +8941,8 @@ function requireNodeGypBuild$1 () {
 	function matchTags (runtime, abi) {
 	  return function (tags) {
 	    if (tags == null) return false
-	    if (tags.runtime !== runtime && !runtimeAgnostic(tags)) return false
-	    if (tags.abi !== abi && !tags.napi) return false
+	    if (tags.runtime && tags.runtime !== runtime && !runtimeAgnostic(tags)) return false
+	    if (tags.abi && tags.abi !== abi && !tags.napi) return false
 	    if (tags.uv && tags.uv !== uv) return false
 	    if (tags.armv && tags.armv !== armv) return false
 	    if (tags.libc && tags.libc !== libc) return false
@@ -8996,8 +9000,9 @@ var hasRequiredNodeGypBuild;
 function requireNodeGypBuild () {
 	if (hasRequiredNodeGypBuild) return nodeGypBuild$1.exports;
 	hasRequiredNodeGypBuild = 1;
-	if (typeof process.addon === 'function') { // if the platform supports native resolving prefer that
-	  nodeGypBuild$1.exports = process.addon.bind(process);
+	const runtimeRequire = typeof __webpack_require__ === 'function' ? __non_webpack_require__ : commonjsRequire; // eslint-disable-line
+	if (typeof runtimeRequire.addon === 'function') { // if the platform supports native resolving prefer that
+	  nodeGypBuild$1.exports = runtimeRequire.addon.bind(runtimeRequire);
 	} else { // else use the runtime version here
 	  nodeGypBuild$1.exports = requireNodeGypBuild$1();
 	}
@@ -9033,7 +9038,7 @@ function requireLoadBindings () {
 	return loadBindings;
 }
 
-var poller = {};
+var poller$1 = {};
 
 var errors = {};
 
@@ -9054,11 +9059,11 @@ function requireErrors () {
 	return errors;
 }
 
-var hasRequiredPoller;
+var hasRequiredPoller$1;
 
-function requirePoller () {
-	if (hasRequiredPoller) return poller;
-	hasRequiredPoller = 1;
+function requirePoller$1 () {
+	if (hasRequiredPoller$1) return poller$1;
+	hasRequiredPoller$1 = 1;
 	(function (exports) {
 		var __importDefault = (commonjsGlobal && commonjsGlobal.__importDefault) || function (mod) {
 		    return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -9163,17 +9168,17 @@ function requirePoller () {
 		    }
 		}
 		exports.Poller = Poller; 
-	} (poller));
-	return poller;
+	} (poller$1));
+	return poller$1;
 }
 
 var unixRead = {};
 
-var hasRequiredUnixRead;
+var hasRequiredUnixRead$1;
 
-function requireUnixRead () {
-	if (hasRequiredUnixRead) return unixRead;
-	hasRequiredUnixRead = 1;
+function requireUnixRead$1 () {
+	if (hasRequiredUnixRead$1) return unixRead;
+	hasRequiredUnixRead$1 = 1;
 	(function (exports) {
 		var __importDefault = (commonjsGlobal && commonjsGlobal.__importDefault) || function (mod) {
 		    return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -9181,7 +9186,7 @@ function requireUnixRead () {
 		Object.defineProperty(exports, "__esModule", { value: true });
 		exports.unixRead = void 0;
 		const util_1 = require$$1$1;
-		const fs_1 = require$$0$3;
+		const fs_1 = require$$0$2;
 		const errors_1 = requireErrors();
 		const debug_1 = __importDefault(requireSrc());
 		const logger = (0, debug_1.default)('serialport/bindings-cpp/unixRead');
@@ -9235,18 +9240,18 @@ function requireUnixRead () {
 
 var unixWrite = {};
 
-var hasRequiredUnixWrite;
+var hasRequiredUnixWrite$1;
 
-function requireUnixWrite () {
-	if (hasRequiredUnixWrite) return unixWrite;
-	hasRequiredUnixWrite = 1;
+function requireUnixWrite$1 () {
+	if (hasRequiredUnixWrite$1) return unixWrite;
+	hasRequiredUnixWrite$1 = 1;
 	(function (exports) {
 		var __importDefault = (commonjsGlobal && commonjsGlobal.__importDefault) || function (mod) {
 		    return (mod && mod.__esModule) ? mod : { "default": mod };
 		};
 		Object.defineProperty(exports, "__esModule", { value: true });
 		exports.unixWrite = void 0;
-		const fs_1 = require$$0$3;
+		const fs_1 = require$$0$2;
 		const debug_1 = __importDefault(requireSrc());
 		const util_1 = require$$1$1;
 		const logger = (0, debug_1.default)('serialport/bindings-cpp/unixWrite');
@@ -9300,23 +9305,23 @@ function requireUnixWrite () {
 	return unixWrite;
 }
 
-var hasRequiredDarwin;
+var hasRequiredDarwin$1;
 
-function requireDarwin () {
-	if (hasRequiredDarwin) return darwin;
-	hasRequiredDarwin = 1;
+function requireDarwin$1 () {
+	if (hasRequiredDarwin$1) return darwin$1;
+	hasRequiredDarwin$1 = 1;
 	var __importDefault = (commonjsGlobal && commonjsGlobal.__importDefault) || function (mod) {
 	    return (mod && mod.__esModule) ? mod : { "default": mod };
 	};
-	Object.defineProperty(darwin, "__esModule", { value: true });
-	darwin.DarwinPortBinding = darwin.DarwinBinding = void 0;
+	Object.defineProperty(darwin$1, "__esModule", { value: true });
+	darwin$1.DarwinPortBinding = darwin$1.DarwinBinding = void 0;
 	const debug_1 = __importDefault(requireSrc());
 	const load_bindings_1 = requireLoadBindings();
-	const poller_1 = requirePoller();
-	const unix_read_1 = requireUnixRead();
-	const unix_write_1 = requireUnixWrite();
+	const poller_1 = requirePoller$1();
+	const unix_read_1 = requireUnixRead$1();
+	const unix_write_1 = requireUnixWrite$1();
 	const debug = (0, debug_1.default)('serialport/bindings-cpp');
-	darwin.DarwinBinding = {
+	darwin$1.DarwinBinding = {
 	    list() {
 	        debug('list');
 	        return (0, load_bindings_1.asyncList)();
@@ -9451,22 +9456,22 @@ function requireDarwin () {
 	        await (0, load_bindings_1.asyncDrain)(this.fd);
 	    }
 	}
-	darwin.DarwinPortBinding = DarwinPortBinding;
-	return darwin;
+	darwin$1.DarwinPortBinding = DarwinPortBinding;
+	return darwin$1;
 }
 
-var linux = {};
+var linux$1 = {};
 
-var linuxList = {};
+var linuxList$1 = {};
 
-var hasRequiredLinuxList;
+var hasRequiredLinuxList$1;
 
-function requireLinuxList () {
-	if (hasRequiredLinuxList) return linuxList;
-	hasRequiredLinuxList = 1;
-	Object.defineProperty(linuxList, "__esModule", { value: true });
-	linuxList.linuxList = void 0;
-	const child_process_1 = require$$0$4;
+function requireLinuxList$1 () {
+	if (hasRequiredLinuxList$1) return linuxList$1;
+	hasRequiredLinuxList$1 = 1;
+	Object.defineProperty(linuxList$1, "__esModule", { value: true });
+	linuxList$1.linuxList = void 0;
+	const child_process_1 = require$$0$3;
 	const parser_readline_1 = requireDist$9();
 	// get only serial port names
 	function checkPathOfDevice(path) {
@@ -9500,7 +9505,7 @@ function requireLinuxList () {
 	    }
 	    return val;
 	}
-	function linuxList$1(spawnCmd = child_process_1.spawn) {
+	function linuxList(spawnCmd = child_process_1.spawn) {
 	    const ports = [];
 	    const udevadm = spawnCmd('udevadm', ['info', '-e']);
 	    const lines = udevadm.stdout.pipe(new parser_readline_1.ReadlineParser());
@@ -9568,28 +9573,28 @@ function requireLinuxList () {
 	        lines.on('finish', () => resolve(ports));
 	    });
 	}
-	linuxList.linuxList = linuxList$1;
-	return linuxList;
+	linuxList$1.linuxList = linuxList;
+	return linuxList$1;
 }
 
-var hasRequiredLinux;
+var hasRequiredLinux$1;
 
-function requireLinux () {
-	if (hasRequiredLinux) return linux;
-	hasRequiredLinux = 1;
+function requireLinux$1 () {
+	if (hasRequiredLinux$1) return linux$1;
+	hasRequiredLinux$1 = 1;
 	var __importDefault = (commonjsGlobal && commonjsGlobal.__importDefault) || function (mod) {
 	    return (mod && mod.__esModule) ? mod : { "default": mod };
 	};
-	Object.defineProperty(linux, "__esModule", { value: true });
-	linux.LinuxPortBinding = linux.LinuxBinding = void 0;
+	Object.defineProperty(linux$1, "__esModule", { value: true });
+	linux$1.LinuxPortBinding = linux$1.LinuxBinding = void 0;
 	const debug_1 = __importDefault(requireSrc());
-	const linux_list_1 = requireLinuxList();
-	const poller_1 = requirePoller();
-	const unix_read_1 = requireUnixRead();
-	const unix_write_1 = requireUnixWrite();
+	const linux_list_1 = requireLinuxList$1();
+	const poller_1 = requirePoller$1();
+	const unix_read_1 = requireUnixRead$1();
+	const unix_write_1 = requireUnixWrite$1();
 	const load_bindings_1 = requireLoadBindings();
 	const debug = (0, debug_1.default)('serialport/bindings-cpp');
-	linux.LinuxBinding = {
+	linux$1.LinuxBinding = {
 	    list() {
 	        debug('list');
 	        return (0, linux_list_1.linuxList)();
@@ -9725,21 +9730,21 @@ function requireLinux () {
 	        await (0, load_bindings_1.asyncDrain)(this.fd);
 	    }
 	}
-	linux.LinuxPortBinding = LinuxPortBinding;
-	return linux;
+	linux$1.LinuxPortBinding = LinuxPortBinding;
+	return linux$1;
 }
 
-var win32 = {};
+var win32$1 = {};
 
-var win32SnParser = {};
+var win32SnParser$1 = {};
 
-var hasRequiredWin32SnParser;
+var hasRequiredWin32SnParser$1;
 
-function requireWin32SnParser () {
-	if (hasRequiredWin32SnParser) return win32SnParser;
-	hasRequiredWin32SnParser = 1;
-	Object.defineProperty(win32SnParser, "__esModule", { value: true });
-	win32SnParser.serialNumParser = void 0;
+function requireWin32SnParser$1 () {
+	if (hasRequiredWin32SnParser$1) return win32SnParser$1;
+	hasRequiredWin32SnParser$1 = 1;
+	Object.defineProperty(win32SnParser$1, "__esModule", { value: true });
+	win32SnParser$1.serialNumParser = void 0;
 	const PARSERS = [/USB\\(?:.+)\\(.+)/, /FTDIBUS\\(?:.+)\+(.+?)A?\\.+/];
 	const serialNumParser = (pnpId) => {
 	    if (!pnpId) {
@@ -9753,26 +9758,26 @@ function requireWin32SnParser () {
 	    }
 	    return null;
 	};
-	win32SnParser.serialNumParser = serialNumParser;
-	return win32SnParser;
+	win32SnParser$1.serialNumParser = serialNumParser;
+	return win32SnParser$1;
 }
 
-var hasRequiredWin32;
+var hasRequiredWin32$1;
 
-function requireWin32 () {
-	if (hasRequiredWin32) return win32;
-	hasRequiredWin32 = 1;
+function requireWin32$1 () {
+	if (hasRequiredWin32$1) return win32$1;
+	hasRequiredWin32$1 = 1;
 	var __importDefault = (commonjsGlobal && commonjsGlobal.__importDefault) || function (mod) {
 	    return (mod && mod.__esModule) ? mod : { "default": mod };
 	};
-	Object.defineProperty(win32, "__esModule", { value: true });
-	win32.WindowsPortBinding = win32.WindowsBinding = void 0;
+	Object.defineProperty(win32$1, "__esModule", { value: true });
+	win32$1.WindowsPortBinding = win32$1.WindowsBinding = void 0;
 	const debug_1 = __importDefault(requireSrc());
 	const _1 = requireDist$1();
 	const load_bindings_1 = requireLoadBindings();
-	const win32_sn_parser_1 = requireWin32SnParser();
+	const win32_sn_parser_1 = requireWin32SnParser$1();
 	const debug = (0, debug_1.default)('serialport/bindings-cpp');
-	win32.WindowsBinding = {
+	win32$1.WindowsBinding = {
 	    async list() {
 	        const ports = await (0, load_bindings_1.asyncList)();
 	        // Grab the serial number from the pnp id
@@ -9922,8 +9927,8 @@ function requireWin32 () {
 	        await (0, load_bindings_1.asyncDrain)(this.fd);
 	    }
 	}
-	win32.WindowsPortBinding = WindowsPortBinding;
-	return win32;
+	win32$1.WindowsPortBinding = WindowsPortBinding;
+	return win32$1;
 }
 
 var dist = {};
@@ -9963,14 +9968,14 @@ function requireDist$1 () {
 		exports.autoDetect = void 0;
 		/* eslint-disable @typescript-eslint/no-var-requires */
 		const debug_1 = __importDefault(requireSrc());
-		const darwin_1 = requireDarwin();
-		const linux_1 = requireLinux();
-		const win32_1 = requireWin32();
+		const darwin_1 = requireDarwin$1();
+		const linux_1 = requireLinux$1();
+		const win32_1 = requireWin32$1();
 		const debug = (0, debug_1.default)('serialport/bindings-cpp');
 		__exportStar(requireDist$2(), exports);
-		__exportStar(requireDarwin(), exports);
-		__exportStar(requireLinux(), exports);
-		__exportStar(requireWin32(), exports);
+		__exportStar(requireDarwin$1(), exports);
+		__exportStar(requireLinux$1(), exports);
+		__exportStar(requireWin32$1(), exports);
 		__exportStar(requireErrors(), exports);
 		/**
 		 * This is an auto detected binding for your current platform
@@ -9996,10 +10001,10 @@ function requireDist$1 () {
 var hasRequiredSerialport;
 
 function requireSerialport () {
-	if (hasRequiredSerialport) return serialport$1;
+	if (hasRequiredSerialport) return serialport;
 	hasRequiredSerialport = 1;
-	Object.defineProperty(serialport$1, "__esModule", { value: true });
-	serialport$1.SerialPort = void 0;
+	Object.defineProperty(serialport, "__esModule", { value: true });
+	serialport.SerialPort = void 0;
 	const stream_1 = requireDist$4();
 	const bindings_cpp_1 = requireDist$1();
 	const DetectedBinding = (0, bindings_cpp_1.autoDetect)();
@@ -10012,10 +10017,10 @@ function requireSerialport () {
 	        super(opts, openCallback);
 	    }
 	}
-	serialport$1.SerialPort = SerialPort;
+	serialport.SerialPort = SerialPort;
 	SerialPort.list = DetectedBinding.list;
 	SerialPort.binding = DetectedBinding;
-	return serialport$1;
+	return serialport;
 }
 
 var hasRequiredDist;
@@ -10163,12 +10168,12 @@ function requireOnewireutils () {
 	return onewireutils;
 }
 
-var firmataIo;
-var hasRequiredFirmataIo;
+var firmata$1;
+var hasRequiredFirmata$1;
 
-function requireFirmataIo () {
-	if (hasRequiredFirmataIo) return firmataIo;
-	hasRequiredFirmataIo = 1;
+function requireFirmata$1 () {
+	if (hasRequiredFirmata$1) return firmata$1;
+	hasRequiredFirmata$1 = 1;
 
 	// Built-in Dependencies
 	const Emitter = EventEmitter$2;
@@ -10185,17 +10190,17 @@ function requireFirmataIo () {
 	 */
 
 	const ANALOG_MAPPING_QUERY = 0x69;
-	const ANALOG_MAPPING_RESPONSE = 0x6a;
-	const ANALOG_MESSAGE = 0xe0;
-	const CAPABILITY_QUERY = 0x6b;
-	const CAPABILITY_RESPONSE = 0x6c;
+	const ANALOG_MAPPING_RESPONSE = 0x6A;
+	const ANALOG_MESSAGE = 0xE0;
+	const CAPABILITY_QUERY = 0x6B;
+	const CAPABILITY_RESPONSE = 0x6C;
 	const DIGITAL_MESSAGE = 0x90;
-	const END_SYSEX = 0xf7;
-	const EXTENDED_ANALOG = 0x6f;
+	const END_SYSEX = 0xF7;
+	const EXTENDED_ANALOG = 0x6F;
 	const I2C_CONFIG = 0x78;
 	const I2C_REPLY = 0x77;
 	const I2C_REQUEST = 0x76;
-	const I2C_READ_MASK = 0x18; // 0b00011000
+	const I2C_READ_MASK = 0x18;   // 0b00011000
 	// const I2C_END_TX_MASK = 0x40; // 0b01000000
 	const ONEWIRE_CONFIG_REQUEST = 0x41;
 	const ONEWIRE_DATA = 0x73;
@@ -10207,19 +10212,19 @@ function requireFirmataIo () {
 	const ONEWIRE_SEARCH_ALARMS_REQUEST = 0x44;
 	const ONEWIRE_SEARCH_REPLY = 0x42;
 	const ONEWIRE_SEARCH_REQUEST = 0x40;
-	const ONEWIRE_WITHDATA_REQUEST_BITS = 0x3c;
+	const ONEWIRE_WITHDATA_REQUEST_BITS = 0x3C;
 	const ONEWIRE_WRITE_REQUEST_BIT = 0x20;
-	const PIN_MODE = 0xf4;
-	const PIN_STATE_QUERY = 0x6d;
-	const PIN_STATE_RESPONSE = 0x6e;
+	const PIN_MODE = 0xF4;
+	const PIN_STATE_QUERY = 0x6D;
+	const PIN_STATE_RESPONSE = 0x6E;
 	const PING_READ = 0x75;
 	// const PULSE_IN = 0x74;
 	// const PULSE_OUT = 0x73;
 	const QUERY_FIRMWARE = 0x79;
-	const REPORT_ANALOG = 0xc0;
-	const REPORT_DIGITAL = 0xd0;
-	const REPORT_VERSION = 0xf9;
-	const SAMPLING_INTERVAL = 0x7a;
+	const REPORT_ANALOG = 0xC0;
+	const REPORT_DIGITAL = 0xD0;
+	const REPORT_VERSION = 0xF9;
+	const SAMPLING_INTERVAL = 0x7A;
 	const SERVO_CONFIG = 0x70;
 	const SERIAL_MESSAGE = 0x60;
 	const SERIAL_CONFIG = 0x10;
@@ -10229,11 +10234,11 @@ function requireFirmataIo () {
 	const SERIAL_CLOSE = 0x50;
 	const SERIAL_FLUSH = 0x60;
 	const SERIAL_LISTEN = 0x70;
-	const START_SYSEX = 0xf0;
+	const START_SYSEX = 0xF0;
 	const STEPPER = 0x72;
 	const ACCELSTEPPER = 0x62;
 	const STRING_DATA = 0x71;
-	const SYSTEM_RESET = 0xff;
+	const SYSTEM_RESET = 0xFF;
 
 	const MAX_PIN_COUNT = 128;
 
@@ -10247,6 +10252,7 @@ function requireFirmataIo () {
 	 */
 
 	const MIDI_RESPONSE = {
+
 	  /**
 	   * Handles a REPORT_VERSION response and emits the reportversion event.
 	   * @private
@@ -10266,7 +10272,7 @@ function requireFirmataIo () {
 	   */
 
 	  [ANALOG_MESSAGE](board) {
-	    const pin = board.buffer[0] & 0x0f;
+	    const pin = board.buffer[0] & 0x0F;
 	    const value = board.buffer[1] | (board.buffer[2] << 7);
 
 	    /* istanbul ignore else */
@@ -10293,7 +10299,7 @@ function requireFirmataIo () {
 	   */
 
 	  [DIGITAL_MESSAGE](board) {
-	    const port = board.buffer[0] & 0x0f;
+	    const port = board.buffer[0] & 0x0F;
 	    const portValue = board.buffer[1] | (board.buffer[2] << 7);
 
 	    for (let i = 0; i < 8; i++) {
@@ -10301,11 +10307,7 @@ function requireFirmataIo () {
 	      const pinRec = board.pins[pin];
 	      const bit = 1 << i;
 
-	      if (
-	        pinRec &&
-	        (pinRec.mode === board.MODES.INPUT ||
-	          pinRec.mode === board.MODES.PULLUP)
-	      ) {
+	      if (pinRec && (pinRec.mode === board.MODES.INPUT || pinRec.mode === board.MODES.PULLUP)) {
 	        pinRec.value = (portValue >> (i & 0x07)) & 0x01;
 
 	        if (pinRec.value) {
@@ -10314,7 +10316,7 @@ function requireFirmataIo () {
 	          board.ports[port] &= ~bit;
 	        }
 
-	        let { value } = pinRec;
+	        let {value} = pinRec;
 
 	        board.emit(`digital-read-${pin}`, value);
 	        board.emit("digital-read", {
@@ -10333,6 +10335,7 @@ function requireFirmataIo () {
 	 */
 
 	const SYSEX_RESPONSE = {
+
 	  /**
 	   * Handles a QUERY_FIRMWARE response and emits the "queryfirmware" event
 	   * @private
@@ -10346,19 +10349,19 @@ function requireFirmataIo () {
 	    let offset = 0;
 
 	    for (let i = 4; i < length; i += 2) {
-	      byte =
-	        ((board.buffer[i] & 0x7f) | ((board.buffer[i + 1] & 0x7f) << 7)) & 0xff;
+	      byte = ((board.buffer[i] & 0x7F) | ((board.buffer[i + 1] & 0x7F) << 7)) & 0xFF;
 	      buffer.writeUInt8(byte, offset++);
 	    }
 
-	    (board.firmware = {
+	    board.firmware = {
 	      name: buffer.toString(),
 	      version: {
 	        major: board.buffer[2],
 	        minor: board.buffer[3],
 	      },
-	    }),
-	      board.emit("queryfirmware");
+	    },
+
+	    board.emit("queryfirmware");
 	  },
 
 	  /**
@@ -10384,7 +10387,7 @@ function requireFirmataIo () {
 	    // Only create pins if none have been previously created on the instance.
 	    if (!board.pins.length) {
 	      for (let i = 2, n = 0; i < board.buffer.length - 1; i++) {
-	        if (board.buffer[i] === 0x7f) {
+	        if (board.buffer[i] === 0x7F) {
 	          board.pins.push({
 	            supportedModes: supportedModes(capability),
 	            mode: undefined,
@@ -10398,7 +10401,7 @@ function requireFirmataIo () {
 	        if (n === 0) {
 	          mode = board.buffer[i];
 	          resolution = (1 << board.buffer[i + 1]) - 1;
-	          capability |= 1 << mode;
+	          capability |= (1 << mode);
 
 	          // ADC Resolution of Analog Inputs
 	          if (mode === board.MODES.ANALOG && board.RESOLUTION.ADC === null) {
@@ -10437,10 +10440,10 @@ function requireFirmataIo () {
 	    board.pins[pin].mode = board.buffer[3];
 	    board.pins[pin].state = board.buffer[4];
 	    if (board.buffer.length > 6) {
-	      board.pins[pin].state |= board.buffer[5] << 7;
+	      board.pins[pin].state |= (board.buffer[5] << 7);
 	    }
 	    if (board.buffer.length > 7) {
-	      board.pins[pin].state |= board.buffer[6] << 14;
+	      board.pins[pin].state |= (board.buffer[6] << 14);
 	    }
 	    board.emit(`pin-state-${pin}`);
 	  },
@@ -10474,8 +10477,8 @@ function requireFirmataIo () {
 
 	  [I2C_REPLY](board) {
 	    const reply = [];
-	    const address = (board.buffer[2] & 0x7f) | ((board.buffer[3] & 0x7f) << 7);
-	    const register = (board.buffer[4] & 0x7f) | ((board.buffer[5] & 0x7f) << 7);
+	    const address = (board.buffer[2] & 0x7F) | ((board.buffer[3] & 0x7F) << 7);
+	    const register = (board.buffer[4] & 0x7F) | ((board.buffer[5] & 0x7F) << 7);
 
 	    for (let i = 6, length = board.buffer.length - 1; i < length; i += 2) {
 	      reply.push(board.buffer[i] | (board.buffer[i + 1] << 7));
@@ -10505,10 +10508,7 @@ function requireFirmataIo () {
 	    const pin = board.buffer[3];
 	    const buffer = board.buffer.slice(4, board.buffer.length - 1);
 
-	    board.emit(
-	      `1-wire-search-alarms-reply-${pin}`,
-	      OneWire.readDevices(buffer)
-	    );
+	    board.emit(`1-wire-search-alarms-reply-${pin}`, OneWire.readDevices(buffer));
 	  },
 
 	  [ONEWIRE_READ_REPLY](board) {
@@ -10526,10 +10526,7 @@ function requireFirmataIo () {
 	   */
 
 	  [STRING_DATA](board) {
-	    board.emit(
-	      "string",
-	      Buffer.from(board.buffer.slice(2, -1)).toString().replace(/\0/g, "")
-	    );
+	    board.emit("string", Buffer.from(board.buffer.slice(2, -1)).toString().replace(/\0/g, ""));
 	  },
 
 	  /**
@@ -10537,18 +10534,17 @@ function requireFirmataIo () {
 	   */
 
 	  [PING_READ](board) {
-	    const pin = (board.buffer[2] & 0x7f) | ((board.buffer[3] & 0x7f) << 7);
+	    const pin = (board.buffer[2] & 0x7F) | ((board.buffer[3] & 0x7F) << 7);
 	    const durationBuffer = [
-	      (board.buffer[4] & 0x7f) | ((board.buffer[5] & 0x7f) << 7),
-	      (board.buffer[6] & 0x7f) | ((board.buffer[7] & 0x7f) << 7),
-	      (board.buffer[8] & 0x7f) | ((board.buffer[9] & 0x7f) << 7),
-	      (board.buffer[10] & 0x7f) | ((board.buffer[11] & 0x7f) << 7),
+	      (board.buffer[4] & 0x7F) | ((board.buffer[5] & 0x7F) << 7),
+	      (board.buffer[6] & 0x7F) | ((board.buffer[7] & 0x7F) << 7),
+	      (board.buffer[8] & 0x7F) | ((board.buffer[9] & 0x7F) << 7),
+	      (board.buffer[10] & 0x7F) | ((board.buffer[11] & 0x7F) << 7),
 	    ];
-	    const duration =
-	      (durationBuffer[0] << 24) +
+	    const duration = ((durationBuffer[0] << 24) +
 	      (durationBuffer[1] << 16) +
 	      (durationBuffer[2] << 8) +
-	      durationBuffer[3];
+	      (durationBuffer[3]));
 	    board.emit(`ping-read-${pin}`, duration);
 	  },
 
@@ -10570,15 +10566,13 @@ function requireFirmataIo () {
 	  [ACCELSTEPPER](board) {
 	    const command = board.buffer[2];
 	    const deviceNum = board.buffer[3];
-	    const value =
-	      command === 0x06 || command === 0x0a
-	        ? decode32BitSignedInteger(board.buffer.slice(4, 9))
-	        : null;
+	    const value = command === 0x06 || command === 0x0A ?
+	      decode32BitSignedInteger(board.buffer.slice(4, 9)) : null;
 
 	    if (command === 0x06) {
 	      board.emit(`stepper-position-${deviceNum}`, value);
 	    }
-	    if (command === 0x0a) {
+	    if (command === 0x0A) {
 	      board.emit(`stepper-done-${deviceNum}`, value);
 	    }
 	    if (command === 0x24) {
@@ -10596,7 +10590,7 @@ function requireFirmataIo () {
 
 	  [SERIAL_MESSAGE](board) {
 	    const command = board.buffer[2] & START_SYSEX;
-	    const portId = board.buffer[2] & 0x0f;
+	    const portId = board.buffer[2] & 0x0F;
 	    const reply = [];
 
 	    /* istanbul ignore else */
@@ -10607,6 +10601,8 @@ function requireFirmataIo () {
 	      board.emit(`serial-data-${portId}`, reply);
 	    }
 	  },
+
+
 	};
 
 	/**
@@ -10614,6 +10610,7 @@ function requireFirmataIo () {
 	 */
 
 	let Transport = null;
+
 
 	/**
 	 * @class The Board object represents an arduino board.
@@ -10651,7 +10648,6 @@ function requireFirmataIo () {
 	        baudRate: 57600,
 	        // https://github.com/node-serialport/node-serialport/blob/5.0.0/UPGRADE_GUIDE.md#open-options
 	        highWaterMark: 256,
-	        path: port,
 	      },
 	    };
 
@@ -10669,9 +10665,9 @@ function requireFirmataIo () {
 	      I2C: 0x06,
 	      ONEWIRE: 0x07,
 	      STEPPER: 0x08,
-	      SERIAL: 0x0a,
-	      PULLUP: 0x0b,
-	      IGNORE: 0x7f,
+	      SERIAL: 0x0A,
+	      PULLUP: 0x0B,
+	      IGNORE: 0x7F,
 	      PING_READ: 0x75,
 	      UNKOWN: 0x10,
 	    };
@@ -10692,7 +10688,7 @@ function requireFirmataIo () {
 	      },
 	      STEP_SIZE: {
 	        WHOLE: 0,
-	        HALF: 1,
+	        HALF: 1
 	      },
 	      RUN_STATE: {
 	        STOP: 0,
@@ -10767,13 +10763,13 @@ function requireFirmataIo () {
 	      if (!Transport) {
 	        throw new Error("Missing Default Transport");
 	      }
-
-	      this.transport = new Transport(settings.serialport);
+	      this.transport = new Transport(port, settings.serialport);
 	    }
 
-	    this.transport.on("close", (event) => {
+	    this.transport.on("close", event => {
+
 	      // https://github.com/node-serialport/node-serialport/blob/5.0.0/UPGRADE_GUIDE.md#opening-and-closing
-	      if (event && event.disconnected) {
+	      if (event && event.disconnect && event.disconnected) {
 	        this.emit("disconnect");
 	        return;
 	      }
@@ -10781,13 +10777,13 @@ function requireFirmataIo () {
 	      this.emit("close");
 	    });
 
-	    this.transport.on("open", (event) => {
+	    this.transport.on("open", event => {
 	      this.emit("open", event);
 	      // Legacy
 	      this.emit("connect", event);
 	    });
 
-	    this.transport.on("error", (error) => {
+	    this.transport.on("error", error => {
 	      if (!this.isReady && typeof callback === "function") {
 	        callback(error);
 	      } else {
@@ -10795,7 +10791,7 @@ function requireFirmataIo () {
 	      }
 	    });
 
-	    this.transport.on("data", (data) => {
+	    this.transport.on("data", data => {
 	      for (let i = 0; i < data.length; i++) {
 	        let byte = data[i];
 	        // we dont want to push 0 as the first byte on our buffer
@@ -10809,6 +10805,7 @@ function requireFirmataIo () {
 
 	          // [START_SYSEX, ... END_SYSEX]
 	          if (first === START_SYSEX && last === END_SYSEX) {
+
 	            let handler = SYSEX_RESPONSE[this.buffer[1]];
 
 	            // Ensure a valid SYSEX_RESPONSE handler exists
@@ -10839,10 +10836,11 @@ function requireFirmataIo () {
 	            // until _after_ REPORT_VERSION, discard it.
 	            //
 	            this.buffer.length = 0;
-	          } else if (first === START_SYSEX && this.buffer.length > 0) {
+
+	          } else if (first === START_SYSEX && (this.buffer.length > 0)) {
 	            // we have a new command after an incomplete sysex command
 	            let currByte = data[i];
-	            if (currByte > 0x7f) {
+	            if (currByte > 0x7F) {
 	              this.buffer.length = 0;
 	              this.buffer.push(currByte);
 	            }
@@ -10852,16 +10850,14 @@ function requireFirmataIo () {
 	              // Check if data gets out of sync: first byte in buffer
 	              // must be a valid response if not START_SYSEX
 	              // Identify response on first byte
-	              let response = first < START_SYSEX ? first & START_SYSEX : first;
+	              let response = first < START_SYSEX ? (first & START_SYSEX) : first;
 
 	              // Check if the first byte is possibly
 	              // a valid MIDI_RESPONSE (handler)
 	              /* istanbul ignore else */
-	              if (
-	                response !== REPORT_VERSION &&
-	                response !== ANALOG_MESSAGE &&
-	                response !== DIGITAL_MESSAGE
-	              ) {
+	              if (response !== REPORT_VERSION &&
+	                  response !== ANALOG_MESSAGE &&
+	                  response !== DIGITAL_MESSAGE) {
 	                // If not valid, then we received garbage and can discard
 	                // whatever bytes have been been queued.
 	                this.buffer.length = 0;
@@ -10873,7 +10869,7 @@ function requireFirmataIo () {
 	          // Might have a MIDI Command
 	          if (this.buffer.length === 3 && first !== START_SYSEX) {
 	            // response bytes under 0xF0 we have a multi byte operation
-	            let response = first < START_SYSEX ? first & START_SYSEX : first;
+	            let response = first < START_SYSEX ? (first & START_SYSEX) : first;
 
 	            /* istanbul ignore else */
 	            if (MIDI_RESPONSE[response]) {
@@ -10902,8 +10898,8 @@ function requireFirmataIo () {
 	    this.reportVersionTimeoutId = setTimeout(() => {
 	      /* istanbul ignore else */
 	      if (this.versionReceived === false) {
-	        this.reportVersion(function () {});
-	        this.queryFirmware(function () {});
+	        this.reportVersion(function() {});
+	        this.queryFirmware(function() {});
 	      }
 	    }, settings.reportVersionTimeout);
 
@@ -10921,6 +10917,7 @@ function requireFirmataIo () {
 	      clearTimeout(this.reportVersionTimeoutId);
 	      this.versionReceived = true;
 	      this.once("queryfirmware", () => {
+
 	        // Only preemptively set the sampling interval if `samplingInterval`
 	        // property was _explicitly_ set as a constructor option.
 	        if (options.samplingInterval !== undefined) {
@@ -10938,7 +10935,7 @@ function requireFirmataIo () {
 	              if (analogChannel < 0) {
 	                analogChannel = 127;
 	              }
-	              this.pins.push({ supportedModes, analogChannel });
+	              this.pins.push({supportedModes, analogChannel});
 	            }
 	          }
 
@@ -10947,8 +10944,8 @@ function requireFirmataIo () {
 	          //
 	          // Based on ATmega328/P
 	          //
-	          this.RESOLUTION.ADC = 0x3ff;
-	          this.RESOLUTION.PWM = 0x0ff;
+	          this.RESOLUTION.ADC = 0x3FF;
+	          this.RESOLUTION.PWM = 0x0FF;
 
 	          ready();
 	        } else {
@@ -10977,8 +10974,14 @@ function requireFirmataIo () {
 
 	  queryFirmware(callback) {
 	    this.once("queryfirmware", callback);
-	    writeToTransport(this, [START_SYSEX, QUERY_FIRMWARE, END_SYSEX]);
+	    writeToTransport(this, [
+	      START_SYSEX,
+	      QUERY_FIRMWARE,
+	      END_SYSEX
+	    ]);
 	  }
+
+
 
 	  /**
 	   * Asks the arduino to read analog data. Turn on reporting for this pin.
@@ -11007,25 +11010,29 @@ function requireFirmataIo () {
 	        START_SYSEX,
 	        EXTENDED_ANALOG,
 	        pin,
-	        value & 0x7f,
-	        (value >> 7) & 0x7f,
+	        value & 0x7F,
+	        (value >> 7) & 0x7F,
 	      ];
 
 	      if (value > 0x00004000) {
-	        data[data.length] = (value >> 14) & 0x7f;
+	        data[data.length] = (value >> 14) & 0x7F;
 	      }
 
 	      if (value > 0x00200000) {
-	        data[data.length] = (value >> 21) & 0x7f;
+	        data[data.length] = (value >> 21) & 0x7F;
 	      }
 
 	      if (value > 0x10000000) {
-	        data[data.length] = (value >> 28) & 0x7f;
+	        data[data.length] = (value >> 28) & 0x7F;
 	      }
 
 	      data[data.length] = END_SYSEX;
 	    } else {
-	      data = [ANALOG_MESSAGE | pin, value & 0x7f, (value >> 7) & 0x7f];
+	      data = [
+	        ANALOG_MESSAGE | pin,
+	        value & 0x7F,
+	        (value >> 7) & 0x7F
+	      ];
 	    }
 
 	    writeToTransport(this, data);
@@ -11074,10 +11081,10 @@ function requireFirmataIo () {
 	      START_SYSEX,
 	      SERVO_CONFIG,
 	      pin,
-	      min & 0x7f,
-	      (min >> 7) & 0x7f,
-	      max & 0x7f,
-	      (max >> 7) & 0x7f,
+	      min & 0x7F,
+	      (min >> 7) & 0x7F,
+	      max & 0x7F,
+	      (max >> 7) & 0x7F,
 	      END_SYSEX,
 	    ]);
 	  }
@@ -11113,7 +11120,11 @@ function requireFirmataIo () {
 	      this.pins[this.analogPins[pin]].mode = mode;
 	    } else {
 	      this.pins[pin].mode = mode;
-	      writeToTransport(this, [PIN_MODE, pin, mode]);
+	      writeToTransport(this, [
+	        PIN_MODE,
+	        pin,
+	        mode
+	      ]);
 	    }
 	  }
 
@@ -11176,8 +11187,8 @@ function requireFirmataIo () {
 	  writeDigitalPort(port) {
 	    writeToTransport(this, [
 	      DIGITAL_MESSAGE | port,
-	      this.ports[port] & 0x7f,
-	      (this.ports[port] >> 7) & 0x7f,
+	      this.ports[port] & 0x7F,
+	      (this.ports[port] >> 7) & 0x7F
 	    ]);
 	  }
 
@@ -11200,7 +11211,11 @@ function requireFirmataIo () {
 
 	  queryCapabilities(callback) {
 	    this.once("capability-query", callback);
-	    writeToTransport(this, [START_SYSEX, CAPABILITY_QUERY, END_SYSEX]);
+	    writeToTransport(this, [
+	      START_SYSEX,
+	      CAPABILITY_QUERY,
+	      END_SYSEX
+	    ]);
 	  }
 
 	  /**
@@ -11210,7 +11225,11 @@ function requireFirmataIo () {
 
 	  queryAnalogMapping(callback) {
 	    this.once("analog-mapping-query", callback);
-	    writeToTransport(this, [START_SYSEX, ANALOG_MAPPING_QUERY, END_SYSEX]);
+	    writeToTransport(this, [
+	      START_SYSEX,
+	      ANALOG_MAPPING_QUERY,
+	      END_SYSEX
+	    ]);
 	  }
 
 	  /**
@@ -11221,7 +11240,12 @@ function requireFirmataIo () {
 
 	  queryPinState(pin, callback) {
 	    this.once(`pin-state-${pin}`, callback);
-	    writeToTransport(this, [START_SYSEX, PIN_STATE_QUERY, pin, END_SYSEX]);
+	    writeToTransport(this, [
+	      START_SYSEX,
+	      PIN_STATE_QUERY,
+	      pin,
+	      END_SYSEX
+	    ]);
 	  }
 
 	  /**
@@ -11235,7 +11259,10 @@ function requireFirmataIo () {
 
 	    data.push(START_SYSEX, STRING_DATA);
 	    for (let i = 0, length = bytes.length; i < length; i++) {
-	      data.push(bytes[i] & 0x7f, (bytes[i] >> 7) & 0x7f);
+	      data.push(
+	        bytes[i] & 0x7F,
+	        (bytes[i] >> 7) & 0x7F
+	      );
 	    }
 	    data.push(END_SYSEX);
 
@@ -11317,8 +11344,8 @@ function requireFirmataIo () {
 	    i2cRequest(this, [
 	      START_SYSEX,
 	      I2C_CONFIG,
-	      delay & 0xff,
-	      (delay >> 8) & 0xff,
+	      delay & 0xFF,
+	      (delay >> 8) & 0xFF,
 	      END_SYSEX,
 	    ]);
 
@@ -11344,7 +11371,10 @@ function requireFirmataIo () {
 	    );
 
 	    for (let i = 0, length = bytes.length; i < length; i++) {
-	      data.push(bytes[i] & 0x7f, (bytes[i] >> 7) & 0x7f);
+	      data.push(
+	        bytes[i] & 0x7F,
+	        (bytes[i] >> 7) & 0x7F
+	      );
 	    }
 
 	    data.push(END_SYSEX);
@@ -11377,14 +11407,18 @@ function requireFirmataIo () {
 	     * command [, ...]
 	     *
 	     */
-	    const data = [START_SYSEX, I2C_REQUEST, address, this.I2C_MODES.WRITE << 3];
+	    const data = [
+	      START_SYSEX,
+	      I2C_REQUEST,
+	      address,
+	      this.I2C_MODES.WRITE << 3
+	    ];
 
 	    // If i2cWrite was used for an i2cWriteReg call...
-	    if (
-	      arguments.length === 3 &&
-	      !Array.isArray(registerOrData) &&
-	      !Array.isArray(inBytes)
-	    ) {
+	    if (arguments.length === 3 &&
+	        !Array.isArray(registerOrData) &&
+	        !Array.isArray(inBytes)) {
+
 	      return this.i2cWriteReg(address, registerOrData, inBytes);
 	    }
 
@@ -11401,7 +11435,10 @@ function requireFirmataIo () {
 	    const bytes = Buffer.from([registerOrData].concat(inBytes));
 
 	    for (var i = 0, length = bytes.length; i < length; i++) {
-	      data.push(bytes[i] & 0x7f, (bytes[i] >> 7) & 0x7f);
+	      data.push(
+	        bytes[i] & 0x7F,
+	        (bytes[i] >> 7) & 0x7F
+	      );
 	    }
 
 	    data.push(END_SYSEX);
@@ -11427,11 +11464,11 @@ function requireFirmataIo () {
 	      address,
 	      this.I2C_MODES.WRITE << 3,
 	      // register
-	      register & 0x7f,
-	      (register >> 7) & 0x7f,
+	      register & 0x7F,
+	      (register >> 7) & 0x7F,
 	      // byte
-	      byte & 0x7f,
-	      (byte >> 7) & 0x7f,
+	      byte & 0x7F,
+	      (byte >> 7) & 0x7F,
 	      END_SYSEX,
 	    ]);
 
@@ -11451,8 +11488,8 @@ function requireFirmataIo () {
 	      I2C_REQUEST,
 	      address,
 	      this.I2C_MODES.READ << 3,
-	      numBytes & 0x7f,
-	      (numBytes >> 7) & 0x7f,
+	      numBytes & 0x7F,
+	      (numBytes >> 7) & 0x7F,
 	      END_SYSEX,
 	    ]);
 	    this.once(`I2C-reply-${address}-0`, callback);
@@ -11471,11 +11508,10 @@ function requireFirmataIo () {
 	   */
 
 	  i2cRead(address, register, bytesToRead, callback) {
-	    if (
-	      arguments.length === 3 &&
-	      typeof register === "number" &&
-	      typeof bytesToRead === "function"
-	    ) {
+
+	    if (arguments.length === 3 &&
+	        typeof register === "number" &&
+	        typeof bytesToRead === "function") {
 	      callback = bytesToRead;
 	      bytesToRead = register;
 	      register = null;
@@ -11490,14 +11526,21 @@ function requireFirmataIo () {
 	    let event = `I2C-reply-${address}-`;
 
 	    if (register !== null) {
-	      data.push(register & 0x7f, (register >> 7) & 0x7f);
+	      data.push(
+	        register & 0x7F,
+	        (register >> 7) & 0x7F
+	      );
 	    } else {
 	      register = 0;
 	    }
 
 	    event += register;
 
-	    data.push(bytesToRead & 0x7f, (bytesToRead >> 7) & 0x7f, END_SYSEX);
+	    data.push(
+	      bytesToRead & 0x7F,
+	      (bytesToRead >> 7) & 0x7F,
+	      END_SYSEX
+	    );
 
 	    this.on(event, callback);
 
@@ -11527,7 +11570,7 @@ function requireFirmataIo () {
 
 	    if (typeof options === "number") {
 	      options = {
-	        address: options,
+	        address: options
 	      };
 	    }
 
@@ -11539,7 +11582,7 @@ function requireFirmataIo () {
 	      END_SYSEX,
 	    ]);
 
-	    Object.keys(this._events).forEach((event) => {
+	    Object.keys(this._events).forEach(event => {
 	      if (event.startsWith(`I2C-reply-${options.address}`)) {
 	        this.removeAllListeners(event);
 	      }
@@ -11560,29 +11603,41 @@ function requireFirmataIo () {
 	   *
 	   */
 
+
 	  i2cReadOnce(address, register, bytesToRead, callback) {
-	    if (
-	      arguments.length === 3 &&
-	      typeof register === "number" &&
-	      typeof bytesToRead === "function"
-	    ) {
+
+	    if (arguments.length === 3 &&
+	        typeof register === "number" &&
+	        typeof bytesToRead === "function") {
 	      callback = bytesToRead;
 	      bytesToRead = register;
 	      register = null;
 	    }
 
-	    const data = [START_SYSEX, I2C_REQUEST, address, this.I2C_MODES.READ << 3];
+	    const data = [
+	      START_SYSEX,
+	      I2C_REQUEST,
+	      address,
+	      this.I2C_MODES.READ << 3,
+	    ];
 	    let event = `I2C-reply-${address}-`;
 
 	    if (register !== null) {
-	      data.push(register & 0x7f, (register >> 7) & 0x7f);
+	      data.push(
+	        register & 0x7F,
+	        (register >> 7) & 0x7F
+	      );
 	    } else {
 	      register = 0;
 	    }
 
 	    event += register;
 
-	    data.push(bytesToRead & 0x7f, (bytesToRead >> 7) & 0x7f, END_SYSEX);
+	    data.push(
+	      bytesToRead & 0x7F,
+	      (bytesToRead >> 7) & 0x7F,
+	      END_SYSEX
+	    );
 
 	    this.once(event, callback);
 
@@ -11642,17 +11697,19 @@ function requireFirmataIo () {
 	  }
 
 	  [SYM_sendOneWireSearch](type, event, pin, callback) {
-	    writeToTransport(this, [START_SYSEX, ONEWIRE_DATA, type, pin, END_SYSEX]);
+	    writeToTransport(this, [
+	      START_SYSEX,
+	      ONEWIRE_DATA,
+	      type,
+	      pin,
+	      END_SYSEX
+	    ]);
 
 	    const timeout = setTimeout(() => {
 	      /* istanbul ignore next */
-	      callback(
-	        new Error(
-	          "1-Wire device search timeout - are you running ConfigurableFirmata?"
-	        )
-	      );
+	      callback(new Error("1-Wire device search timeout - are you running ConfigurableFirmata?"));
 	    }, 5000);
-	    this.once(event, (devices) => {
+	    this.once(event, devices => {
 	      clearTimeout(timeout);
 	      callback(null, devices);
 	    });
@@ -11673,11 +11730,7 @@ function requireFirmataIo () {
 	    /* istanbul ignore next */
 	    const timeout = setTimeout(() => {
 	      /* istanbul ignore next */
-	      callback(
-	        new Error(
-	          "1-Wire device read timeout - are you running ConfigurableFirmata?"
-	        )
-	      );
+	      callback(new Error("1-Wire device read timeout - are you running ConfigurableFirmata?"));
 	    }, 5000);
 	    this[SYM_sendOneWireRequest](
 	      pin,
@@ -11688,7 +11741,7 @@ function requireFirmataIo () {
 	      null,
 	      null,
 	      `1-wire-read-reply-${correlationId}`,
-	      (data) => {
+	      data => {
 	        clearTimeout(timeout);
 	        callback(null, data);
 	      }
@@ -11701,7 +11754,10 @@ function requireFirmataIo () {
 	   */
 
 	  sendOneWireReset(pin) {
-	    this[SYM_sendOneWireRequest](pin, ONEWIRE_RESET_REQUEST_BIT);
+	    this[SYM_sendOneWireRequest](
+	      pin,
+	      ONEWIRE_RESET_REQUEST_BIT
+	    );
 	  }
 
 	  /**
@@ -11760,11 +11816,7 @@ function requireFirmataIo () {
 	    /* istanbul ignore next */
 	    const timeout = setTimeout(() => {
 	      /* istanbul ignore next */
-	      callback(
-	        new Error(
-	          "1-Wire device read timeout - are you running ConfigurableFirmata?"
-	        )
-	      );
+	      callback(new Error("1-Wire device read timeout - are you running ConfigurableFirmata?"));
 	    }, 5000);
 	    this[SYM_sendOneWireRequest](
 	      pin,
@@ -11775,7 +11827,7 @@ function requireFirmataIo () {
 	      null,
 	      Array.isArray(data) ? data : [data],
 	      `1-wire-read-reply-${correlationId}`,
-	      (data) => {
+	      data => {
 	        clearTimeout(timeout);
 	        callback(null, data);
 	      }
@@ -11783,17 +11835,7 @@ function requireFirmataIo () {
 	  }
 
 	  // see http://firmata.org/wiki/Proposals#OneWire_Proposal
-	  [SYM_sendOneWireRequest](
-	    pin,
-	    subcommand,
-	    device,
-	    numBytesToRead,
-	    correlationId,
-	    delay,
-	    dataToWrite,
-	    event,
-	    callback
-	  ) {
+	  [SYM_sendOneWireRequest](pin, subcommand, device, numBytesToRead, correlationId, delay, dataToWrite, event, callback) {
 	    const bytes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 	    if (device || numBytesToRead || correlationId || delay || dataToWrite) {
@@ -11805,20 +11847,20 @@ function requireFirmataIo () {
 	    }
 
 	    if (numBytesToRead) {
-	      bytes[8] = numBytesToRead & 0xff;
-	      bytes[9] = (numBytesToRead >> 8) & 0xff;
+	      bytes[8] = numBytesToRead & 0xFF;
+	      bytes[9] = (numBytesToRead >> 8) & 0xFF;
 	    }
 
 	    if (correlationId) {
-	      bytes[10] = correlationId & 0xff;
-	      bytes[11] = (correlationId >> 8) & 0xff;
+	      bytes[10] = correlationId & 0xFF;
+	      bytes[11] = (correlationId >> 8) & 0xFF;
 	    }
 
 	    if (delay) {
-	      bytes[12] = delay & 0xff;
-	      bytes[13] = (delay >> 8) & 0xff;
-	      bytes[14] = (delay >> 16) & 0xff;
-	      bytes[15] = (delay >> 24) & 0xff;
+	      bytes[12] = delay & 0xFF;
+	      bytes[13] = (delay >> 8) & 0xFF;
+	      bytes[14] = (delay >> 16) & 0xFF;
+	      bytes[15] = (delay >> 24) & 0xFF;
 	    }
 
 	    if (dataToWrite) {
@@ -11847,13 +11889,13 @@ function requireFirmataIo () {
 	   */
 
 	  setSamplingInterval(interval) {
-	    const safeint = interval < 10 ? 10 : interval > 65535 ? 65535 : interval;
+	    const safeint = interval < 10 ? 10 : (interval > 65535 ? 65535 : interval);
 	    this.settings.samplingInterval = safeint;
 	    writeToTransport(this, [
 	      START_SYSEX,
 	      SAMPLING_INTERVAL,
-	      safeint & 0x7f,
-	      (safeint >> 7) & 0x7f,
+	      (safeint & 0x7F),
+	      ((safeint >> 7) & 0x7F),
 	      END_SYSEX,
 	    ]);
 	  }
@@ -11878,7 +11920,10 @@ function requireFirmataIo () {
 	    /* istanbul ignore else */
 	    if (value === 0 || value === 1) {
 	      this.pins[this.analogPins[pin]].report = value;
-	      writeToTransport(this, [REPORT_ANALOG | pin, value]);
+	      writeToTransport(this, [
+	        REPORT_ANALOG | pin,
+	        value
+	      ]);
 	    }
 	  }
 
@@ -11893,7 +11938,10 @@ function requireFirmataIo () {
 	    /* istanbul ignore else */
 	    if (value === 0 || value === 1) {
 	      this.pins[pin].report = value;
-	      writeToTransport(this, [REPORT_DIGITAL | port, value]);
+	      writeToTransport(this, [
+	        REPORT_DIGITAL | port,
+	        value
+	      ]);
 	    }
 	  }
 
@@ -11903,11 +11951,17 @@ function requireFirmataIo () {
 	   */
 
 	  pingRead(options, callback) {
+
 	    if (!this.pins[options.pin].supportedModes.includes(PING_READ)) {
 	      throw new Error("Please upload PingFirmata to the board");
 	    }
 
-	    const { pin, value, pulseOut = 0, timeout = 1000000 } = options;
+	    const {
+	      pin,
+	      value,
+	      pulseOut = 0,
+	      timeout = 1000000
+	    } = options;
 
 	    writeToTransport(this, [
 	      START_SYSEX,
@@ -11915,16 +11969,16 @@ function requireFirmataIo () {
 	      pin,
 	      value,
 	      ...Firmata.encode([
-	        (pulseOut >> 24) & 0xff,
-	        (pulseOut >> 16) & 0xff,
-	        (pulseOut >> 8) & 0xff,
-	        pulseOut & 0xff,
+	        (pulseOut >> 24) & 0xFF,
+	        (pulseOut >> 16) & 0xFF,
+	        (pulseOut >> 8) & 0xFF,
+	        (pulseOut & 0xFF),
 	      ]),
 	      ...Firmata.encode([
-	        (timeout >> 24) & 0xff,
-	        (timeout >> 16) & 0xff,
-	        (timeout >> 8) & 0xff,
-	        timeout & 0xff,
+	        (timeout >> 24) & 0xFF,
+	        (timeout >> 16) & 0xFF,
+	        (timeout >> 8) & 0xFF,
+	        (timeout & 0xFF),
 	      ]),
 	      END_SYSEX,
 	    ]);
@@ -11954,6 +12008,7 @@ function requireFirmataIo () {
 	   */
 
 	  accelStepperConfig(options) {
+
 	    let {
 	      deviceNum,
 	      invertPins,
@@ -11970,7 +12025,7 @@ function requireFirmataIo () {
 	      START_SYSEX,
 	      ACCELSTEPPER,
 	      0x00, // STEPPER_CONFIG from firmware
-	      deviceNum,
+	      deviceNum
 	    ];
 
 	    let iface = ((type & 0x07) << 4) | ((stepSize & 0x07) << 1);
@@ -11989,8 +12044,8 @@ function requireFirmataIo () {
 	      "motorPin2",
 	      "motorPin3",
 	      "motorPin4",
-	      "enablePin",
-	    ].forEach((pin) => {
+	      "enablePin"
+	    ].forEach(pin => {
 	      if (typeof options[pin] !== "undefined") {
 	        data.push(options[pin]);
 	      }
@@ -12014,7 +12069,10 @@ function requireFirmataIo () {
 	      }
 	    }
 
-	    data.push(pinsToInvert, END_SYSEX);
+	    data.push(
+	      pinsToInvert,
+	      END_SYSEX
+	    );
 
 	    writeToTransport(this, data);
 	  }
@@ -12043,6 +12101,7 @@ function requireFirmataIo () {
 	   * @param {number} steps Number of steps to make
 	   */
 	  accelStepperStep(deviceNum, steps, callback) {
+
 	    writeToTransport(this, [
 	      START_SYSEX,
 	      ACCELSTEPPER,
@@ -12063,6 +12122,7 @@ function requireFirmataIo () {
 	   * @param {number} position Desired position
 	   */
 	  accelStepperTo(deviceNum, position, callback) {
+
 	    writeToTransport(this, [
 	      START_SYSEX,
 	      ACCELSTEPPER,
@@ -12190,9 +12250,7 @@ function requireFirmataIo () {
 
 	  multiStepperTo(groupNum, positions, callback) {
 	    if (groupNum < 0 || groupNum > 5) {
-	      throw new RangeError(
-	        `Invalid "groupNum": ${groupNum}. Expected "groupNum" between 0-5`
-	      );
+	      throw new RangeError(`Invalid "groupNum": ${groupNum}. Expected "groupNum" between 0-5`);
 	    }
 
 	    writeToTransport(this, [
@@ -12200,10 +12258,7 @@ function requireFirmataIo () {
 	      ACCELSTEPPER,
 	      0x21, // MULTISTEPPER_TO from firmware
 	      groupNum,
-	      ...positions.reduce(
-	        (a, b) => a.concat(...encode32BitSignedInteger(b)),
-	        []
-	      ),
+	      ...positions.reduce((a, b) => a.concat(...encode32BitSignedInteger(b)), []),
 	      END_SYSEX,
 	    ]);
 
@@ -12221,9 +12276,7 @@ function requireFirmataIo () {
 	  multiStepperStop(groupNum) {
 	    /* istanbul ignore else */
 	    if (groupNum < 0 || groupNum > 5) {
-	      throw new RangeError(
-	        `Invalid "groupNum": ${groupNum}. Expected "groupNum" between 0-5`
-	      );
+	      throw new RangeError(`Invalid "groupNum": ${groupNum}. Expected "groupNum" between 0-5`);
 	    }
 	    writeToTransport(this, [
 	      START_SYSEX,
@@ -12250,27 +12303,19 @@ function requireFirmataIo () {
 	   * @param {number} [motorPin4] Only required if type == this.STEPPER.TYPE.FOUR_WIRE
 	   */
 
-	  stepperConfig(
-	    deviceNum,
-	    type,
-	    stepsPerRev,
-	    dirOrMotor1Pin,
-	    dirOrMotor2Pin,
-	    motorPin3,
-	    motorPin4
-	  ) {
+	  stepperConfig(deviceNum, type, stepsPerRev, dirOrMotor1Pin, dirOrMotor2Pin, motorPin3, motorPin4) {
 	    writeToTransport(this, [
 	      START_SYSEX,
 	      STEPPER,
 	      0x00, // STEPPER_CONFIG from firmware
 	      deviceNum,
 	      type,
-	      stepsPerRev & 0x7f,
-	      (stepsPerRev >> 7) & 0x7f,
+	      stepsPerRev & 0x7F,
+	      (stepsPerRev >> 7) & 0x7F,
 	      dirOrMotor1Pin,
 	      dirOrMotor2Pin,
 	      ...(type === this.STEPPER.TYPE.FOUR_WIRE ? [motorPin3, motorPin4] : []),
-	      END_SYSEX,
+	      END_SYSEX
 	    ]);
 	  }
 
@@ -12302,15 +12347,11 @@ function requireFirmataIo () {
 	      0x01, // STEPPER_STEP from firmware
 	      deviceNum,
 	      direction, // one of this.STEPPER.DIRECTION.*
-	      steps & 0x7f,
-	      (steps >> 7) & 0x7f,
-	      (steps >> 14) & 0x7f,
-	      speed & 0x7f,
-	      (speed >> 7) & 0x7f,
+	      steps & 0x7F, (steps >> 7) & 0x7F, (steps >> 14) & 0x7F,
+	      speed & 0x7F, (speed >> 7) & 0x7F,
 
-	      ...(accel > 0 || decel > 0
-	        ? [accel & 0x7f, (accel >> 7) & 0x7f, decel & 0x7f, (decel >> 7) & 0x7f]
-	        : []),
+	      ...(accel > 0 || decel > 0 ?
+	          [accel & 0x7F, (accel >> 7) & 0x7F, decel & 0x7F, (decel >> 7) & 0x7F] : []),
 
 	      END_SYSEX,
 	    ]);
@@ -12332,6 +12373,7 @@ function requireFirmataIo () {
 	   */
 
 	  serialConfig(options) {
+
 	    let portId;
 	    let baud;
 	    let rxPin;
@@ -12347,9 +12389,7 @@ function requireFirmataIo () {
 
 	    /* istanbul ignore else */
 	    if (typeof portId === "undefined") {
-	      throw new Error(
-	        "portId must be specified, see SERIAL_PORT_IDs for options."
-	      );
+	      throw new Error("portId must be specified, see SERIAL_PORT_IDs for options.");
 	    }
 
 	    baud = baud || 57600;
@@ -12358,20 +12398,17 @@ function requireFirmataIo () {
 	      START_SYSEX,
 	      SERIAL_MESSAGE,
 	      SERIAL_CONFIG | portId,
-	      baud & 0x7f,
-	      (baud >> 7) & 0x7f,
-	      (baud >> 14) & 0x7f,
+	      baud & 0x7F,
+	      (baud >> 7) & 0x7F,
+	      (baud >> 14) & 0x7F
 	    ];
-	    if (
-	      portId > 7 &&
-	      typeof rxPin !== "undefined" &&
-	      typeof txPin !== "undefined"
-	    ) {
-	      data.push(rxPin, txPin);
-	    } else if (portId > 7) {
-	      throw new Error(
-	        "Both RX and TX pins must be defined when using Software Serial."
+	    if (portId > 7 && typeof rxPin !== "undefined" && typeof txPin !== "undefined") {
+	      data.push(
+	        rxPin,
+	        txPin
 	      );
+	    } else if (portId > 7) {
+	      throw new Error("Both RX and TX pins must be defined when using Software Serial.");
 	    }
 
 	    data.push(END_SYSEX);
@@ -12385,9 +12422,16 @@ function requireFirmataIo () {
 	   */
 
 	  serialWrite(portId, bytes) {
-	    const data = [START_SYSEX, SERIAL_MESSAGE, SERIAL_WRITE | portId];
+	    const data = [
+	      START_SYSEX,
+	      SERIAL_MESSAGE,
+	      SERIAL_WRITE | portId,
+	    ];
 	    for (let i = 0, len = bytes.length; i < len; i++) {
-	      data.push(bytes[i] & 0x7f, (bytes[i] >> 7) & 0x7f);
+	      data.push(
+	        bytes[i] & 0x7F,
+	        (bytes[i] >> 7) & 0x7F
+	      );
 	    }
 	    data.push(END_SYSEX);
 	    /* istanbul ignore else */
@@ -12411,13 +12455,16 @@ function requireFirmataIo () {
 	      START_SYSEX,
 	      SERIAL_MESSAGE,
 	      SERIAL_READ | portId,
-	      this.SERIAL_MODES.CONTINUOUS_READ,
+	      this.SERIAL_MODES.CONTINUOUS_READ
 	    ];
 
 	    if (arguments.length === 2 && typeof maxBytesToRead === "function") {
 	      callback = maxBytesToRead;
 	    } else {
-	      data.push(maxBytesToRead & 0x7f, (maxBytesToRead >> 7) & 0x7f);
+	      data.push(
+	        maxBytesToRead & 0x7F,
+	        (maxBytesToRead >> 7) & 0x7F
+	      );
 	    }
 
 	    data.push(END_SYSEX);
@@ -12514,8 +12561,7 @@ function requireFirmataIo () {
 	      throw new Error(`${commandByte} is not an available SYSEX_RESPONSE byte`);
 	    }
 
-	    Firmata.SYSEX_RESPONSE[commandByte] = (board) =>
-	      handler.call(board, board.buffer.slice(2, -1));
+	    Firmata.SYSEX_RESPONSE[commandByte] = board => handler.call(board, board.buffer.slice(2, -1));
 
 	    return this;
 	  }
@@ -12546,11 +12592,16 @@ function requireFirmataIo () {
 	   */
 
 	  sysexCommand(message) {
+
 	    if (!message || !message.length) {
 	      throw new Error("Sysex Command cannot be empty");
 	    }
 
-	    writeToTransport(this, [START_SYSEX, ...message.slice(), END_SYSEX]);
+	    writeToTransport(this, [
+	      START_SYSEX,
+	      ...message.slice(),
+	      END_SYSEX
+	    ]);
 	    return this;
 	  }
 
@@ -12588,22 +12639,18 @@ function requireFirmataIo () {
 	      process.nextTick(() => {
 	        callback(new Error("No Transport provided"), null);
 	      });
-	      return;
+	      return
 	    }
-	    Transport.list()
-	      .then((ports) => {
-	        const port = ports.find(
-	          (port) => Firmata.isAcceptablePort(port) && port
-	        );
-	        if (port) {
-	          callback(null, port);
-	        } else {
-	          callback(new Error("No Acceptable Port Found"), null);
-	        }
-	      })
-	      .catch((error) => {
-	        callback(error, null);
-	      });
+	    Transport.list().then((ports) => {
+	      const port = ports.find(port => Firmata.isAcceptablePort(port) && port);
+	      if (port) {
+	        callback(null, port);
+	      } else {
+	        callback(new Error("No Acceptable Port Found"), null);
+	      }
+	    }).catch(error => {
+	      callback(error, null);
+	    });
 	  }
 
 	  // Expose encode/decode for custom sysex messages
@@ -12612,7 +12659,10 @@ function requireFirmataIo () {
 	    const length = data.length;
 
 	    for (let i = 0; i < length; i++) {
-	      encoded.push(data[i] & 0x7f, (data[i] >> 7) & 0x7f);
+	      encoded.push(
+	        data[i] & 0x7F,
+	        (data[i] >> 7) & 0x7F
+	      );
 	    }
 
 	    return encoded;
@@ -12622,9 +12672,7 @@ function requireFirmataIo () {
 	    const decoded = [];
 
 	    if (data.length % 2 !== 0) {
-	      throw new Error(
-	        "Firmata.decode(data) called with odd number of data bytes"
-	      );
+	      throw new Error("Firmata.decode(data) called with odd number of data bytes");
 	    }
 
 	    while (data.length) {
@@ -12667,9 +12715,7 @@ function requireFirmataIo () {
 	  const active = i2cActive.get(board);
 
 	  if (!active) {
-	    throw new Error(
-	      "I2C is not enabled for this board. To enable, call the i2cConfig() method."
-	    );
+	    throw new Error("I2C is not enabled for this board. To enable, call the i2cConfig() method.");
 	  }
 
 	  // Do not tamper with I2C_CONFIG messages
@@ -12695,17 +12741,18 @@ function requireFirmataIo () {
 	  writeToTransport(board, bytes);
 	}
 
+
 	function encode32BitSignedInteger(data) {
 	  const negative = data < 0;
 
 	  data = Math.abs(data);
 
 	  const encoded = [
-	    data & 0x7f,
-	    (data >> 7) & 0x7f,
-	    (data >> 14) & 0x7f,
-	    (data >> 21) & 0x7f,
-	    (data >> 28) & 0x07,
+	    data & 0x7F,
+	    (data >> 7) & 0x7F,
+	    (data >> 14) & 0x7F,
+	    (data >> 21) & 0x7F,
+	    (data >> 28) & 0x07
 	  ];
 
 	  if (negative) {
@@ -12716,11 +12763,10 @@ function requireFirmataIo () {
 	}
 
 	function decode32BitSignedInteger(bytes) {
-	  let result =
-	    (bytes[0] & 0x7f) |
-	    ((bytes[1] & 0x7f) << 7) |
-	    ((bytes[2] & 0x7f) << 14) |
-	    ((bytes[3] & 0x7f) << 21) |
+	  let result = (bytes[0] & 0x7F) |
+	    ((bytes[1] & 0x7F) << 7) |
+	    ((bytes[2] & 0x7F) << 14) |
+	    ((bytes[3] & 0x7F) << 21) |
 	    ((bytes[4] & 0x07) << 28);
 
 	  if (bytes[4] >> 3) {
@@ -12758,27 +12804,30 @@ function requireFirmataIo () {
 	  exponent += 11;
 
 	  const encoded = [
-	    input & 0x7f,
-	    (input >> 7) & 0x7f,
-	    (input >> 14) & 0x7f,
-	    ((input >> 21) & 0x03) | ((exponent & 0x0f) << 2) | ((sign & 0x01) << 6),
+	    input & 0x7F,
+	    (input >> 7) & 0x7F,
+	    (input >> 14) & 0x7F,
+	    (input >> 21) & 0x03 | (exponent & 0x0F) << 2 | (sign & 0x01) << 6
 	  ];
 
 	  return encoded;
 	}
 
 	function decodeCustomFloat(input) {
-	  const exponent = ((input[3] >> 2) & 0x0f) - 11;
+	  const exponent = ((input[3] >> 2) & 0x0F) - 11;
 	  const sign = (input[3] >> 6) & 0x01;
 
-	  let result =
-	    input[0] | (input[1] << 7) | (input[2] << 14) | ((input[3] & 0x03) << 21);
+	  let result = input[0] |
+	    (input[1] << 7) |
+	    (input[2] << 14) |
+	    (input[3] & 0x03) << 21;
 
 	  if (sign) {
 	    result *= -1;
 	  }
 	  return result * Math.pow(10, exponent);
 	}
+
 
 	/* istanbul ignore else */
 	if (process.env.IS_TEST_MODE) {
@@ -12806,19 +12855,2527 @@ function requireFirmataIo () {
 	    symbols: {
 	      SYM_sendOneWireRequest,
 	      SYM_sendOneWireSearch,
-	    },
+	    }
 	  };
 	}
 
-	const bindTransport = function (transport) {
+	const bindTransport = function(transport) {
 	  Transport = transport;
 	  return Firmata;
 	};
 
 	bindTransport.Firmata = Firmata;
 
-	firmataIo = bindTransport;
-	return firmataIo;
+	firmata$1 = bindTransport;
+	return firmata$1;
+}
+
+var lib$b;
+var hasRequiredLib$b;
+
+function requireLib$b () {
+	if (hasRequiredLib$b) return lib$b;
+	hasRequiredLib$b = 1;
+	const stream = require$$0;
+	const util = require$$1$1;
+	const debug = requireSrc()('serialport/stream');
+
+	//  VALIDATION
+	const DATABITS = Object.freeze([5, 6, 7, 8]);
+	const STOPBITS = Object.freeze([1, 1.5, 2]);
+	const PARITY = Object.freeze(['none', 'even', 'mark', 'odd', 'space']);
+	const FLOWCONTROLS = Object.freeze(['xon', 'xoff', 'xany', 'rtscts']);
+
+	const defaultSettings = Object.freeze({
+	  autoOpen: true,
+	  endOnClose: false,
+	  baudRate: 9600,
+	  dataBits: 8,
+	  hupcl: true,
+	  lock: true,
+	  parity: 'none',
+	  rtscts: false,
+	  stopBits: 1,
+	  xany: false,
+	  xoff: false,
+	  xon: false,
+	  highWaterMark: 64 * 1024,
+	});
+
+	const defaultSetFlags = Object.freeze({
+	  brk: false,
+	  cts: false,
+	  dtr: true,
+	  dts: false,
+	  rts: true,
+	});
+
+	function allocNewReadPool(poolSize) {
+	  const pool = Buffer.allocUnsafe(poolSize);
+	  pool.used = 0;
+	  return pool
+	}
+
+	/**
+	 * A callback called with an error or null.
+	 * @typedef {function} errorCallback
+	 * @param {?error} error
+	 */
+
+	/**
+	 * A callback called with an error or an object with the modem line values (cts, dsr, dcd).
+	 * @typedef {function} modemBitsCallback
+	 * @param {?error} error
+	 * @param {?object} status
+	 * @param {boolean} [status.cts=false]
+	 * @param {boolean} [status.dsr=false]
+	 * @param {boolean} [status.dcd=false]
+	 */
+
+	/**
+	 * @typedef {Object} openOptions
+	 * @property {boolean} [autoOpen=true] Automatically opens the port on `nextTick`.
+	 * @property {number=} [baudRate=9600] The baud rate of the port to be opened. This should match one of the commonly available baud rates, such as 110, 300, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, or 115200. Custom rates are supported best effort per platform. The device connected to the serial port is not guaranteed to support the requested baud rate, even if the port itself supports that baud rate.
+	 * @property {number} [dataBits=8] Must be one of these: 8, 7, 6, or 5.
+	 * @property {number} [highWaterMark=65536] The size of the read and write buffers defaults to 64k.
+	 * @property {boolean} [lock=true] Prevent other processes from opening the port. Windows does not currently support `false`.
+	 * @property {number} [stopBits=1] Must be one of these: 1 or 2.
+	 * @property {string} [parity=none] Must be one of these: 'none', 'even', 'mark', 'odd', 'space'.
+	 * @property {boolean} [rtscts=false] flow control setting
+	 * @property {boolean} [xon=false] flow control setting
+	 * @property {boolean} [xoff=false] flow control setting
+	 * @property {boolean} [xany=false] flow control setting
+	 * @property {object=} bindingOptions sets binding-specific options
+	 * @property {Binding=} Binding The hardware access binding. `Bindings` are how Node-Serialport talks to the underlying system. By default we auto detect Windows (`WindowsBinding`), Linux (`LinuxBinding`) and OS X (`DarwinBinding`) and load the appropriate module for your system.
+	 * @property {number} [bindingOptions.vmin=1] see [`man termios`](http://linux.die.net/man/3/termios) LinuxBinding and DarwinBinding
+	 * @property {number} [bindingOptions.vtime=0] see [`man termios`](http://linux.die.net/man/3/termios) LinuxBinding and DarwinBinding
+	 */
+
+	/**
+	 * Create a new serial port object for the `path`. In the case of invalid arguments or invalid options, when constructing a new SerialPort it will throw an error. The port will open automatically by default, which is the equivalent of calling `port.open(openCallback)` in the next tick. You can disable this by setting the option `autoOpen` to `false`.
+	 * @class SerialPort
+	 * @param {string} path - The system path of the serial port you want to open. For example, `/dev/tty.XXX` on Mac/Linux, or `COM1` on Windows.
+	 * @param {openOptions=} options - Port configuration options
+	 * @param {errorCallback=} openCallback - Called after a connection is opened. If this is not provided and an error occurs, it will be emitted on the port's `error` event. The callback will NOT be called if `autoOpen` is set to `false` in the `openOptions` as the open will not be performed.
+	 * @property {number} baudRate The port's baudRate. Use `.update` to change it. Read-only.
+	 * @property {object} binding The binding object backing the port. Read-only.
+	 * @property {boolean} isOpen `true` if the port is open, `false` otherwise. Read-only. (`since 5.0.0`)
+	 * @property {string} path The system path or name of the serial port. Read-only.
+	 * @throws {TypeError} When given invalid arguments, a `TypeError` will be thrown.
+	 * @emits open
+	 * @emits data
+	 * @emits close
+	 * @emits error
+	 * @alias module:serialport
+	 */
+	function SerialPort(path, options, openCallback) {
+	  if (!(this instanceof SerialPort)) {
+	    return new SerialPort(path, options, openCallback)
+	  }
+
+	  if (options instanceof Function) {
+	    openCallback = options;
+	    options = {};
+	  }
+
+	  const settings = { ...defaultSettings, ...options };
+
+	  stream.Duplex.call(this, {
+	    highWaterMark: settings.highWaterMark,
+	  });
+
+	  const Binding = settings.binding || SerialPort.Binding;
+
+	  if (!Binding) {
+	    throw new TypeError('"Bindings" is invalid pass it as `options.binding` or set it on `SerialPort.Binding`')
+	  }
+
+	  if (!path) {
+	    throw new TypeError(`"path" is not defined: ${path}`)
+	  }
+
+	  if (settings.baudrate) {
+	    throw new TypeError(`"baudrate" is an unknown option, did you mean "baudRate"?`)
+	  }
+
+	  if (typeof settings.baudRate !== 'number') {
+	    throw new TypeError(`"baudRate" must be a number: ${settings.baudRate}`)
+	  }
+
+	  if (DATABITS.indexOf(settings.dataBits) === -1) {
+	    throw new TypeError(`"databits" is invalid: ${settings.dataBits}`)
+	  }
+
+	  if (STOPBITS.indexOf(settings.stopBits) === -1) {
+	    throw new TypeError(`"stopbits" is invalid: ${settings.stopbits}`)
+	  }
+
+	  if (PARITY.indexOf(settings.parity) === -1) {
+	    throw new TypeError(`"parity" is invalid: ${settings.parity}`)
+	  }
+
+	  FLOWCONTROLS.forEach(control => {
+	    if (typeof settings[control] !== 'boolean') {
+	      throw new TypeError(`"${control}" is not boolean: ${settings[control]}`)
+	    }
+	  });
+
+	  const binding = new Binding({
+	    bindingOptions: settings.bindingOptions,
+	  });
+
+	  Object.defineProperties(this, {
+	    binding: {
+	      enumerable: true,
+	      value: binding,
+	    },
+	    path: {
+	      enumerable: true,
+	      value: path,
+	    },
+	    settings: {
+	      enumerable: true,
+	      value: settings,
+	    },
+	  });
+
+	  this.opening = false;
+	  this.closing = false;
+	  this._pool = allocNewReadPool(this.settings.highWaterMark);
+	  this._kMinPoolSpace = 128;
+
+	  if (this.settings.autoOpen) {
+	    this.open(openCallback);
+	  }
+	}
+
+	util.inherits(SerialPort, stream.Duplex);
+
+	Object.defineProperties(SerialPort.prototype, {
+	  isOpen: {
+	    enumerable: true,
+	    get() {
+	      return this.binding.isOpen && !this.closing
+	    },
+	  },
+	  baudRate: {
+	    enumerable: true,
+	    get() {
+	      return this.settings.baudRate
+	    },
+	  },
+	});
+
+	/**
+	 * The `error` event's callback is called with an error object whenever there is an error.
+	 * @event error
+	 */
+
+	SerialPort.prototype._error = function(error, callback) {
+	  if (callback) {
+	    callback.call(this, error);
+	  } else {
+	    this.emit('error', error);
+	  }
+	};
+
+	SerialPort.prototype._asyncError = function(error, callback) {
+	  process.nextTick(() => this._error(error, callback));
+	};
+
+	/**
+	 * The `open` event's callback is called with no arguments when the port is opened and ready for writing. This happens if you have the constructor open immediately (which opens in the next tick) or if you open the port manually with `open()`. See [Useage/Opening a Port](#opening-a-port) for more information.
+	 * @event open
+	 */
+
+	/**
+	 * Opens a connection to the given serial port.
+	 * @param {errorCallback=} openCallback - Called after a connection is opened. If this is not provided and an error occurs, it will be emitted on the port's `error` event.
+	 * @emits open
+	 * @returns {undefined}
+	 */
+	SerialPort.prototype.open = function(openCallback) {
+	  if (this.isOpen) {
+	    return this._asyncError(new Error('Port is already open'), openCallback)
+	  }
+
+	  if (this.opening) {
+	    return this._asyncError(new Error('Port is opening'), openCallback)
+	  }
+
+	  this.opening = true;
+	  debug('opening', `path: ${this.path}`);
+	  this.binding.open(this.path, this.settings).then(
+	    () => {
+	      debug('opened', `path: ${this.path}`);
+	      this.opening = false;
+	      this.emit('open');
+	      if (openCallback) {
+	        openCallback.call(this, null);
+	      }
+	    },
+	    err => {
+	      this.opening = false;
+	      debug('Binding #open had an error', err);
+	      this._error(err, openCallback);
+	    }
+	  );
+	};
+
+	/**
+	 * Changes the baud rate for an open port. Throws if you provide a bad argument. Emits an error or calls the callback if the baud rate isn't supported.
+	 * @param {object=} options Only supports `baudRate`.
+	 * @param {number=} [options.baudRate] The baud rate of the port to be opened. This should match one of the commonly available baud rates, such as 110, 300, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, or 115200. Custom rates are supported best effort per platform. The device connected to the serial port is not guaranteed to support the requested baud rate, even if the port itself supports that baud rate.
+	 * @param {errorCallback=} [callback] Called once the port's baud rate changes. If `.update` is called without a callback, and there is an error, an error event is emitted.
+	 * @returns {undefined}
+	 */
+	SerialPort.prototype.update = function(options, callback) {
+	  if (typeof options !== 'object') {
+	    throw TypeError('"options" is not an object')
+	  }
+
+	  if (!this.isOpen) {
+	    debug('update attempted, but port is not open');
+	    return this._asyncError(new Error('Port is not open'), callback)
+	  }
+
+	  const settings = { ...defaultSettings, ...options };
+	  this.settings.baudRate = settings.baudRate;
+
+	  debug('update', `baudRate: ${settings.baudRate}`);
+	  this.binding.update(this.settings).then(
+	    () => {
+	      debug('binding.update', 'finished');
+	      if (callback) {
+	        callback.call(this, null);
+	      }
+	    },
+	    err => {
+	      debug('binding.update', 'error', err);
+	      return this._error(err, callback)
+	    }
+	  );
+	};
+
+	/**
+	 * Writes data to the given serial port. Buffers written data if the port is not open.
+
+	The write operation is non-blocking. When it returns, data might still not have been written to the serial port. See `drain()`.
+
+	Some devices, like the Arduino, reset when you open a connection to them. In such cases, immediately writing to the device will cause lost data as they wont be ready to receive the data. This is often worked around by having the Arduino send a "ready" byte that your Node program waits for before writing. You can also often get away with waiting around 400ms.
+
+	If a port is disconnected during a write, the write will error in addition to the `close` event.
+
+	From the [stream docs](https://nodejs.org/api/stream.html#stream_writable_write_chunk_encoding_callback) write errors don't always provide the error in the callback, sometimes they use the error event.
+	> If an error occurs, the callback may or may not be called with the error as its first argument. To reliably detect write errors, add a listener for the 'error' event.
+
+	In addition to the usual `stream.write` arguments (`String` and `Buffer`), `write()` can accept arrays of bytes (positive numbers under 256) which is passed to `Buffer.from([])` for conversion. This extra functionality is pretty sweet.
+	 * @method SerialPort.prototype.write
+	 * @param  {(string|array|buffer)} data Accepts a [`Buffer` ](http://nodejs.org/api/buffer.html) object, or a type that is accepted by the `Buffer` constructor (e.g. an array of bytes or a string).
+	 * @param  {string=} encoding The encoding, if chunk is a string. Defaults to `'utf8'`. Also accepts `'ascii'`, `'base64'`, `'binary'`, and `'hex'` See [Buffers and Character Encodings](https://nodejs.org/api/buffer.html#buffer_buffers_and_character_encodings) for all available options.
+	 * @param  {function=} callback Called once the write operation finishes. Data may not yet be flushed to the underlying port. No arguments.
+	 * @returns {boolean} `false` if the stream wishes for the calling code to wait for the `'drain'` event to be emitted before continuing to write additional data; otherwise `true`.
+	 * @since 5.0.0
+	 */
+	const superWrite = SerialPort.prototype.write;
+	SerialPort.prototype.write = function(data, encoding, callback) {
+	  if (Array.isArray(data)) {
+	    data = Buffer.from(data);
+	  }
+	  return superWrite.call(this, data, encoding, callback)
+	};
+
+	SerialPort.prototype._write = function(data, encoding, callback) {
+	  if (!this.isOpen) {
+	    return this.once('open', function afterOpenWrite() {
+	      this._write(data, encoding, callback);
+	    })
+	  }
+	  debug('_write', `${data.length} bytes of data`);
+	  this.binding.write(data).then(
+	    () => {
+	      debug('binding.write', 'write finished');
+	      callback(null);
+	    },
+	    err => {
+	      debug('binding.write', 'error', err);
+	      if (!err.canceled) {
+	        this._disconnected(err);
+	      }
+	      callback(err);
+	    }
+	  );
+	};
+
+	SerialPort.prototype._writev = function(data, callback) {
+	  debug('_writev', `${data.length} chunks of data`);
+	  const dataV = data.map(write => write.chunk);
+	  this._write(Buffer.concat(dataV), null, callback);
+	};
+
+	/**
+	 * Request a number of bytes from the SerialPort. The `read()` method pulls some data out of the internal buffer and returns it. If no data is available to be read, null is returned. By default, the data is returned as a `Buffer` object unless an encoding has been specified using the `.setEncoding()` method.
+	 * @method SerialPort.prototype.read
+	 * @param {number=} size Specify how many bytes of data to return, if available
+	 * @returns {(string|Buffer|null)} The data from internal buffers
+	 * @since 5.0.0
+	 */
+
+	/**
+	 * Listening for the `data` event puts the port in flowing mode. Data is emitted as soon as it's received. Data is a `Buffer` object with a varying amount of data in it. The `readLine` parser converts the data into string lines. See the [parsers](https://serialport.io/docs/api-parsers-overview) section for more information on parsers, and the [Node.js stream documentation](https://nodejs.org/api/stream.html#stream_event_data) for more information on the data event.
+	 * @event data
+	 */
+
+	SerialPort.prototype._read = function(bytesToRead) {
+	  if (!this.isOpen) {
+	    debug('_read', 'queueing _read for after open');
+	    this.once('open', () => {
+	      this._read(bytesToRead);
+	    });
+	    return
+	  }
+
+	  if (!this._pool || this._pool.length - this._pool.used < this._kMinPoolSpace) {
+	    debug('_read', 'discarding the read buffer pool because it is below kMinPoolSpace');
+	    this._pool = allocNewReadPool(this.settings.highWaterMark);
+	  }
+
+	  // Grab another reference to the pool in the case that while we're
+	  // in the thread pool another read() finishes up the pool, and
+	  // allocates a new one.
+	  const pool = this._pool;
+	  // Read the smaller of rest of the pool or however many bytes we want
+	  const toRead = Math.min(pool.length - pool.used, bytesToRead);
+	  const start = pool.used;
+
+	  // the actual read.
+	  debug('_read', `reading`, { start, toRead });
+	  this.binding.read(pool, start, toRead).then(
+	    ({ bytesRead }) => {
+	      debug('binding.read', `finished`, { bytesRead });
+	      // zero bytes means read means we've hit EOF? Maybe this should be an error
+	      if (bytesRead === 0) {
+	        debug('binding.read', 'Zero bytes read closing readable stream');
+	        this.push(null);
+	        return
+	      }
+	      pool.used += bytesRead;
+	      this.push(pool.slice(start, start + bytesRead));
+	    },
+	    err => {
+	      debug('binding.read', `error`, err);
+	      if (!err.canceled) {
+	        this._disconnected(err);
+	      }
+	      this._read(bytesToRead); // prime to read more once we're reconnected
+	    }
+	  );
+	};
+
+	SerialPort.prototype._disconnected = function(err) {
+	  if (!this.isOpen) {
+	    debug('disconnected aborted because already closed', err);
+	    return
+	  }
+	  debug('disconnected', err);
+	  err.disconnected = true;
+	  this.close(null, err);
+	};
+
+	/**
+	 * The `close` event's callback is called with no arguments when the port is closed. In the case of a disconnect it will be called with a Disconnect Error object (`err.disconnected == true`). In the event of a close error (unlikely), an error event is triggered.
+	 * @event close
+	 */
+
+	/**
+	 * Closes an open connection.
+	 *
+	 * If there are in progress writes when the port is closed the writes will error.
+	 * @param {errorCallback} callback Called once a connection is closed.
+	 * @param {Error} disconnectError used internally to propagate a disconnect error
+	 * @emits close
+	 * @returns {undefined}
+	 */
+	SerialPort.prototype.close = function(callback, disconnectError) {
+	  disconnectError = disconnectError || null;
+
+	  if (!this.isOpen) {
+	    debug('close attempted, but port is not open');
+	    return this._asyncError(new Error('Port is not open'), callback)
+	  }
+
+	  this.closing = true;
+	  debug('#close');
+	  this.binding.close().then(
+	    () => {
+	      this.closing = false;
+	      debug('binding.close', 'finished');
+	      this.emit('close', disconnectError);
+	      if (this.settings.endOnClose) {
+	        this.emit('end');
+	      }
+	      if (callback) {
+	        callback.call(this, disconnectError);
+	      }
+	    },
+	    err => {
+	      this.closing = false;
+	      debug('binding.close', 'had an error', err);
+	      return this._error(err, callback)
+	    }
+	  );
+	};
+
+	/**
+	 * Set control flags on an open port. Uses [`SetCommMask`](https://msdn.microsoft.com/en-us/library/windows/desktop/aa363257(v=vs.85).aspx) for Windows and [`ioctl`](http://linux.die.net/man/4/tty_ioctl) for OS X and Linux.
+	 * @param {object=} options All options are operating system default when the port is opened. Every flag is set on each call to the provided or default values. If options isn't provided default options is used.
+	 * @param {Boolean} [options.brk=false] sets the brk flag
+	 * @param {Boolean} [options.cts=false] sets the cts flag
+	 * @param {Boolean} [options.dsr=false] sets the dsr flag
+	 * @param {Boolean} [options.dtr=true] sets the dtr flag
+	 * @param {Boolean} [options.rts=true] sets the rts flag
+	 * @param {errorCallback=} callback Called once the port's flags have been set.
+	 * @since 5.0.0
+	 * @returns {undefined}
+	 */
+	SerialPort.prototype.set = function(options, callback) {
+	  if (typeof options !== 'object') {
+	    throw TypeError('"options" is not an object')
+	  }
+
+	  if (!this.isOpen) {
+	    debug('set attempted, but port is not open');
+	    return this._asyncError(new Error('Port is not open'), callback)
+	  }
+
+	  const settings = { ...defaultSetFlags, ...options };
+	  debug('#set', settings);
+	  this.binding.set(settings).then(
+	    () => {
+	      debug('binding.set', 'finished');
+	      if (callback) {
+	        callback.call(this, null);
+	      }
+	    },
+	    err => {
+	      debug('binding.set', 'had an error', err);
+	      return this._error(err, callback)
+	    }
+	  );
+	};
+
+	/**
+	 * Returns the control flags (CTS, DSR, DCD) on the open port.
+	 * Uses [`GetCommModemStatus`](https://msdn.microsoft.com/en-us/library/windows/desktop/aa363258(v=vs.85).aspx) for Windows and [`ioctl`](http://linux.die.net/man/4/tty_ioctl) for mac and linux.
+	 * @param {modemBitsCallback=} callback Called once the modem bits are retrieved.
+	 * @returns {undefined}
+	 */
+	SerialPort.prototype.get = function(callback) {
+	  if (!this.isOpen) {
+	    debug('get attempted, but port is not open');
+	    return this._asyncError(new Error('Port is not open'), callback)
+	  }
+
+	  debug('#get');
+	  this.binding.get().then(
+	    status => {
+	      debug('binding.get', 'finished');
+	      if (callback) {
+	        callback.call(this, null, status);
+	      }
+	    },
+	    err => {
+	      debug('binding.get', 'had an error', err);
+	      return this._error(err, callback)
+	    }
+	  );
+	};
+
+	/**
+	 * Flush discards data received but not read, and written but not transmitted by the operating system. For more technical details, see [`tcflush(fd, TCIOFLUSH)`](http://linux.die.net/man/3/tcflush) for Mac/Linux and [`FlushFileBuffers`](http://msdn.microsoft.com/en-us/library/windows/desktop/aa364439) for Windows.
+	 * @param  {errorCallback=} callback Called once the flush operation finishes.
+	 * @returns {undefined}
+	 */
+	SerialPort.prototype.flush = function(callback) {
+	  if (!this.isOpen) {
+	    debug('flush attempted, but port is not open');
+	    return this._asyncError(new Error('Port is not open'), callback)
+	  }
+
+	  debug('#flush');
+	  this.binding.flush().then(
+	    () => {
+	      debug('binding.flush', 'finished');
+	      if (callback) {
+	        callback.call(this, null);
+	      }
+	    },
+	    err => {
+	      debug('binding.flush', 'had an error', err);
+	      return this._error(err, callback)
+	    }
+	  );
+	};
+
+	/**
+	 * Waits until all output data is transmitted to the serial port. After any pending write has completed it calls [`tcdrain()`](http://linux.die.net/man/3/tcdrain) or [FlushFileBuffers()](https://msdn.microsoft.com/en-us/library/windows/desktop/aa364439(v=vs.85).aspx) to ensure it has been written to the device.
+	 * @param {errorCallback=} callback Called once the drain operation returns.
+	 * @returns {undefined}
+	 * @example
+	Write the `data` and wait until it has finished transmitting to the target serial port before calling the callback. This will queue until the port is open and writes are finished.
+
+	```js
+	function writeAndDrain (data, callback) {
+	  port.write(data);
+	  port.drain(callback);
+	}
+	```
+	 */
+	SerialPort.prototype.drain = function(callback) {
+	  debug('drain');
+	  if (!this.isOpen) {
+	    debug('drain queuing on port open');
+	    return this.once('open', () => {
+	      this.drain(callback);
+	    })
+	  }
+	  this.binding.drain().then(
+	    () => {
+	      debug('binding.drain', 'finished');
+	      if (callback) {
+	        callback.call(this, null);
+	      }
+	    },
+	    err => {
+	      debug('binding.drain', 'had an error', err);
+	      return this._error(err, callback)
+	    }
+	  );
+	};
+
+	/**
+	 * The `pause()` method causes a stream in flowing mode to stop emitting 'data' events, switching out of flowing mode. Any data that becomes available remains in the internal buffer.
+	 * @method SerialPort.prototype.pause
+	 * @see resume
+	 * @since 5.0.0
+	 * @returns `this`
+	 */
+
+	/**
+	 * The `resume()` method causes an explicitly paused, `Readable` stream to resume emitting 'data' events, switching the stream into flowing mode.
+	 * @method SerialPort.prototype.resume
+	 * @see pause
+	 * @since 5.0.0
+	 * @returns `this`
+	 */
+
+	/**
+	 * Retrieves a list of available serial ports with metadata. Only the `path` is guaranteed. If unavailable the other fields will be undefined. The `path` is either the path or an identifier (eg `COM1`) used to open the SerialPort.
+	 *
+	 * We make an effort to identify the hardware attached and have consistent results between systems. Linux and OS X are mostly consistent. Windows relies on 3rd party device drivers for the information and is unable to guarantee the information. On windows If you have a USB connected device can we provide a serial number otherwise it will be `undefined`. The `pnpId` and `locationId` are not the same or present on all systems. The examples below were run with the same Arduino Uno.
+	 * @type {function}
+	 * @returns {Promise} Resolves with the list of available serial ports.
+	 * @example
+	```js
+	// OSX example port
+	{
+	  path: '/dev/tty.usbmodem1421',
+	  manufacturer: 'Arduino (www.arduino.cc)',
+	  serialNumber: '752303138333518011C1',
+	  pnpId: undefined,
+	  locationId: '14500000',
+	  productId: '0043',
+	  vendorId: '2341'
+	}
+
+	// Linux example port
+	{
+	  path: '/dev/ttyACM0',
+	  manufacturer: 'Arduino (www.arduino.cc)',
+	  serialNumber: '752303138333518011C1',
+	  pnpId: 'usb-Arduino__www.arduino.cc__0043_752303138333518011C1-if00',
+	  locationId: undefined,
+	  productId: '0043',
+	  vendorId: '2341'
+	}
+
+	// Windows example port
+	{
+	  path: 'COM3',
+	  manufacturer: 'Arduino LLC (www.arduino.cc)',
+	  serialNumber: '752303138333518011C1',
+	  pnpId: 'USB\\VID_2341&PID_0043\\752303138333518011C1',
+	  locationId: 'Port_#0003.Hub_#0001',
+	  productId: '0043',
+	  vendorId: '2341'
+	}
+	```
+
+	```js
+	var SerialPort = require('serialport');
+
+	// promise approach
+	SerialPort.list()
+	  .then(ports) {...});
+	  .catch(err) {...});
+	```
+	 */
+	SerialPort.list = async function(callback) {
+	  debug('.list');
+	  if (!SerialPort.Binding) {
+	    throw new TypeError('No Binding set on `SerialPort.Binding`')
+	  }
+	  if (callback) {
+	    throw new TypeError('SerialPort.list no longer takes a callback and only returns a promise')
+	  }
+	  return SerialPort.Binding.list()
+	};
+
+	lib$b = SerialPort;
+	return lib$b;
+}
+
+var lib$a = {exports: {}};
+
+var bindings = {exports: {}};
+
+var fileUriToPath_1;
+var hasRequiredFileUriToPath;
+
+function requireFileUriToPath () {
+	if (hasRequiredFileUriToPath) return fileUriToPath_1;
+	hasRequiredFileUriToPath = 1;
+	/**
+	 * Module dependencies.
+	 */
+
+	var sep = require$$2.sep || '/';
+
+	/**
+	 * Module exports.
+	 */
+
+	fileUriToPath_1 = fileUriToPath;
+
+	/**
+	 * File URI to Path function.
+	 *
+	 * @param {String} uri
+	 * @return {String} path
+	 * @api public
+	 */
+
+	function fileUriToPath (uri) {
+	  if ('string' != typeof uri ||
+	      uri.length <= 7 ||
+	      'file://' != uri.substring(0, 7)) {
+	    throw new TypeError('must pass in a file:// URI to convert to a file path');
+	  }
+
+	  var rest = decodeURI(uri.substring(7));
+	  var firstSlash = rest.indexOf('/');
+	  var host = rest.substring(0, firstSlash);
+	  var path = rest.substring(firstSlash + 1);
+
+	  // 2.  Scheme Definition
+	  // As a special case, <host> can be the string "localhost" or the empty
+	  // string; this is interpreted as "the machine from which the URL is
+	  // being interpreted".
+	  if ('localhost' == host) host = '';
+
+	  if (host) {
+	    host = sep + sep + host;
+	  }
+
+	  // 3.2  Drives, drive letters, mount points, file system root
+	  // Drive letters are mapped into the top of a file URI in various ways,
+	  // depending on the implementation; some applications substitute
+	  // vertical bar ("|") for the colon after the drive letter, yielding
+	  // "file:///c|/tmp/test.txt".  In some cases, the colon is left
+	  // unchanged, as in "file:///c:/tmp/test.txt".  In other cases, the
+	  // colon is simply omitted, as in "file:///c/tmp/test.txt".
+	  path = path.replace(/^(.+)\|/, '$1:');
+
+	  // for Windows, we need to invert the path separators from what a URI uses
+	  if (sep == '\\') {
+	    path = path.replace(/\//g, '\\');
+	  }
+
+	  if (/^.+\:/.test(path)) ; else {
+	    // unix path…
+	    path = sep + path;
+	  }
+
+	  return host + path;
+	}
+	return fileUriToPath_1;
+}
+
+/**
+ * Module dependencies.
+ */
+
+var hasRequiredBindings;
+
+function requireBindings () {
+	if (hasRequiredBindings) return bindings.exports;
+	hasRequiredBindings = 1;
+	(function (module, exports) {
+		var fs = require$$0$2,
+		  path = require$$2,
+		  fileURLToPath = requireFileUriToPath(),
+		  join = path.join,
+		  dirname = path.dirname,
+		  exists =
+		    (fs.accessSync &&
+		      function(path) {
+		        try {
+		          fs.accessSync(path);
+		        } catch (e) {
+		          return false;
+		        }
+		        return true;
+		      }) ||
+		    fs.existsSync ||
+		    path.existsSync,
+		  defaults = {
+		    arrow: process.env.NODE_BINDINGS_ARROW || ' → ',
+		    compiled: process.env.NODE_BINDINGS_COMPILED_DIR || 'compiled',
+		    platform: process.platform,
+		    arch: process.arch,
+		    nodePreGyp:
+		      'node-v' +
+		      process.versions.modules +
+		      '-' +
+		      process.platform +
+		      '-' +
+		      process.arch,
+		    version: process.versions.node,
+		    bindings: 'bindings.node',
+		    try: [
+		      // node-gyp's linked version in the "build" dir
+		      ['module_root', 'build', 'bindings'],
+		      // node-waf and gyp_addon (a.k.a node-gyp)
+		      ['module_root', 'build', 'Debug', 'bindings'],
+		      ['module_root', 'build', 'Release', 'bindings'],
+		      // Debug files, for development (legacy behavior, remove for node v0.9)
+		      ['module_root', 'out', 'Debug', 'bindings'],
+		      ['module_root', 'Debug', 'bindings'],
+		      // Release files, but manually compiled (legacy behavior, remove for node v0.9)
+		      ['module_root', 'out', 'Release', 'bindings'],
+		      ['module_root', 'Release', 'bindings'],
+		      // Legacy from node-waf, node <= 0.4.x
+		      ['module_root', 'build', 'default', 'bindings'],
+		      // Production "Release" buildtype binary (meh...)
+		      ['module_root', 'compiled', 'version', 'platform', 'arch', 'bindings'],
+		      // node-qbs builds
+		      ['module_root', 'addon-build', 'release', 'install-root', 'bindings'],
+		      ['module_root', 'addon-build', 'debug', 'install-root', 'bindings'],
+		      ['module_root', 'addon-build', 'default', 'install-root', 'bindings'],
+		      // node-pre-gyp path ./lib/binding/{node_abi}-{platform}-{arch}
+		      ['module_root', 'lib', 'binding', 'nodePreGyp', 'bindings']
+		    ]
+		  };
+
+		/**
+		 * The main `bindings()` function loads the compiled bindings for a given module.
+		 * It uses V8's Error API to determine the parent filename that this function is
+		 * being invoked from, which is then used to find the root directory.
+		 */
+
+		function bindings(opts) {
+		  // Argument surgery
+		  if (typeof opts == 'string') {
+		    opts = { bindings: opts };
+		  } else if (!opts) {
+		    opts = {};
+		  }
+
+		  // maps `defaults` onto `opts` object
+		  Object.keys(defaults).map(function(i) {
+		    if (!(i in opts)) opts[i] = defaults[i];
+		  });
+
+		  // Get the module root
+		  if (!opts.module_root) {
+		    opts.module_root = exports.getRoot(exports.getFileName());
+		  }
+
+		  // Ensure the given bindings name ends with .node
+		  if (path.extname(opts.bindings) != '.node') {
+		    opts.bindings += '.node';
+		  }
+
+		  // https://github.com/webpack/webpack/issues/4175#issuecomment-342931035
+		  var requireFunc =
+		    typeof __webpack_require__ === 'function'
+		      ? __non_webpack_require__
+		      : commonjsRequire;
+
+		  var tries = [],
+		    i = 0,
+		    l = opts.try.length,
+		    n,
+		    b,
+		    err;
+
+		  for (; i < l; i++) {
+		    n = join.apply(
+		      null,
+		      opts.try[i].map(function(p) {
+		        return opts[p] || p;
+		      })
+		    );
+		    tries.push(n);
+		    try {
+		      b = opts.path ? requireFunc.resolve(n) : requireFunc(n);
+		      if (!opts.path) {
+		        b.path = n;
+		      }
+		      return b;
+		    } catch (e) {
+		      if (e.code !== 'MODULE_NOT_FOUND' &&
+		          e.code !== 'QUALIFIED_PATH_RESOLUTION_FAILED' &&
+		          !/not find/i.test(e.message)) {
+		        throw e;
+		      }
+		    }
+		  }
+
+		  err = new Error(
+		    'Could not locate the bindings file. Tried:\n' +
+		      tries
+		        .map(function(a) {
+		          return opts.arrow + a;
+		        })
+		        .join('\n')
+		  );
+		  err.tries = tries;
+		  throw err;
+		}
+		module.exports = exports = bindings;
+
+		/**
+		 * Gets the filename of the JavaScript file that invokes this function.
+		 * Used to help find the root directory of a module.
+		 * Optionally accepts an filename argument to skip when searching for the invoking filename
+		 */
+
+		exports.getFileName = function getFileName(calling_file) {
+		  var origPST = Error.prepareStackTrace,
+		    origSTL = Error.stackTraceLimit,
+		    dummy = {},
+		    fileName;
+
+		  Error.stackTraceLimit = 10;
+
+		  Error.prepareStackTrace = function(e, st) {
+		    for (var i = 0, l = st.length; i < l; i++) {
+		      fileName = st[i].getFileName();
+		      if (fileName !== __filename) {
+		        if (calling_file) {
+		          if (fileName !== calling_file) {
+		            return;
+		          }
+		        } else {
+		          return;
+		        }
+		      }
+		    }
+		  };
+
+		  // run the 'prepareStackTrace' function above
+		  Error.captureStackTrace(dummy);
+		  dummy.stack;
+
+		  // cleanup
+		  Error.prepareStackTrace = origPST;
+		  Error.stackTraceLimit = origSTL;
+
+		  // handle filename that starts with "file://"
+		  var fileSchema = 'file://';
+		  if (fileName.indexOf(fileSchema) === 0) {
+		    fileName = fileURLToPath(fileName);
+		  }
+
+		  return fileName;
+		};
+
+		/**
+		 * Gets the root directory of a module, given an arbitrary filename
+		 * somewhere in the module tree. The "root directory" is the directory
+		 * containing the `package.json` file.
+		 *
+		 *   In:  /home/nate/node-native-module/lib/index.js
+		 *   Out: /home/nate/node-native-module
+		 */
+
+		exports.getRoot = function getRoot(file) {
+		  var dir = dirname(file),
+		    prev;
+		  while (true) {
+		    if (dir === '.') {
+		      // Avoids an infinite loop in rare cases, like the REPL
+		      dir = process.cwd();
+		    }
+		    if (
+		      exists(join(dir, 'package.json')) ||
+		      exists(join(dir, 'node_modules'))
+		    ) {
+		      // Found the 'package.json' file or 'node_modules' dir; we're done
+		      return dir;
+		    }
+		    if (prev === dir) {
+		      // Got to the top
+		      throw new Error(
+		        'Could not find module root given file: "' +
+		          file +
+		          '". Do you have a `package.json` file? '
+		      );
+		    }
+		    // Try the parent dir next
+		    prev = dir;
+		    dir = join(dir, '..');
+		  }
+		}; 
+	} (bindings, bindings.exports));
+	return bindings.exports;
+}
+
+var lib$9;
+var hasRequiredLib$a;
+
+function requireLib$a () {
+	if (hasRequiredLib$a) return lib$9;
+	hasRequiredLib$a = 1;
+	const debug = requireSrc()('serialport/binding-abstract');
+
+	/**
+	 * @name Binding
+	 * @type {AbstractBinding}
+	 * @since 5.0.0
+	 * @description The `Binding` is how Node-SerialPort talks to the underlying system. By default, we auto detect Windows, Linux and OS X, and load the appropriate module for your system. You can assign `SerialPort.Binding` to any binding you like. Find more by searching at [npm](https://npmjs.org/).
+	  Prevent auto loading the default bindings by requiring SerialPort with:
+	  ```js
+	  var SerialPort = require('@serialport/stream');
+	  SerialPort.Binding = MyBindingClass;
+	  ```
+	 */
+
+	/**
+	 * You never have to use `Binding` objects directly. SerialPort uses them to access the underlying hardware. This documentation is geared towards people who are making bindings for different platforms. This class can be inherited from to get type checking for each method.
+	 * @class AbstractBinding
+	 * @param {object} options options for the binding
+	 * @property {boolean} isOpen Required property. `true` if the port is open, `false` otherwise. Should be read-only.
+	 * @throws {TypeError} When given invalid arguments, a `TypeError` is thrown.
+	 * @since 5.0.0
+	 */
+	class AbstractBinding {
+	  /**
+	   * Retrieves a list of available serial ports with metadata. The `path` must be guaranteed, and all other fields should be undefined if unavailable. The `path` is either the path or an identifier (eg `COM1`) used to open the serialport.
+	   * @returns {Promise} resolves to an array of port [info objects](#module_serialport--SerialPort.list).
+	   */
+	  static async list() {
+	    debug('list');
+	  }
+
+	  constructor(opt = {}) {
+	    if (typeof opt !== 'object') {
+	      throw new TypeError('"options" is not an object')
+	    }
+	  }
+
+	  /**
+	   * Opens a connection to the serial port referenced by the path.
+	   * @param {string} path the path or com port to open
+	   * @param {openOptions} options openOptions for the serialport
+	   * @returns {Promise} Resolves after the port is opened and configured.
+	   * @rejects {TypeError} When given invalid arguments, a `TypeError` is rejected.
+	   */
+	  async open(path, options) {
+	    if (!path) {
+	      throw new TypeError('"path" is not a valid port')
+	    }
+
+	    if (typeof options !== 'object') {
+	      throw new TypeError('"options" is not an object')
+	    }
+	    debug('open');
+
+	    if (this.isOpen) {
+	      throw new Error('Already open')
+	    }
+	  }
+
+	  /**
+	   * Closes an open connection
+	   * @returns {Promise} Resolves once the connection is closed.
+	   * @rejects {TypeError} When given invalid arguments, a `TypeError` is rejected.
+	   */
+	  async close() {
+	    debug('close');
+	    if (!this.isOpen) {
+	      throw new Error('Port is not open')
+	    }
+	  }
+
+	  /**
+	   * Request a number of bytes from the SerialPort. This function is similar to Node's [`fs.read`](http://nodejs.org/api/fs.html#fs_fs_read_fd_buffer_offset_length_position_callback) except it will always return at least one byte.
+
+	The in progress reads must error when the port is closed with an error object that has the property `canceled` equal to `true`. Any other error will cause a disconnection.
+
+	   * @param {buffer} buffer Accepts a [`Buffer`](http://nodejs.org/api/buffer.html) object.
+	   * @param {integer} offset The offset in the buffer to start writing at.
+	   * @param {integer} length Specifies the maximum number of bytes to read.
+	   * @returns {Promise} Resolves with the number of bytes read after a read operation.
+	   * @rejects {TypeError} When given invalid arguments, a `TypeError` is rejected.
+	   */
+	  async read(buffer, offset, length) {
+	    if (!Buffer.isBuffer(buffer)) {
+	      throw new TypeError('"buffer" is not a Buffer')
+	    }
+
+	    if (typeof offset !== 'number' || isNaN(length)) {
+	      throw new TypeError(`"offset" is not an integer got "${isNaN(length) ? 'NaN' : typeof offset}"`)
+	    }
+
+	    if (typeof length !== 'number' || isNaN(length)) {
+	      throw new TypeError(`"length" is not an integer got "${isNaN(length) ? 'NaN' : typeof length}"`)
+	    }
+
+	    debug('read');
+	    if (buffer.length < offset + length) {
+	      throw new Error('buffer is too small')
+	    }
+
+	    if (!this.isOpen) {
+	      throw new Error('Port is not open')
+	    }
+	  }
+
+	  /**
+	   * Write bytes to the SerialPort. Only called when there is no pending write operation.
+
+	The in progress writes must error when the port is closed with an error object that has the property `canceled` equal to `true`. Any other error will cause a disconnection.
+
+	   * @param {buffer} buffer - Accepts a [`Buffer`](http://nodejs.org/api/buffer.html) object.
+	   * @returns {Promise} Resolves after the data is passed to the operating system for writing.
+	   * @rejects {TypeError} When given invalid arguments, a `TypeError` is rejected.
+	   */
+	  async write(buffer) {
+	    if (!Buffer.isBuffer(buffer)) {
+	      throw new TypeError('"buffer" is not a Buffer')
+	    }
+
+	    debug('write', buffer.length, 'bytes');
+	    if (!this.isOpen) {
+	      debug('write', 'error port is not open');
+
+	      throw new Error('Port is not open')
+	    }
+	  }
+
+	  /**
+	   * Changes connection settings on an open port. Only `baudRate` is supported.
+	   * @param {object=} options Only supports `baudRate`.
+	   * @param {number=} [options.baudRate] If provided a baud rate that the bindings do not support, it should reject.
+	   * @returns {Promise} Resolves once the port's baud rate changes.
+	   * @rejects {TypeError} When given invalid arguments, a `TypeError` is rejected.
+	   */
+	  async update(options) {
+	    if (typeof options !== 'object') {
+	      throw TypeError('"options" is not an object')
+	    }
+
+	    if (typeof options.baudRate !== 'number') {
+	      throw new TypeError('"options.baudRate" is not a number')
+	    }
+
+	    debug('update');
+	    if (!this.isOpen) {
+	      throw new Error('Port is not open')
+	    }
+	  }
+
+	  /**
+	   * Set control flags on an open port.
+	   * @param {object=} options All options are operating system default when the port is opened. Every flag is set on each call to the provided or default values. All options are always provided.
+	   * @param {Boolean} [options.brk=false] flag for brk
+	   * @param {Boolean} [options.cts=false] flag for cts
+	   * @param {Boolean} [options.dsr=false] flag for dsr
+	   * @param {Boolean} [options.dtr=true] flag for dtr
+	   * @param {Boolean} [options.rts=true] flag for rts
+	   * @returns {Promise} Resolves once the port's flags are set.
+	   * @rejects {TypeError} When given invalid arguments, a `TypeError` is rejected.
+	   */
+	  async set(options) {
+	    if (typeof options !== 'object') {
+	      throw new TypeError('"options" is not an object')
+	    }
+	    debug('set');
+	    if (!this.isOpen) {
+	      throw new Error('Port is not open')
+	    }
+	  }
+
+	  /**
+	   * Get the control flags (CTS, DSR, DCD) on the open port.
+	   * @returns {Promise} Resolves with the retrieved flags.
+	   * @rejects {TypeError} When given invalid arguments, a `TypeError` is rejected.
+	   */
+	  async get() {
+	    debug('get');
+	    if (!this.isOpen) {
+	      throw new Error('Port is not open')
+	    }
+	  }
+
+	  /**
+	   * Get the OS reported baud rate for the open port.
+	   * Used mostly for debugging custom baud rates.
+	   * @returns {Promise} Resolves with the current baud rate.
+	   * @rejects {TypeError} When given invalid arguments, a `TypeError` is rejected.
+	   */
+	  async getBaudRate() {
+	    debug('getbaudRate');
+	    if (!this.isOpen) {
+	      throw new Error('Port is not open')
+	    }
+	  }
+
+	  /**
+	   * Flush (discard) data received but not read, and written but not transmitted.
+	   * @returns {Promise} Resolves once the flush operation finishes.
+	   * @rejects {TypeError} When given invalid arguments, a `TypeError` is rejected.
+	   */
+	  async flush() {
+	    debug('flush');
+	    if (!this.isOpen) {
+	      throw new Error('Port is not open')
+	    }
+	  }
+
+	  /**
+	   * Drain waits until all output data is transmitted to the serial port. An in progress write should be completed before this returns.
+	   * @returns {Promise} Resolves once the drain operation finishes.
+	   * @rejects {TypeError} When given invalid arguments, a `TypeError` is rejected.
+	   */
+	  async drain() {
+	    debug('drain');
+	    if (!this.isOpen) {
+	      throw new Error('Port is not open')
+	    }
+	  }
+	}
+
+	lib$9 = AbstractBinding;
+	return lib$9;
+}
+
+var win32SnParser;
+var hasRequiredWin32SnParser;
+
+function requireWin32SnParser () {
+	if (hasRequiredWin32SnParser) return win32SnParser;
+	hasRequiredWin32SnParser = 1;
+	const PARSERS = [/USB\\(?:.+)\\(.+)/, /FTDIBUS\\(?:.+)\+(.+?)A?\\.+/];
+
+	win32SnParser = function(pnpId) {
+	  if (!pnpId) {
+	    return null
+	  }
+	  for (const parser of PARSERS) {
+	    const sn = pnpId.match(parser);
+	    if (sn) {
+	      return sn[1]
+	    }
+	  }
+	  return null
+	};
+	return win32SnParser;
+}
+
+var legacy;
+var hasRequiredLegacy;
+
+function requireLegacy () {
+	if (hasRequiredLegacy) return legacy;
+	hasRequiredLegacy = 1;
+	let warningSent = false;
+
+	const wrapWithHiddenComName = async portsPromise => {
+	  const ports = await portsPromise;
+	  return ports.map(port => {
+	    const newPort = { ...port };
+	    return Object.defineProperties(newPort, {
+	      comName: {
+	        get() {
+	          if (!warningSent) {
+	            warningSent = true;
+	            console.warn(
+	              `"PortInfo.comName" has been deprecated. You should now use "PortInfo.path". The property will be removed in the next major release.`
+	            );
+	          }
+	          return newPort.path
+	        },
+	        enumerable: false,
+	      },
+	    })
+	  })
+	};
+
+	legacy = {
+	  wrapWithHiddenComName,
+	};
+	return legacy;
+}
+
+var win32;
+var hasRequiredWin32;
+
+function requireWin32 () {
+	if (hasRequiredWin32) return win32;
+	hasRequiredWin32 = 1;
+	const binding = requireBindings()('bindings.node');
+	const AbstractBinding = requireLib$a();
+	const { promisify } = require$$1$1;
+	const serialNumParser = requireWin32SnParser();
+
+	const asyncList = promisify(binding.list);
+	const asyncOpen = promisify(binding.open);
+	const asyncClose = promisify(binding.close);
+	const asyncRead = promisify(binding.read);
+	const asyncWrite = promisify(binding.write);
+	const asyncUpdate = promisify(binding.update);
+	const asyncSet = promisify(binding.set);
+	const asyncGet = promisify(binding.get);
+	const asyncGetBaudRate = promisify(binding.getBaudRate);
+	const asyncDrain = promisify(binding.drain);
+	const asyncFlush = promisify(binding.flush);
+	const { wrapWithHiddenComName } = requireLegacy();
+
+	/**
+	 * The Windows binding layer
+	 */
+	class WindowsBinding extends AbstractBinding {
+	  static async list() {
+	    const ports = await asyncList();
+	    // Grab the serial number from the pnp id
+	    return wrapWithHiddenComName(
+	      ports.map(port => {
+	        if (port.pnpId && !port.serialNumber) {
+	          const serialNumber = serialNumParser(port.pnpId);
+	          if (serialNumber) {
+	            return {
+	              ...port,
+	              serialNumber,
+	            }
+	          }
+	        }
+	        return port
+	      })
+	    )
+	  }
+
+	  constructor(opt = {}) {
+	    super(opt);
+	    this.bindingOptions = { ...opt.bindingOptions };
+	    this.fd = null;
+	    this.writeOperation = null;
+	  }
+
+	  get isOpen() {
+	    return this.fd !== null
+	  }
+
+	  async open(path, options) {
+	    await super.open(path, options);
+	    this.openOptions = { ...this.bindingOptions, ...options };
+	    const fd = await asyncOpen(path, this.openOptions);
+	    this.fd = fd;
+	  }
+
+	  async close() {
+	    await super.close();
+	    const fd = this.fd;
+	    this.fd = null;
+	    return asyncClose(fd)
+	  }
+
+	  async read(buffer, offset, length) {
+	    await super.read(buffer, offset, length);
+	    try {
+	      const bytesRead = await asyncRead(this.fd, buffer, offset, length);
+	      return { bytesRead, buffer }
+	    } catch (err) {
+	      if (!this.isOpen) {
+	        err.canceled = true;
+	      }
+	      throw err
+	    }
+	  }
+
+	  async write(buffer) {
+	    this.writeOperation = super.write(buffer).then(async () => {
+	      if (buffer.length === 0) {
+	        return
+	      }
+	      await asyncWrite(this.fd, buffer);
+	      this.writeOperation = null;
+	    });
+	    return this.writeOperation
+	  }
+
+	  async update(options) {
+	    await super.update(options);
+	    return asyncUpdate(this.fd, options)
+	  }
+
+	  async set(options) {
+	    await super.set(options);
+	    return asyncSet(this.fd, options)
+	  }
+
+	  async get() {
+	    await super.get();
+	    return asyncGet(this.fd)
+	  }
+
+	  async getBaudRate() {
+	    await super.get();
+	    return asyncGetBaudRate(this.fd)
+	  }
+
+	  async drain() {
+	    await super.drain();
+	    await this.writeOperation;
+	    return asyncDrain(this.fd)
+	  }
+
+	  async flush() {
+	    await super.flush();
+	    return asyncFlush(this.fd)
+	  }
+	}
+
+	win32 = WindowsBinding;
+	return win32;
+}
+
+var poller;
+var hasRequiredPoller;
+
+function requirePoller () {
+	if (hasRequiredPoller) return poller;
+	hasRequiredPoller = 1;
+	const debug = requireSrc();
+	const logger = debug('serialport/bindings/poller');
+	const EventEmitter = EventEmitter$2;
+	const PollerBindings = requireBindings()('bindings.node').Poller;
+
+	const EVENTS = {
+	  UV_READABLE: 0b0001,
+	  UV_WRITABLE: 0b0010,
+	  UV_DISCONNECT: 0b0100,
+	};
+
+	function handleEvent(error, eventFlag) {
+	  if (error) {
+	    logger('error', error);
+	    this.emit('readable', error);
+	    this.emit('writable', error);
+	    this.emit('disconnect', error);
+	    return
+	  }
+	  if (eventFlag & EVENTS.UV_READABLE) {
+	    logger('received "readable"');
+	    this.emit('readable', null);
+	  }
+	  if (eventFlag & EVENTS.UV_WRITABLE) {
+	    logger('received "writable"');
+	    this.emit('writable', null);
+	  }
+	  if (eventFlag & EVENTS.UV_DISCONNECT) {
+	    logger('received "disconnect"');
+	    this.emit('disconnect', null);
+	  }
+	}
+
+	/**
+	 * Polls unix systems for readable or writable states of a file or serialport
+	 */
+	class Poller extends EventEmitter {
+	  constructor(fd, FDPoller = PollerBindings) {
+	    logger('Creating poller');
+	    super();
+	    this.poller = new FDPoller(fd, handleEvent.bind(this));
+	  }
+	  /**
+	   * Wait for the next event to occur
+	   * @param {string} event ('readable'|'writable'|'disconnect')
+	   * @returns {Poller} returns itself
+	   */
+	  once(event, callback) {
+	    switch (event) {
+	      case 'readable':
+	        this.poll(EVENTS.UV_READABLE);
+	        break
+	      case 'writable':
+	        this.poll(EVENTS.UV_WRITABLE);
+	        break
+	      case 'disconnect':
+	        this.poll(EVENTS.UV_DISCONNECT);
+	        break
+	    }
+	    return super.once(event, callback)
+	  }
+
+	  /**
+	   * Ask the bindings to listen for an event, it is recommend to use `.once()` for easy use
+	   * @param {EVENTS} eventFlag polls for an event or group of events based upon a flag.
+	   * @returns {undefined}
+	   */
+	  poll(eventFlag) {
+	    eventFlag = eventFlag || 0;
+
+	    if (eventFlag & EVENTS.UV_READABLE) {
+	      logger('Polling for "readable"');
+	    }
+	    if (eventFlag & EVENTS.UV_WRITABLE) {
+	      logger('Polling for "writable"');
+	    }
+	    if (eventFlag & EVENTS.UV_DISCONNECT) {
+	      logger('Polling for "disconnect"');
+	    }
+
+	    this.poller.poll(eventFlag);
+	  }
+
+	  /**
+	   * Stop listening for events and cancel all outstanding listening with an error
+	   * @returns {undefined}
+	   */
+	  stop() {
+	    logger('Stopping poller');
+	    this.poller.stop();
+	    this.emitCanceled();
+	  }
+
+	  destroy() {
+	    logger('Destroying poller');
+	    this.poller.destroy();
+	    this.emitCanceled();
+	  }
+
+	  emitCanceled() {
+	    const err = new Error('Canceled');
+	    err.canceled = true;
+	    this.emit('readable', err);
+	    this.emit('writable', err);
+	    this.emit('disconnect', err);
+	  }
+	}
+
+	Poller.EVENTS = EVENTS;
+
+	poller = Poller;
+	return poller;
+}
+
+var unixRead_1;
+var hasRequiredUnixRead;
+
+function requireUnixRead () {
+	if (hasRequiredUnixRead) return unixRead_1;
+	hasRequiredUnixRead = 1;
+	const fs = require$$0$2;
+	const debug = requireSrc();
+	const logger = debug('serialport/bindings/unixRead');
+	const { promisify } = require$$1$1;
+
+	const readAsync = promisify(fs.read);
+
+	const readable = binding => {
+	  return new Promise((resolve, reject) => {
+	    binding.poller.once('readable', err => (err ? reject(err) : resolve()));
+	  })
+	};
+
+	const unixRead = async ({ binding, buffer, offset, length, fsReadAsync = readAsync }) => {
+	  logger('Starting read');
+	  if (!binding.isOpen) {
+	    const err = new Error('Port is not open');
+	    err.canceled = true;
+	    throw err
+	  }
+
+	  try {
+	    const { bytesRead } = await fsReadAsync(binding.fd, buffer, offset, length, null);
+	    if (bytesRead === 0) {
+	      return unixRead({ binding, buffer, offset, length, fsReadAsync })
+	    }
+	    logger('Finished read', bytesRead, 'bytes');
+	    return { bytesRead, buffer }
+	  } catch (err) {
+	    logger('read error', err);
+	    if (err.code === 'EAGAIN' || err.code === 'EWOULDBLOCK' || err.code === 'EINTR') {
+	      if (!binding.isOpen) {
+	        const err = new Error('Port is not open');
+	        err.canceled = true;
+	        throw err
+	      }
+	      logger('waiting for readable because of code:', err.code);
+	      await readable(binding);
+	      return unixRead({ binding, buffer, offset, length, fsReadAsync })
+	    }
+
+	    const disconnectError =
+	      err.code === 'EBADF' || // Bad file number means we got closed
+	      err.code === 'ENXIO' || // No such device or address probably usb disconnect
+	      err.code === 'UNKNOWN' ||
+	      err.errno === -1; // generic error
+
+	    if (disconnectError) {
+	      err.canceled = true;
+	      logger('disconnecting', err);
+	    }
+
+	    throw err
+	  }
+	};
+
+	unixRead_1 = unixRead;
+	return unixRead_1;
+}
+
+var unixWrite_1;
+var hasRequiredUnixWrite;
+
+function requireUnixWrite () {
+	if (hasRequiredUnixWrite) return unixWrite_1;
+	hasRequiredUnixWrite = 1;
+	const fs = require$$0$2;
+	const debug = requireSrc();
+	const logger = debug('serialport/bindings/unixWrite');
+	const { promisify } = require$$1$1;
+
+	const writeAsync = promisify(fs.write);
+
+	const writable = binding => {
+	  return new Promise((resolve, reject) => {
+	    binding.poller.once('writable', err => (err ? reject(err) : resolve()));
+	  })
+	};
+
+	const unixWrite = async ({ binding, buffer, offset = 0, fsWriteAsync = writeAsync }) => {
+	  const bytesToWrite = buffer.length - offset;
+	  logger('Starting write', buffer.length, 'bytes offset', offset, 'bytesToWrite', bytesToWrite);
+	  if (!binding.isOpen) {
+	    throw new Error('Port is not open')
+	  }
+	  try {
+	    const { bytesWritten } = await fsWriteAsync(binding.fd, buffer, offset, bytesToWrite);
+	    logger('write returned: wrote', bytesWritten, 'bytes');
+	    if (bytesWritten + offset < buffer.length) {
+	      if (!binding.isOpen) {
+	        throw new Error('Port is not open')
+	      }
+	      return unixWrite({ binding, buffer, offset: bytesWritten + offset, fsWriteAsync })
+	    }
+
+	    logger('Finished writing', bytesWritten + offset, 'bytes');
+	  } catch (err) {
+	    logger('write errored', err);
+	    if (err.code === 'EAGAIN' || err.code === 'EWOULDBLOCK' || err.code === 'EINTR') {
+	      if (!binding.isOpen) {
+	        throw new Error('Port is not open')
+	      }
+	      logger('waiting for writable because of code:', err.code);
+	      await writable(binding);
+	      return unixWrite({ binding, buffer, offset, fsWriteAsync })
+	    }
+
+	    const disconnectError =
+	      err.code === 'EBADF' || // Bad file number means we got closed
+	      err.code === 'ENXIO' || // No such device or address probably usb disconnect
+	      err.code === 'UNKNOWN' ||
+	      err.errno === -1; // generic error
+
+	    if (disconnectError) {
+	      err.disconnect = true;
+	      logger('disconnecting', err);
+	    }
+
+	    logger('error', err);
+	    throw err
+	  }
+	};
+	unixWrite_1 = unixWrite;
+	return unixWrite_1;
+}
+
+var darwin;
+var hasRequiredDarwin;
+
+function requireDarwin () {
+	if (hasRequiredDarwin) return darwin;
+	hasRequiredDarwin = 1;
+	const { promisify } = require$$1$1;
+	const binding = requireBindings()('bindings.node');
+	const AbstractBinding = requireLib$a();
+	const Poller = requirePoller();
+	const unixRead = requireUnixRead();
+	const unixWrite = requireUnixWrite();
+	const { wrapWithHiddenComName } = requireLegacy();
+
+	const defaultBindingOptions = Object.freeze({
+	  vmin: 1,
+	  vtime: 0,
+	});
+
+	const asyncList = promisify(binding.list);
+	const asyncOpen = promisify(binding.open);
+	const asyncClose = promisify(binding.close);
+	const asyncUpdate = promisify(binding.update);
+	const asyncSet = promisify(binding.set);
+	const asyncGet = promisify(binding.get);
+	const asyncGetBaudRate = promisify(binding.getBaudRate);
+	const asyncDrain = promisify(binding.drain);
+	const asyncFlush = promisify(binding.flush);
+
+	/**
+	 * The Darwin binding layer for OSX
+	 */
+	class DarwinBinding extends AbstractBinding {
+	  static list() {
+	    return wrapWithHiddenComName(asyncList())
+	  }
+
+	  constructor(opt = {}) {
+	    super(opt);
+	    this.bindingOptions = { ...defaultBindingOptions, ...opt.bindingOptions };
+	    this.fd = null;
+	    this.writeOperation = null;
+	  }
+
+	  get isOpen() {
+	    return this.fd !== null
+	  }
+
+	  async open(path, options) {
+	    await super.open(path, options);
+	    this.openOptions = { ...this.bindingOptions, ...options };
+	    const fd = await asyncOpen(path, this.openOptions);
+	    this.fd = fd;
+	    this.poller = new Poller(fd);
+	  }
+
+	  async close() {
+	    await super.close();
+	    const fd = this.fd;
+	    this.poller.stop();
+	    this.poller.destroy();
+	    this.poller = null;
+	    this.openOptions = null;
+	    this.fd = null;
+	    return asyncClose(fd)
+	  }
+
+	  async read(buffer, offset, length) {
+	    await super.read(buffer, offset, length);
+	    return unixRead({ binding: this, buffer, offset, length })
+	  }
+
+	  async write(buffer) {
+	    this.writeOperation = super.write(buffer).then(async () => {
+	      if (buffer.length === 0) {
+	        return
+	      }
+	      await unixWrite({ binding: this, buffer });
+	      this.writeOperation = null;
+	    });
+	    return this.writeOperation
+	  }
+
+	  async update(options) {
+	    await super.update(options);
+	    return asyncUpdate(this.fd, options)
+	  }
+
+	  async set(options) {
+	    await super.set(options);
+	    return asyncSet(this.fd, options)
+	  }
+
+	  async get() {
+	    await super.get();
+	    return asyncGet(this.fd)
+	  }
+
+	  async getBaudRate() {
+	    await super.get();
+	    return asyncGetBaudRate(this.fd)
+	  }
+
+	  async drain() {
+	    await super.drain();
+	    await this.writeOperation;
+	    return asyncDrain(this.fd)
+	  }
+
+	  async flush() {
+	    await super.flush();
+	    return asyncFlush(this.fd)
+	  }
+	}
+
+	darwin = DarwinBinding;
+	return darwin;
+}
+
+var lib$8;
+var hasRequiredLib$9;
+
+function requireLib$9 () {
+	if (hasRequiredLib$9) return lib$8;
+	hasRequiredLib$9 = 1;
+	const { Transform } = require$$0;
+
+	/**
+	 * A transform stream that emits data each time a byte sequence is received.
+	 * @extends Transform
+	 * @summary To use the `Delimiter` parser, provide a delimiter as a string, buffer, or array of bytes. Runs in O(n) time.
+	 * @example
+	const SerialPort = require('serialport')
+	const Delimiter = require('@serialport/parser-delimiter')
+	const port = new SerialPort('/dev/tty-usbserial1')
+	const parser = port.pipe(new Delimiter({ delimiter: '\n' }))
+	parser.on('data', console.log)
+	 */
+	class DelimiterParser extends Transform {
+	  constructor(options = {}) {
+	    super(options);
+
+	    if (options.delimiter === undefined) {
+	      throw new TypeError('"delimiter" is not a bufferable object')
+	    }
+
+	    if (options.delimiter.length === 0) {
+	      throw new TypeError('"delimiter" has a 0 or undefined length')
+	    }
+
+	    this.includeDelimiter = options.includeDelimiter !== undefined ? options.includeDelimiter : false;
+	    this.delimiter = Buffer.from(options.delimiter);
+	    this.buffer = Buffer.alloc(0);
+	  }
+
+	  _transform(chunk, encoding, cb) {
+	    let data = Buffer.concat([this.buffer, chunk]);
+	    let position;
+	    while ((position = data.indexOf(this.delimiter)) !== -1) {
+	      this.push(data.slice(0, position + (this.includeDelimiter ? this.delimiter.length : 0)));
+	      data = data.slice(position + this.delimiter.length);
+	    }
+	    this.buffer = data;
+	    cb();
+	  }
+
+	  _flush(cb) {
+	    this.push(this.buffer);
+	    this.buffer = Buffer.alloc(0);
+	    cb();
+	  }
+	}
+
+	lib$8 = DelimiterParser;
+	return lib$8;
+}
+
+var lib$7;
+var hasRequiredLib$8;
+
+function requireLib$8 () {
+	if (hasRequiredLib$8) return lib$7;
+	hasRequiredLib$8 = 1;
+	const DelimiterParser = requireLib$9();
+
+	/**
+	 *  A transform stream that emits data after a newline delimiter is received.
+	 * @summary To use the `Readline` parser, provide a delimiter (defaults to `\n`). Data is emitted as string controllable by the `encoding` option (defaults to `utf8`).
+	 * @extends DelimiterParser
+	 * @example
+	const SerialPort = require('serialport')
+	const Readline = require('@serialport/parser-readline')
+	const port = new SerialPort('/dev/tty-usbserial1')
+	const parser = port.pipe(new Readline({ delimiter: '\r\n' }))
+	parser.on('data', console.log)
+	*/
+	class ReadLineParser extends DelimiterParser {
+	  constructor(options) {
+	    const opts = {
+	      delimiter: Buffer.from('\n', 'utf8'),
+	      encoding: 'utf8',
+	      ...options,
+	    };
+
+	    if (typeof opts.delimiter === 'string') {
+	      opts.delimiter = Buffer.from(opts.delimiter, opts.encoding);
+	    }
+
+	    super(opts);
+	  }
+	}
+
+	lib$7 = ReadLineParser;
+	return lib$7;
+}
+
+var linuxList;
+var hasRequiredLinuxList;
+
+function requireLinuxList () {
+	if (hasRequiredLinuxList) return linuxList;
+	hasRequiredLinuxList = 1;
+	const childProcess = require$$0$3;
+	const Readline = requireLib$8();
+
+	// get only serial port names
+	function checkPathOfDevice(path) {
+	  return /(tty(S|WCH|ACM|USB|AMA|MFD|O|XRUSB)|rfcomm)/.test(path) && path
+	}
+
+	function propName(name) {
+	  return {
+	    DEVNAME: 'path',
+	    ID_VENDOR_ENC: 'manufacturer',
+	    ID_SERIAL_SHORT: 'serialNumber',
+	    ID_VENDOR_ID: 'vendorId',
+	    ID_MODEL_ID: 'productId',
+	    DEVLINKS: 'pnpId',
+	  }[name.toUpperCase()]
+	}
+
+	function decodeHexEscape(str) {
+	  return str.replace(/\\x([a-fA-F0-9]{2})/g, (a, b) => {
+	    return String.fromCharCode(parseInt(b, 16))
+	  })
+	}
+
+	function propVal(name, val) {
+	  if (name === 'pnpId') {
+	    const match = val.match(/\/by-id\/([^\s]+)/);
+	    return (match && match[1]) || undefined
+	  }
+	  if (name === 'manufacturer') {
+	    return decodeHexEscape(val)
+	  }
+	  if (/^0x/.test(val)) {
+	    return val.substr(2)
+	  }
+	  return val
+	}
+
+	function listLinux() {
+	  return new Promise((resolve, reject) => {
+	    const ports = [];
+	    const ude = childProcess.spawn('udevadm', ['info', '-e']);
+	    const lines = ude.stdout.pipe(new Readline());
+	    ude.on('close', code => code && reject(new Error(`Error listing ports udevadm exited with error code: ${code}`)));
+	    ude.on('error', reject);
+	    lines.on('error', reject);
+
+	    let port = {};
+	    let skipPort = false;
+	    lines.on('data', line => {
+	      const lineType = line.slice(0, 1);
+	      const data = line.slice(3);
+	      // new port entry
+	      if (lineType === 'P') {
+	        port = {
+	          manufacturer: undefined,
+	          serialNumber: undefined,
+	          pnpId: undefined,
+	          locationId: undefined,
+	          vendorId: undefined,
+	          productId: undefined,
+	        };
+	        skipPort = false;
+	        return
+	      }
+
+	      if (skipPort) {
+	        return
+	      }
+
+	      // Check dev name and save port if it matches flag to skip the rest of the data if not
+	      if (lineType === 'N') {
+	        if (checkPathOfDevice(data)) {
+	          ports.push(port);
+	        } else {
+	          skipPort = true;
+	        }
+	        return
+	      }
+
+	      // parse data about each port
+	      if (lineType === 'E') {
+	        const keyValue = data.match(/^(.+)=(.*)/);
+	        if (!keyValue) {
+	          return
+	        }
+	        const key = propName(keyValue[1]);
+	        if (!key) {
+	          return
+	        }
+	        port[key] = propVal(key, keyValue[2]);
+	      }
+	    });
+
+	    lines.on('finish', () => resolve(ports));
+	  })
+	}
+
+	linuxList = listLinux;
+	return linuxList;
+}
+
+var linux;
+var hasRequiredLinux;
+
+function requireLinux () {
+	if (hasRequiredLinux) return linux;
+	hasRequiredLinux = 1;
+	const { promisify } = require$$1$1;
+	const binding = requireBindings()('bindings.node');
+	const AbstractBinding = requireLib$a();
+	const linuxList = requireLinuxList();
+	const Poller = requirePoller();
+	const unixRead = requireUnixRead();
+	const unixWrite = requireUnixWrite();
+	const { wrapWithHiddenComName } = requireLegacy();
+
+	const defaultBindingOptions = Object.freeze({
+	  vmin: 1,
+	  vtime: 0,
+	});
+
+	const asyncOpen = promisify(binding.open);
+	const asyncClose = promisify(binding.close);
+	const asyncUpdate = promisify(binding.update);
+	const asyncSet = promisify(binding.set);
+	const asyncGet = promisify(binding.get);
+	const asyncGetBaudRate = promisify(binding.getBaudRate);
+	const asyncDrain = promisify(binding.drain);
+	const asyncFlush = promisify(binding.flush);
+
+	/**
+	 * The linux binding layer
+	 */
+	class LinuxBinding extends AbstractBinding {
+	  static list() {
+	    return wrapWithHiddenComName(linuxList())
+	  }
+
+	  constructor(opt = {}) {
+	    super(opt);
+	    this.bindingOptions = { ...defaultBindingOptions, ...opt.bindingOptions };
+	    this.fd = null;
+	    this.writeOperation = null;
+	  }
+
+	  get isOpen() {
+	    return this.fd !== null
+	  }
+
+	  async open(path, options) {
+	    await super.open(path, options);
+	    this.openOptions = { ...this.bindingOptions, ...options };
+	    const fd = await asyncOpen(path, this.openOptions);
+	    this.fd = fd;
+	    this.poller = new Poller(fd);
+	  }
+
+	  async close() {
+	    await super.close();
+	    const fd = this.fd;
+	    this.poller.stop();
+	    this.poller.destroy();
+	    this.poller = null;
+	    this.openOptions = null;
+	    this.fd = null;
+	    return asyncClose(fd)
+	  }
+
+	  async read(buffer, offset, length) {
+	    await super.read(buffer, offset, length);
+	    return unixRead({ binding: this, buffer, offset, length })
+	  }
+
+	  async write(buffer) {
+	    this.writeOperation = super.write(buffer).then(async () => {
+	      if (buffer.length === 0) {
+	        return
+	      }
+	      await unixWrite({ binding: this, buffer });
+	      this.writeOperation = null;
+	    });
+	    return this.writeOperation
+	  }
+
+	  async update(options) {
+	    await super.update(options);
+	    return asyncUpdate(this.fd, options)
+	  }
+
+	  async set(options) {
+	    await super.set(options);
+	    return asyncSet(this.fd, options)
+	  }
+
+	  async get() {
+	    await super.get();
+	    return asyncGet(this.fd)
+	  }
+
+	  async getBaudRate() {
+	    await super.get();
+	    return asyncGetBaudRate(this.fd)
+	  }
+
+	  async drain() {
+	    await super.drain();
+	    await this.writeOperation;
+	    return asyncDrain(this.fd)
+	  }
+
+	  async flush() {
+	    await super.flush();
+	    return asyncFlush(this.fd)
+	  }
+	}
+
+	linux = LinuxBinding;
+	return linux;
+}
+
+var hasRequiredLib$7;
+
+function requireLib$7 () {
+	if (hasRequiredLib$7) return lib$a.exports;
+	hasRequiredLib$7 = 1;
+	const debug = requireSrc()('serialport/bindings');
+
+	switch (process.platform) {
+	  case 'win32':
+	    debug('loading WindowsBinding');
+	    lib$a.exports = requireWin32();
+	    break
+	  case 'darwin':
+	    debug('loading DarwinBinding');
+	    lib$a.exports = requireDarwin();
+	    break
+	  default:
+	    debug('loading LinuxBinding');
+	    lib$a.exports = requireLinux();
+	}
+	return lib$a.exports;
+}
+
+var lib$6;
+var hasRequiredLib$6;
+
+function requireLib$6 () {
+	if (hasRequiredLib$6) return lib$6;
+	hasRequiredLib$6 = 1;
+	const { Transform } = require$$0;
+
+	/**
+	 * Emit data every number of bytes
+	 * @extends Transform
+	 * @param {Object} options parser options object
+	 * @param {Number} options.length the number of bytes on each data event
+	 * @summary A transform stream that emits data as a buffer after a specific number of bytes are received. Runs in O(n) time.
+	 * @example
+	const SerialPort = require('serialport')
+	const ByteLength = require('@serialport/parser-byte-length')
+	const port = new SerialPort('/dev/tty-usbserial1')
+	const parser = port.pipe(new ByteLength({length: 8}))
+	parser.on('data', console.log) // will have 8 bytes per data event
+	 */
+	class ByteLengthParser extends Transform {
+	  constructor(options = {}) {
+	    super(options);
+
+	    if (typeof options.length !== 'number') {
+	      throw new TypeError('"length" is not a number')
+	    }
+
+	    if (options.length < 1) {
+	      throw new TypeError('"length" is not greater than 0')
+	    }
+
+	    this.length = options.length;
+	    this.position = 0;
+	    this.buffer = Buffer.alloc(this.length);
+	  }
+
+	  _transform(chunk, encoding, cb) {
+	    let cursor = 0;
+	    while (cursor < chunk.length) {
+	      this.buffer[this.position] = chunk[cursor];
+	      cursor++;
+	      this.position++;
+	      if (this.position === this.length) {
+	        this.push(this.buffer);
+	        this.buffer = Buffer.alloc(this.length);
+	        this.position = 0;
+	      }
+	    }
+	    cb();
+	  }
+
+	  _flush(cb) {
+	    this.push(this.buffer.slice(0, this.position));
+	    this.buffer = Buffer.alloc(this.length);
+	    cb();
+	  }
+	}
+
+	lib$6 = ByteLengthParser;
+	return lib$6;
+}
+
+var lib$5;
+var hasRequiredLib$5;
+
+function requireLib$5 () {
+	if (hasRequiredLib$5) return lib$5;
+	hasRequiredLib$5 = 1;
+	const { Transform } = require$$0;
+
+	/**
+	 * Parse the CCTalk protocol
+	 * @extends Transform
+	 * @summary A transform stream that emits CCTalk packets as they are received.
+	 * @example
+	const SerialPort = require('serialport')
+	const CCTalk = require('@serialport/parser-cctalk')
+	const port = new SerialPort('/dev/ttyUSB0')
+	const parser = port.pipe(new CCtalk())
+	parser.on('data', console.log)
+	 */
+	class CCTalkParser extends Transform {
+	  constructor(maxDelayBetweenBytesMs = 50) {
+	    super();
+	    this.array = [];
+	    this.cursor = 0;
+	    this.lastByteFetchTime = 0;
+	    this.maxDelayBetweenBytesMs = maxDelayBetweenBytesMs;
+	  }
+	  _transform(buffer, _, cb) {
+	    if (this.maxDelayBetweenBytesMs > 0) {
+	      const now = Date.now();
+	      if (now - this.lastByteFetchTime > this.maxDelayBetweenBytesMs) {
+	        this.array = [];
+	        this.cursor = 0;
+	      }
+	      this.lastByteFetchTime = now;
+	    }
+
+	    this.cursor += buffer.length;
+	    // TODO: Better Faster es7 no supported by node 4
+	    // ES7 allows directly push [...buffer]
+	    // this.array = this.array.concat(Array.from(buffer)) //Slower ?!?
+	    Array.from(buffer).map(byte => this.array.push(byte));
+	    while (this.cursor > 1 && this.cursor >= this.array[1] + 5) {
+	      // full frame accumulated
+	      // copy command from the array
+	      const FullMsgLength = this.array[1] + 5;
+
+	      const frame = Buffer.from(this.array.slice(0, FullMsgLength));
+	      // Preserve Extra Data
+	      this.array = this.array.slice(frame.length, this.array.length);
+	      this.cursor -= FullMsgLength;
+	      this.push(frame);
+	    }
+	    cb();
+	  }
+	}
+
+	lib$5 = CCTalkParser;
+	return lib$5;
+}
+
+var lib$4;
+var hasRequiredLib$4;
+
+function requireLib$4 () {
+	if (hasRequiredLib$4) return lib$4;
+	hasRequiredLib$4 = 1;
+	const { Transform } = require$$0;
+
+	/**
+	 * A transform stream that emits data each time a byte sequence is received.
+	 * @extends Transform
+	 * @summary To use the `Delimiter` parser, provide a delimiter as a string, buffer, or array of bytes. Runs in O(n) time.
+	 * @example
+	const SerialPort = require('serialport')
+	const Delimiter = require('@serialport/parser-delimiter')
+	const port = new SerialPort('/dev/tty-usbserial1')
+	const parser = port.pipe(new Delimiter({ delimiter: '\n' }))
+	parser.on('data', console.log)
+	 */
+	class DelimiterParser extends Transform {
+	  constructor(options = {}) {
+	    super(options);
+
+	    if (options.delimiter === undefined) {
+	      throw new TypeError('"delimiter" is not a bufferable object')
+	    }
+
+	    if (options.delimiter.length === 0) {
+	      throw new TypeError('"delimiter" has a 0 or undefined length')
+	    }
+
+	    this.includeDelimiter = options.includeDelimiter !== undefined ? options.includeDelimiter : false;
+	    this.delimiter = Buffer.from(options.delimiter);
+	    this.buffer = Buffer.alloc(0);
+	  }
+
+	  _transform(chunk, encoding, cb) {
+	    let data = Buffer.concat([this.buffer, chunk]);
+	    let position;
+	    while ((position = data.indexOf(this.delimiter)) !== -1) {
+	      this.push(data.slice(0, position + (this.includeDelimiter ? this.delimiter.length : 0)));
+	      data = data.slice(position + this.delimiter.length);
+	    }
+	    this.buffer = data;
+	    cb();
+	  }
+
+	  _flush(cb) {
+	    this.push(this.buffer);
+	    this.buffer = Buffer.alloc(0);
+	    cb();
+	  }
+	}
+
+	lib$4 = DelimiterParser;
+	return lib$4;
+}
+
+var lib$3;
+var hasRequiredLib$3;
+
+function requireLib$3 () {
+	if (hasRequiredLib$3) return lib$3;
+	hasRequiredLib$3 = 1;
+	const DelimiterParser = requireLib$4();
+
+	/**
+	 *  A transform stream that emits data after a newline delimiter is received.
+	 * @summary To use the `Readline` parser, provide a delimiter (defaults to `\n`). Data is emitted as string controllable by the `encoding` option (defaults to `utf8`).
+	 * @extends DelimiterParser
+	 * @example
+	const SerialPort = require('serialport')
+	const Readline = require('@serialport/parser-readline')
+	const port = new SerialPort('/dev/tty-usbserial1')
+	const parser = port.pipe(new Readline({ delimiter: '\r\n' }))
+	parser.on('data', console.log)
+	*/
+	class ReadLineParser extends DelimiterParser {
+	  constructor(options) {
+	    const opts = {
+	      delimiter: Buffer.from('\n', 'utf8'),
+	      encoding: 'utf8',
+	      ...options,
+	    };
+
+	    if (typeof opts.delimiter === 'string') {
+	      opts.delimiter = Buffer.from(opts.delimiter, opts.encoding);
+	    }
+
+	    super(opts);
+	  }
+	}
+
+	lib$3 = ReadLineParser;
+	return lib$3;
+}
+
+var lib$2;
+var hasRequiredLib$2;
+
+function requireLib$2 () {
+	if (hasRequiredLib$2) return lib$2;
+	hasRequiredLib$2 = 1;
+	const { Transform } = require$$0;
+
+	/**
+	 * A transform stream that waits for a sequence of "ready" bytes before emitting a ready event and emitting data events
+	 * @summary To use the `Ready` parser provide a byte start sequence. After the bytes have been received a ready event is fired and data events are passed through.
+	 * @extends Transform
+	 * @example
+	const SerialPort = require('serialport')
+	const Ready = require('@serialport/parser-ready')
+	const port = new SerialPort('/dev/tty-usbserial1')
+	const parser = port.pipe(new Ready({ delimiter: 'READY' }))
+	parser.on('ready', () => console.log('the ready byte sequence has been received'))
+	parser.on('data', console.log) // all data after READY is received
+	 */
+	class ReadyParser extends Transform {
+	  /**
+	   *
+	   * @param {object} options options for the parser
+	   * @param {string|Buffer|array} options.delimiter data to look for before emitted "ready"
+	   */
+	  constructor(options = {}) {
+	    if (options.delimiter === undefined) {
+	      throw new TypeError('"delimiter" is not a bufferable object')
+	    }
+
+	    if (options.delimiter.length === 0) {
+	      throw new TypeError('"delimiter" has a 0 or undefined length')
+	    }
+
+	    super(options);
+	    this.delimiter = Buffer.from(options.delimiter);
+	    this.readOffset = 0;
+	    this.ready = false;
+	  }
+
+	  _transform(chunk, encoding, cb) {
+	    if (this.ready) {
+	      this.push(chunk);
+	      return cb()
+	    }
+	    const delimiter = this.delimiter;
+	    let chunkOffset = 0;
+	    while (this.readOffset < delimiter.length && chunkOffset < chunk.length) {
+	      if (delimiter[this.readOffset] === chunk[chunkOffset]) {
+	        this.readOffset++;
+	      } else {
+	        this.readOffset = 0;
+	      }
+	      chunkOffset++;
+	    }
+	    if (this.readOffset === delimiter.length) {
+	      this.ready = true;
+	      this.emit('ready');
+	      const chunkRest = chunk.slice(chunkOffset);
+	      if (chunkRest.length > 0) {
+	        this.push(chunkRest);
+	      }
+	    }
+	    cb();
+	  }
+	}
+
+	lib$2 = ReadyParser;
+	return lib$2;
+}
+
+var lib$1;
+var hasRequiredLib$1;
+
+function requireLib$1 () {
+	if (hasRequiredLib$1) return lib$1;
+	hasRequiredLib$1 = 1;
+	const { Transform } = require$$0;
+
+	/**
+	 * A transform stream that uses a regular expression to split the incoming text upon.
+	 *
+	 * To use the `Regex` parser provide a regular expression to split the incoming text upon. Data is emitted as string controllable by the `encoding` option (defaults to `utf8`).
+	 * @extends Transform
+	 * @example
+	const SerialPort = require('serialport')
+	const Regex = require('@serialport/parser-regex')
+	const port = new SerialPort('/dev/tty-usbserial1')
+	const parser = port.pipe(new Regex({ regex: /[\r\n]+/ }))
+	parser.on('data', console.log)
+	 */
+	class RegexParser extends Transform {
+	  constructor(options) {
+	    const opts = {
+	      encoding: 'utf8',
+	      ...options,
+	    };
+
+	    if (opts.regex === undefined) {
+	      throw new TypeError('"options.regex" must be a regular expression pattern or object')
+	    }
+
+	    if (!(opts.regex instanceof RegExp)) {
+	      opts.regex = new RegExp(opts.regex);
+	    }
+	    super(opts);
+
+	    this.regex = opts.regex;
+	    this.data = '';
+	  }
+
+	  _transform(chunk, encoding, cb) {
+	    const data = this.data + chunk;
+	    const parts = data.split(this.regex);
+	    this.data = parts.pop();
+
+	    parts.forEach(part => {
+	      this.push(part);
+	    });
+	    cb();
+	  }
+
+	  _flush(cb) {
+	    this.push(this.data);
+	    this.data = '';
+	    cb();
+	  }
+	}
+
+	lib$1 = RegexParser;
+	return lib$1;
+}
+
+var parsers;
+var hasRequiredParsers;
+
+function requireParsers () {
+	if (hasRequiredParsers) return parsers;
+	hasRequiredParsers = 1;
+	parsers = {
+	  ByteLength: requireLib$6(),
+	  CCTalk: requireLib$5(),
+	  Delimiter: requireLib$4(),
+	  Readline: requireLib$3(),
+	  Ready: requireLib$2(),
+	  Regex: requireLib$1(),
+	};
+	return parsers;
+}
+
+var lib;
+var hasRequiredLib;
+
+function requireLib () {
+	if (hasRequiredLib) return lib;
+	hasRequiredLib = 1;
+	const SerialPort = requireLib$b();
+	const Binding = requireLib$7();
+	const parsers = requireParsers();
+
+	/**
+	 * @type {AbstractBinding}
+	 */
+	SerialPort.Binding = Binding;
+
+	/**
+	 * @type {Parsers}
+	 */
+	SerialPort.parsers = parsers;
+
+	lib = SerialPort;
+	return lib;
 }
 
 var com_1;
@@ -12831,7 +15388,7 @@ function requireCom () {
 	const Emitter = EventEmitter$2;
 
 	class TransportStub extends Emitter {
-	  constructor(path /*, options, openCallback*/) {
+	  constructor(path/*, options, openCallback*/) {
 	    super();
 	    this.isOpen = true;
 	    this.baudRate = 0;
@@ -12869,7 +15426,7 @@ function requireCom () {
 	  if (process.env.IS_TEST_MODE) {
 	    com = TransportStub;
 	  } else {
-	    SerialPort = requireDist().SerialPort;
+	    SerialPort = requireLib();
 	    com = SerialPort;
 	  }
 	} catch (err) {
@@ -12883,9 +15440,7 @@ function requireCom () {
 	    com = TransportStub;
 	  } else {
 	    console.log("It looks like serialport didn't install properly.");
-	    console.log(
-	      "More information can be found here https://serialport.io/docs/guide-installation"
-	    );
+	    console.log("More information can be found here https://serialport.io/docs/guide-installation");
 	    console.log(`The result of requiring the package is: ${SerialPort}`);
 	    console.log(error);
 	    throw "Missing serialport dependency";
@@ -12903,7 +15458,7 @@ function requireFirmata () {
 	if (hasRequiredFirmata) return firmata;
 	hasRequiredFirmata = 1;
 
-	firmata = requireFirmataIo()(requireCom());
+	firmata = requireFirmata$1()(requireCom());
 	return firmata;
 }
 
@@ -15021,7 +17576,7 @@ function requireBoard () {
 	    const maxAttempts = 10;
 	    // Delay (ms) before trying again to list serial connections
 	    const retryDelay = 400;
-	    // let serialport;
+	    let serialport;
 
 	    /* istanbul ignore next */
 	    if (parseFloat(process.versions.nw) >= 0.13) {
@@ -15034,8 +17589,7 @@ function requireBoard () {
 	    // Request a list of available ports, from
 	    // the result set, filter for valid paths
 	    // via known path pattern match.
-
-	    serialport.list().then((results) => {
+	    serialport.list().then(results => {
 	      const portPaths = results.reduce((accum, result) => {
 	        let available = true;
 
@@ -15059,6 +17613,7 @@ function requireBoard () {
 
 	      // If no portPaths are detected...
 	      if (!portPaths.length) {
+
 	        /* istanbul ignore if */
 	        if (IS_TEST_MODE && this.abort) {
 	          /* istanbul ignore next */
@@ -15113,7 +17668,10 @@ function requireBoard () {
 	      //
 	      path = portOrPath.path;
 
-	      this.info(portOrPath.transport || "SerialPort", chalk.grey(path));
+	      this.info(
+	        (portOrPath.transport || "SerialPort"),
+	        chalk.grey(path)
+	      );
 	    } else {
 	      //
 	      // Board({ port: path String })
@@ -15131,7 +17689,7 @@ function requireBoard () {
 	    Serial.used.push(path);
 
 	    try {
-	      io = new IO(portOrPath, (error) => {
+	      io = new IO(portOrPath, error => {
 	        if (error) {
 	          caught = error;
 	        }
@@ -15161,7 +17719,7 @@ function requireBoard () {
 
 	    // Execute "connect" callback
 	    callback.call(this, caught, type, io);
-	  },
+	  }
 	};
 
 	/**
@@ -15254,7 +17812,7 @@ function requireBoard () {
 	        /* istanbul ignore next */
 	        replContext[this.id] = this;
 	        /* istanbul ignore next */
-	        Repl.ref.on("ready", function () {
+	        Repl.ref.on("ready", function() {
 	          /* istanbul ignore next */
 	          Repl.ref.inject(replContext);
 	        });
@@ -15273,15 +17831,14 @@ function requireBoard () {
 	      this.transport = this.io.transport || null;
 	      this.port = this.io.name;
 	      this.pins = Board.Pins(this);
-	      this.RESOLUTION = Object.assign(
-	        { ADC: 1023, DAC: null, PWM: 255 },
-	        this.io.RESOLUTION || {}
-	      );
+	      this.RESOLUTION = Object.assign({ ADC: 1023, DAC: null, PWM: 255 }, this.io.RESOLUTION || {});
+
 	    } else {
+
 	      if (this.port && options.port) {
 	        Serial.connect.call(this, this.port, finalizeAndBroadcast);
 	      } else {
-	        Serial.detect.call(this, function (path) {
+	        Serial.detect.call(this, function(path) {
 	          Serial.connect.call(this, path, finalizeAndBroadcast);
 	        });
 	      }
@@ -15325,13 +17882,13 @@ function requireBoard () {
 	    this.once("ready", () => {
 	      const hrstart = process.hrtime();
 
-	      this.millis = function () {
+	      this.millis = function() {
 	        const now = process.hrtime(hrstart);
-	        return now[1] / 1000000;
+	        return (now[1] / 1000000);
 	      };
 
-	      ["close", "disconnect", "error", "string"].forEach((type) => {
-	        this.io.on(type, (data) => this.emit(type, data));
+	      ["close", "disconnect", "error", "string"].forEach(type => {
+	        this.io.on(type, data => this.emit(type, data));
 	      });
 	    });
 
@@ -15361,7 +17918,10 @@ function requireBoard () {
 	    this.isConnected = true;
 	    this.port = io.port || io.name;
 
-	    this.info("Connected", chalk.grey(this.port));
+	    this.info(
+	      "Connected",
+	      chalk.grey(this.port)
+	    );
 
 	    // Unless a "timeout" value has been provided apply 10 Second timeout...
 	    //
@@ -15375,16 +17935,13 @@ function requireBoard () {
 	          "Device or Firmware Error",
 
 	          "A timeout occurred while connecting to the Board. \n\n" +
-	            "Please check that you've properly flashed the board with the correct firmware.\n" +
-	            "See: https://github.com/rwaldron/johnny-five/wiki/Getting-Started#trouble-shooting\n\n" +
-	            "If connecting to a Leonardo or Leonardo clone, press the 'Reset' button on the " +
-	            "board, wait approximately 11 seconds for complete reset, then run your program again."
+	          "Please check that you've properly flashed the board with the correct firmware.\n" +
+	          "See: https://github.com/rwaldron/johnny-five/wiki/Getting-Started#trouble-shooting\n\n" +
+	          "If connecting to a Leonardo or Leonardo clone, press the 'Reset' button on the " +
+	          "board, wait approximately 11 seconds for complete reset, then run your program again."
 	        );
 
-	        this.emit(
-	          "error",
-	          new Error("A timeout occurred while connecting to the Board.")
-	        );
+	        this.emit("error", new Error("A timeout occurred while connecting to the Board."));
 	      }, this.timeout || 1e4);
 	    }
 	  }
@@ -15399,11 +17956,13 @@ function requireBoard () {
 	    this.pins = Board.Pins(this);
 	    this.MODES = this.io.MODES;
 
-	    if (typeof io.debug !== UNDEFINED && io.debug === false) {
+	    if (typeof io.debug !== UNDEFINED &&
+	        io.debug === false) {
 	      this.debug = false;
 	    }
 
-	    if (typeof io.repl !== UNDEFINED && io.repl === false) {
+	    if (typeof io.repl !== UNDEFINED &&
+	        io.repl === false) {
 	      this.repl = false;
 	    }
 	    // In multi-board mode, block the REPL from
@@ -15442,10 +18001,8 @@ function requireBoard () {
 
 	    // Older versions of Firmata and some IO plugins
 	    // may not have set RESOLUTION.
-	    this.RESOLUTION = Object.assign(
-	      { ADC: 1023, DAC: null, PWM: 255 },
-	      io.RESOLUTION || {}
-	    );
+	    this.RESOLUTION = Object.assign({ ADC: 1023, DAC: null, PWM: 255 }, io.RESOLUTION || {});
+
 	  }
 
 	  // If there is a REPL...
@@ -15468,43 +18025,26 @@ function requireBoard () {
 	 * Pass through methods
 	 */
 	[
-	  "digitalWrite",
-	  "analogWrite",
-	  "analogRead",
-	  "digitalRead",
-	  "pinMode",
-	  "queryPinState",
-	  "stepperConfig",
-	  "stepperStep",
-	  "sendI2CConfig",
-	  "sendI2CWriteRequest",
-	  "sendI2CReadRequest",
-	  "i2cConfig",
-	  "i2cWrite",
-	  "i2cWriteReg",
-	  "i2cRead",
-	  "i2cReadOnce",
+	  "digitalWrite", "analogWrite",
+	  "analogRead", "digitalRead",
+	  "pinMode", "queryPinState",
+	  "stepperConfig", "stepperStep",
+	  "sendI2CConfig", "sendI2CWriteRequest", "sendI2CReadRequest",
+	  "i2cConfig", "i2cWrite", "i2cWriteReg", "i2cRead", "i2cReadOnce",
 	  "pwmWrite",
-	  "servoConfig",
-	  "servoWrite",
-	  "sysexCommand",
-	  "sysexResponse",
-	  "serialConfig",
-	  "serialWrite",
-	  "serialRead",
-	  "serialStop",
-	  "serialClose",
-	  "serialFlush",
-	  "serialListen",
-	].forEach(function (method) {
+	  "servoConfig", "servoWrite",
+	  "sysexCommand", "sysexResponse",
+	  "serialConfig", "serialWrite", "serialRead", "serialStop", "serialClose", "serialFlush", "serialListen",
+	].forEach(function(method) {
 	  /* istanbul ignore next */
-	  Board.prototype[method] = function () {
+	  Board.prototype[method] = function() {
 	    this.io[method].apply(this.io, arguments);
 	    return this;
 	  };
 	});
 
-	Board.prototype.snapshot = function (reducer) {
+
+	Board.prototype.snapshot = function(reducer) {
 	  const blacklist = this.snapshot.blacklist;
 	  const special = this.snapshot.special;
 	  const hasReducer = typeof reducer === "function";
@@ -15517,6 +18057,7 @@ function requireBoard () {
 	          const value = component[prop];
 
 	          if (!blacklist.includes(prop) && typeof value !== "function") {
+
 	            if (hasReducer) {
 	              const result = reducer(prop, value, component);
 
@@ -15524,7 +18065,8 @@ function requireBoard () {
 	                pAccum[prop] = result;
 	              }
 	            } else {
-	              pAccum[prop] = special[prop] ? special[prop](value) : value;
+	              pAccum[prop] = special[prop] ?
+	                special[prop](value) : value;
 	            }
 	          }
 	          return pAccum;
@@ -15536,40 +18078,36 @@ function requireBoard () {
 	  }, []);
 	};
 
-	Board.prototype.serialize = function (reducer) {
+	Board.prototype.serialize = function(reducer) {
 	  return JSON.stringify(this.snapshot(reducer));
 	};
 
 	Board.prototype.snapshot.blacklist = [
-	  "board",
-	  "io",
-	  "_events",
-	  "_eventsCount",
-	  "state",
+	  "board", "io", "_events", "_eventsCount", "state",
 	];
 
-	Board.prototype.samplingInterval = function (ms) {
+	Board.prototype.samplingInterval = function(ms) {
+
 	  if (this.io.setSamplingInterval) {
 	    this.io.setSamplingInterval(ms);
 	  } else {
-	    throw new Error(
-	      "This IO plugin does not implement an interval adjustment method"
-	    );
+	    throw new Error("This IO plugin does not implement an interval adjustment method");
 	  }
 	  return this;
 	};
 
+
 	Board.prototype.snapshot.special = {
-	  mode: function (value) {
+	  mode: function(value) {
 	    return ["INPUT", "OUTPUT", "ANALOG", "PWM", "SERVO"][value] || "unknown";
-	  },
+	  }
 	};
 
 	/**
 	 *  shiftOut
 	 *
 	 */
-	Board.prototype.shiftOut = function (dataPin, clockPin, isBigEndian, value) {
+	Board.prototype.shiftOut = function(dataPin, clockPin, isBigEndian, value) {
 	  if (arguments.length === 3) {
 	    value = isBigEndian;
 	    isBigEndian = true;
@@ -15587,76 +18125,80 @@ function requireBoard () {
 	};
 
 	const logging = {
-	  specials: ["error", "fail", "warn", "info"],
+	  specials: [
+	    "error",
+	    "fail",
+	    "warn",
+	    "info",
+	  ],
 	  colors: {
 	    log: "white",
 	    error: "red",
 	    fail: "inverse",
 	    warn: "yellow",
-	    info: "cyan",
-	  },
+	    info: "cyan"
+	  }
 	};
 
-	Board.prototype.log =
-	  function (/* type, klass, message [, long description] */) {
-	    var args = Array.from(arguments);
+	Board.prototype.log = function( /* type, klass, message [, long description] */ ) {
+	  var args = Array.from(arguments);
 
-	    // If this was a direct call to `log(...)`, make sure
-	    // there is a correct "type" to emit below.
-	    if (!logging.specials.includes(args[0])) {
-	      args.unshift("log");
-	    }
+	  // If this was a direct call to `log(...)`, make sure
+	  // there is a correct "type" to emit below.
+	  if (!logging.specials.includes(args[0])) {
+	    args.unshift("log");
+	  }
 
-	    var type = args.shift();
-	    var klass = args.shift();
-	    var message = args.shift();
-	    var color = logging.colors[type];
-	    var now = Date.now();
-	    var event = {
-	      type: type,
-	      timestamp: now,
-	      class: klass,
-	      message: "",
-	      data: null,
-	    };
-
-	    if (typeof args[args.length - 1] === "object") {
-	      event.data = args.pop();
-	    }
-
-	    message += " " + args.join(", ");
-	    event.message = message.trim();
-
-	    /* istanbul ignore if */
-	    if (this.debug) {
-	      /* istanbul ignore next */
-	      console.log(
-	        [
-	          // Timestamp
-	          chalk.grey(now),
-	          // Module, color matches type of log
-	          chalk.magenta(klass),
-	          // Details
-	          chalk[color](message),
-	          // Miscellaneous args
-	          args.join(", "),
-	        ].join(" ")
-	      );
-	    }
-
-	    this.emit(type, event);
-	    this.emit("message", event);
+	  var type = args.shift();
+	  var klass = args.shift();
+	  var message = args.shift();
+	  var color = logging.colors[type];
+	  var now = Date.now();
+	  var event = {
+	    type: type,
+	    timestamp: now,
+	    class: klass,
+	    message: "",
+	    data: null,
 	  };
 
+	  if (typeof args[args.length - 1] === "object") {
+	    event.data = args.pop();
+	  }
+
+	  message += " " + args.join(", ");
+	  event.message = message.trim();
+
+	  /* istanbul ignore if */
+	  if (this.debug) {
+	    /* istanbul ignore next */
+	    console.log([
+	      // Timestamp
+	      chalk.grey(now),
+	      // Module, color matches type of log
+	      chalk.magenta(klass),
+	      // Details
+	      chalk[color](message),
+	      // Miscellaneous args
+	      args.join(", ")
+	    ].join(" "));
+	  }
+
+	  this.emit(type, event);
+	  this.emit("message", event);
+	};
+
+
 	// Make shortcuts to all logging methods
-	logging.specials.forEach(function (type) {
-	  Board.prototype[type] = function () {
+	logging.specials.forEach(function(type) {
+	  Board.prototype[type] = function() {
 	    var args = [].slice.call(arguments);
 	    args.unshift(type);
 
 	    this.log.apply(this, args);
 	  };
 	});
+
 
 	/**
 	 * delay, loop, queue
@@ -15688,14 +18230,14 @@ function requireBoard () {
 	//
 	// TODO: Repalce with temporal or compulsive API
 
-	Board.prototype.wait = function (time, callback) {
+	Board.prototype.wait = function(time, callback) {
 	  setTimeout(callback, time);
 	  return this;
 	};
 
-	Board.prototype.loop = function (time, callback) {
-	  var handler = function () {
-	    callback(function () {
+	Board.prototype.loop = function(time, callback) {
+	  var handler = function() {
+	    callback(function() {
 	      clearInterval(interval);
 	    });
 	  };
@@ -15750,7 +18292,7 @@ function requireBoard () {
 	// giving the developer the option of omitting an
 	// explicit Board reference in a module
 	// constructor's options
-	Board.mount = function (arg) {
+	Board.mount = function(arg) {
 	  var index = typeof arg === "number" && arg,
 	    hardware;
 
@@ -15777,6 +18319,8 @@ function requireBoard () {
 	  return null;
 	};
 
+
+
 	/**
 	 * Board.Component
 	 *
@@ -15793,7 +18337,7 @@ function requireBoard () {
 	 *       to avoid boilerplate
 	 */
 
-	Board.Component = function (opts, componentOpts) {
+	Board.Component = function(opts, componentOpts) {
 	  if (typeof opts === UNDEFINED) {
 	    opts = {};
 	  }
@@ -15819,6 +18363,7 @@ function requireBoard () {
 	      originalPins = opts.pins.slice();
 	    } else {
 	      if (typeof opts.pins === "object" && opts.pins !== null) {
+
 	        var pinset = opts.pins || opts.pin;
 
 	        originalPins = [];
@@ -15830,6 +18375,7 @@ function requireBoard () {
 	  }
 
 	  if (opts.controller) {
+
 	    if (typeof opts.controller === "string") {
 	      opts.controller = opts.controller.replace(/-/g, "");
 	    }
@@ -15885,10 +18431,10 @@ function requireBoard () {
 	  this.board.register.push(this);
 	};
 
-	Board.Component.initialization = function (opts) {
+	Board.Component.initialization = function(opts) {
 	  var defaults = {
 	    requestPin: true,
-	    normalizePin: true,
+	    normalizePin: true
 	  };
 
 	  return Object.assign({}, defaults, opts);
@@ -15907,13 +18453,12 @@ function requireBoard () {
 	 *
 	 */
 
-	Board.Controller = function (controllers, options) {
+	Board.Controller = function(controllers, options) {
+
 	  let controller;
 
 	  if (typeof options.controller === "string") {
-	    controller =
-	      controllers[options.controller] ||
-	      controllers[options.controller.toUpperCase()];
+	    controller = controllers[options.controller] || controllers[options.controller.toUpperCase()];
 	  } else {
 	    controller = options.controller || controllers.DEFAULT || null;
 	  }
@@ -15927,7 +18472,7 @@ function requireBoard () {
 	  if (requirements) {
 	    /* istanbul ignore else */
 	    if (requirements.options) {
-	      Object.keys(requirements.options).forEach(function (key) {
+	      Object.keys(requirements.options).forEach(function(key) {
 	        /*
 	        requirements: {
 	          value: {
@@ -15941,17 +18486,12 @@ function requireBoard () {
 	          }
 	        },
 	        */
-	        if (
-	          typeof options[key] === UNDEFINED ||
-	          typeof options[key] !== requirements.options[key].typeof
-	        ) {
+	        if (typeof options[key] === UNDEFINED ||
+	          typeof options[key] !== requirements.options[key].typeof) {
 	          if (requirements.options[key].throws) {
 	            throw new Error(requirements.options[key].message);
 	          } else {
-	            this.board.warn(
-	              this.constructor.name,
-	              requirements.options[key].message
-	            );
+	            this.board.warn(this.constructor.name, requirements.options[key].message);
 	          }
 	        }
 	      }, this);
@@ -15961,12 +18501,13 @@ function requireBoard () {
 	  Object.defineProperties(this, controller);
 	};
 
+
 	/**
 	 * Pin Capability Signature Mapping
 	 */
 
 	Board.Pins = Pins;
-	Board.Options = function (options) {
+	Board.Options = function(options) {
 	  return new Options(options);
 	};
 
@@ -15975,7 +18516,7 @@ function requireBoard () {
 	Object.defineProperty(Board, "cache", {
 	  get() {
 	    return boards;
-	  },
+	  }
 	});
 
 	/**
@@ -15985,7 +18526,8 @@ function requireBoard () {
 	 *   target - the instance for which the event fired.
 	 *   0..* other properties
 	 */
-	Board.Event = function (event) {
+	Board.Event = function(event) {
+
 	  if (typeof event === UNDEFINED) {
 	    throw new Error("Board.Event missing Event object");
 	  }
@@ -16000,6 +18542,7 @@ function requireBoard () {
 	  // param specified properties.
 	  Object.assign(this, event);
 	};
+
 
 	/**
 	 * Boards or Board.Collection; Used when the program must connect to
@@ -16026,11 +18569,7 @@ function requireBoard () {
 
 	    // new Boards({ ports: [ ...Array of board options ], .... })
 	    /* istanbul ignore else */
-	    if (
-	      !Array.isArray(options) &&
-	      typeof options === "object" &&
-	      options.ports !== undefined
-	    ) {
+	    if (!Array.isArray(options) && typeof options === "object" && options.ports !== undefined) {
 	      ports = options.ports;
 	    }
 
@@ -16050,8 +18589,8 @@ function requireBoard () {
 	    }
 
 	    const initialized = {};
-	    const noRepl = ports.some(({ repl }) => repl === false);
-	    const noDebug = ports.some(({ debug }) => debug === false);
+	    const noRepl = ports.some(({repl}) => repl === false);
+	    const noDebug = ports.some(({debug}) => debug === false);
 	    const boardObjects = ports.map((port) => {
 	      let portOpts;
 
@@ -16106,35 +18645,33 @@ function requireBoard () {
 	    const expecteds = this.map((board, index) => {
 	      initialized[board.id] = board;
 	      return new Promise((resolve) => {
-	        this[index].on("error", (error) => this.emit("error", error));
-	        this[index].on("fail", (event) => this.emit("fail", event));
+	        this[index].on("error", error => this.emit("error", error));
+	        this[index].on("fail", event => this.emit("fail", event));
 	        this[index].on("ready", () => resolve(this[index]));
 	      });
 	    });
 
-	    Promise.all(expecteds)
-	      .then((/* boards */) => {
-	        this.each((board) => {
-	          board.info("Board ID: ", chalk.green(board.id));
-	        });
-
-	        // If the Boards instance requires a REPL,
-	        // make sure it's created before calling "ready"
-	        if (this.repl) {
-	          this.repl = new Repl(
-	            Object.assign({}, initialized, {
-	              board: this,
-	            })
-	          );
-	          this.repl.initialize(() => this.emit("ready", initialized));
-	        } else {
-	          // Otherwise, call ready immediately
-	          this.emit("ready", initialized);
-	        }
-	      })
-	      .catch((error) => {
-	        console.error(chalk.red(error));
+	    Promise.all(expecteds).then((/* boards */) => {
+	      this.each(board => {
+	        board.info("Board ID: ", chalk.green(board.id));
 	      });
+
+	      // If the Boards instance requires a REPL,
+	      // make sure it's created before calling "ready"
+	      if (this.repl) {
+	        this.repl = new Repl(
+	          Object.assign({}, initialized, {
+	            board: this
+	          })
+	        );
+	        this.repl.initialize(() => this.emit("ready", initialized));
+	      } else {
+	        // Otherwise, call ready immediately
+	        this.emit("ready", initialized);
+	      }
+	    }).catch(error => {
+	      console.error(chalk.red(error));
+	    });
 	  }
 
 	  static get type() {
@@ -16142,11 +18679,16 @@ function requireBoard () {
 	  }
 	}
 
-	Collection.installMethodForwarding(Boards.prototype, Board.prototype);
+	Collection.installMethodForwarding(
+	  Boards.prototype, Board.prototype
+	);
 
-	Object.assign(Boards.prototype, Emitter.prototype);
+	Object.assign(
+	  Boards.prototype,
+	  Emitter.prototype
+	);
 
-	Boards.prototype.byId = function (id) {
+	Boards.prototype.byId = function(id) {
 	  for (var i = 0; i < this.length; i++) {
 	    if (this[i].id === id) {
 	      return this[i];
@@ -16158,9 +18700,9 @@ function requireBoard () {
 
 	Boards.prototype.log = Board.prototype.log;
 
-	logging.specials.forEach(function (type) {
+	logging.specials.forEach(function(type) {
 	  /* istanbul ignore next */
-	  Boards.prototype[type] = function () {
+	  Boards.prototype[type] = function() {
 	    var args = [].slice.call(arguments);
 	    args.unshift(type);
 
@@ -16170,12 +18712,12 @@ function requireBoard () {
 
 	/* istanbul ignore else */
 	if (IS_TEST_MODE) {
-	  Serial.purge = function () {
+	  Serial.purge = function() {
 	    Serial.used.length = 0;
 	  };
 	  Board.Serial = Serial;
 
-	  Board.purge = function () {
+	  Board.purge = function() {
 	    Board.Pins.normalize.clear();
 	    Repl.isActive = false;
 	    Repl.isBlocked = true;
@@ -16183,7 +18725,7 @@ function requireBoard () {
 	    boards.length = 0;
 	  };
 
-	  Board.testMode = function (state) {
+	  Board.testMode = function(state) {
 	    if (!arguments.length) {
 	      return IS_TEST_MODE;
 	    } else {
@@ -24572,13 +27114,6 @@ let temporal;
 // Test metronomic on real animation
 // Create jquery FX like queue
 
-/**
- * The max time we want to allow a temporal animation segment to run.
- * When running, temporal can push CPU utilization to 100%. When this
- * time (in ms) is reached we will fall back to setInterval which is less
- * accurate (by nanoseconds) but perfectly serviceable.
- **/
-let temporalTTL = 5000;
 
 /**
  * Animation
@@ -24839,7 +27374,16 @@ let Animation$5 = class Animation extends Emitter$b {
     this.startTime = now - this.scaledDuration * this.progress;
     this.endTime = this.startTime + this.scaledDuration;
 
-    // If our animation runs for more than 5 seconds switch to setTimeout
+    /**
+     * temporalTTL is the max time we want to allow a temporal animation segment to run.
+     * When running, temporal can push CPU utilization to 100%. When this
+     * time (in ms) is reached we will fall back to setInterval which is less
+     * accurate (by nanoseconds) but perfectly serviceable.
+     * The default value is 5 seconds, but can be configured by Animation.segment options
+     **/
+     let temporalTTL = typeof this.temporalTTL === "number" ? this.temporalTTL : 5000;
+
+    // If our animation runs for more than temporalTTL seconds switch to setTimeout
     this.fallBackTime = now + temporalTTL;
     this.frameCount = 0;
 
@@ -25094,6 +27638,7 @@ Animation$5.Segment = class {
     this.onstop = null;
     this.oncomplete = null;
     this.onloop = null;
+    this.temporalTTL = null;
 
     if (options) {
       Object.assign(this, options);
@@ -29120,12 +31665,21 @@ let RGB$2 = class RGB {
       intensity: 100,
       isAnode: options.isAnode || false,
       interval: null,
+      // isRunning is used to track whether an Animation is in progress
+      isRunning: false,
       // red, green, and blue store the raw color set via .color()
       // values takes state into account, such as on/off and intensity
       values: {
         red: 255,
         green: 255,
-        blue: 255,
+        blue: 255
+      },
+      // state.prev records the last color set using color(),
+      // and is used to determine the new color when calling on() or pulse()
+      prev: {
+        red: 255,
+        green: 255,
+        blue: 255
       }
     };
 
@@ -29139,7 +31693,7 @@ let RGB$2 = class RGB {
       },
       isRunning: {
         get() {
-          return !!state.interval;
+          return !!state.interval || state.isRunning;
         }
       },
       isAnode: {
@@ -29153,6 +31707,7 @@ let RGB$2 = class RGB {
         }
       },
       update: {
+        writable: true,
         value(colors) {
           const state = priv$f.get(this);
 
@@ -29207,38 +31762,33 @@ let RGB$2 = class RGB {
 
     this.update(update);
 
+    // store colors to state.prev for future use by on()
+    state.prev = update;
+
     return this;
   }
 
   on() {
     const state = priv$f.get(this);
-    let colors;
 
     // If it's not already on, we set them to the previous color
     if (!this.isOn) {
       /* istanbul ignore next */
-      colors = state.prev || {
-        red: 255,
-        green: 255,
-        blue: 255
-      };
-
-      state.prev = null;
-
-      this.update(colors);
+      this.update(state.prev);
+    } else if (state.isRunning) {
+      this.stop();
+      this.update(state.prev);
+      
     }
+
 
     return this;
   }
 
   off() {
-    const state = priv$f.get(this);
-
-    // If it's already off, do nothing so the pervious state stays intact
+    // If it's already off, do nothing so the previous state stays intact
     /* istanbul ignore else */
     if (this.isOn) {
-      state.prev = RGB.colors.reduce((current, color) => (current[color] = state[color], current), {});
-
       this.update({
         red: 0,
         green: 0,
@@ -29275,6 +31825,60 @@ let RGB$2 = class RGB {
     return this;
   }
 
+  /**
+   * pulse - fade the RGB in and out in a loop with specified time
+   * @param  {Number} duration Time in ms that a fade in/out will elapse
+   * @return {RGB}
+   *
+   * - or -
+   *
+   * @param  {Object} val An Animation() segment config object
+   */
+  pulse(duration, callback) {
+    const state = priv$f.get(this);
+    var currentColor = state.prev;
+
+    // Avoid traffic jams
+    this.stop();
+
+    const options = {
+      duration: typeof duration === "number" ? duration : 1000,
+      keyFrames: [
+        {
+          color: currentColor,
+          intensity: 0
+        },
+        {
+          color: currentColor,
+          intensity: 100
+        }
+      ],
+      metronomic: true,
+      loop: true,
+      easing: "inOutSine",
+      onloop() {
+        /* istanbul ignore else */
+        if (typeof callback === "function") {
+          callback();
+        }
+      }
+    };
+
+    if (typeof duration === "object") {
+      Object.assign(options, duration);
+    }
+
+    if (typeof duration === "function") {
+      callback = duration;
+    }
+
+    state.isRunning = true;
+
+    state.animation = state.animation || new Animation$4(this);
+    state.animation.enqueue(options);
+    return this;
+  }
+
   toggle() {
     return this[this.isOn ? "off" : "on"]();
   }
@@ -29291,7 +31895,7 @@ let RGB$2 = class RGB {
       state.animation.stop();
     }
 
-    state.interval = null;
+    state.interval = null; // sets isRunning to false
 
     return this;
   }
@@ -29377,18 +31981,21 @@ let RGB$2 = class RGB {
    */
 
   [Animation$4.render](frames) {
-    return this.color(frames[0]);
+    const state = priv$f.get(this);
+    state.value = frames[0];
+    return this.update(state.value);
   }
 
 
 };
+
+RGB$2.colors = ["red", "green", "blue"];
+
 /**
  * For multi-property animation, must define
  * the keys to use for tween calculation.
  */
 RGB$2.prototype[Animation$4.keys] = RGB$2.colors;
-
-RGB$2.colors = ["red", "green", "blue"];
 
 RGB$2.ToScaledRGB = (intensity, colors) => {
   const scale = intensity / 100;
@@ -31002,6 +33609,7 @@ let Led$3 = class Led {
       metronomic: true,
       loop: true,
       easing: "inOutSine",
+      temporalTTL: 0,
       onloop() {
         /* istanbul ignore else */
         if (typeof callback === "function") {
@@ -32324,7 +34932,7 @@ const Controllers$9 = {
           throw new Error("The `row` method is only supported for Matrix devices");
         }
         if (typeof val === "number") {
-          val = (`0000000000000000${parseInt(val, 10).toString(2)}`).substr(0 - (this.columns), this.columns);
+          val = (`0000000000000000${parseInt(val, 10).toString(2)}`).slice(0 - (this.columns));
         }
         if (arguments.length === 2) {
           val = row;
@@ -40439,12 +43047,13 @@ var pixel = {
 var pixel$1 = /*@__PURE__*/getDefaultExportFromCjs(pixel);
 
 class LEDStrip extends pixel$1.Strip {
-    constructor({ pin, board, ledCount = 30, }) {
+    constructor({ pin, board, ledCount = 30, gamma = 2.8, colorOrder = "GRB", }) {
         super({
             board: board,
             controller: "FIRMATA",
-            strips: [{ pin: pin, length: ledCount }],
-            gamma: 2.8, // set to a gamma that works nicely for WS2812
+            strips: [{ pin: pin, length: ledCount }], // this is preferred form for definition
+            gamma: gamma, // set to a gamma that works nicely for WS2812
+            color_order: pixel$1.COLOR_ORDER[colorOrder],
         });
     }
 }
@@ -41501,7 +44110,7 @@ crc32$1.exports = crc32;
 
 var crc32Exports = crc32$1.exports;
 
-var zlib = require$$0$5;
+var zlib = require$$0$4;
 
 var crc32 = crc32Exports;
 
@@ -42854,9 +45463,13 @@ class SocketIOIntegration extends EventEmitter$2 {
     onMessage(data) {
         const message = {
             message: data[this.format.message],
-            value: !isNaN(+data[this.format.value])
-                ? +data[this.format.value]
-                : data[this.format.value],
+            value: data[this.format.value] === undefined ||
+                data[this.format.value] === null ||
+                data[this.format.value] === ""
+                ? undefined
+                : !isNaN(+data[this.format.value])
+                    ? +data[this.format.value]
+                    : data[this.format.value],
         };
         this.emit("received", message);
     }
@@ -42885,7 +45498,8 @@ class SocketIOIntegration extends EventEmitter$2 {
 class Timer extends EventEmitter$2 {
     constructor(value = 0) {
         super();
-        this.value = value;
+        // this.value is in milliseconds
+        this.value = value * 1000;
         this.interval;
     }
     startInterval() {
@@ -42893,31 +45507,33 @@ class Timer extends EventEmitter$2 {
             clearInterval(this.interval);
         }
         this.interval = setInterval(() => {
-            this.value++;
-            this.emit("change", this.value);
-        }, 1000);
+            this.value += 50;
+            this.emit("change", this.value / 1000);
+            this.emit("tick", this.value / 1000);
+        }, 50);
     }
     start() {
+        this.emit("start", this.value / 1000);
         if (this.interval) {
             return;
         }
         this.startInterval();
-        this.emit("start");
     }
     stop() {
         clearInterval(this.interval);
         this.interval = undefined;
-        this.emit("stop");
+        this.emit("stop", this.value / 1000);
     }
     reset() {
         this.startInterval();
         this.value = 0;
-        this.emit("change", this.value);
-        this.emit("reset");
+        this.emit("change", this.value / 1000);
+        this.emit("reset", 0);
     }
     setTo(value) {
-        this.value = value;
-        this.emit("change", this.value);
+        this.value = value * 1000;
+        this.emit("change", this.value / 1000);
+        this.emit("set", this.value / 1000);
     }
 }
 

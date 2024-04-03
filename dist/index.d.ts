@@ -1,3 +1,4 @@
+/// <reference path="./src/@types/decs.d.ts" />
 /// <reference types="node" />
 import { Namespace, Server, Socket, DisconnectReason } from 'socket.io';
 import EventEmitter from 'events';
@@ -221,10 +222,12 @@ declare class Joystick extends EventEmitter {
 }
 
 declare class LEDStrip extends pixel.Strip {
-    constructor({ pin, board, ledCount, }: {
+    constructor({ pin, board, ledCount, gamma, colorOrder, }: {
         pin: number;
-        board: any;
+        board: five.Board;
         ledCount?: number;
+        gamma?: number;
+        colorOrder?: "GRB" | "RGB" | "BRG";
     });
 }
 
