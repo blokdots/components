@@ -79,6 +79,81 @@
     estree-walker "^2.0.2"
     picomatch "^2.3.1"
 
+"@rollup/rollup-android-arm-eabi@4.14.0":
+  version "4.14.0"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-android-arm-eabi/-/rollup-android-arm-eabi-4.14.0.tgz#57936f50d0335e2e7bfac496d209606fa516add4"
+  integrity sha512-jwXtxYbRt1V+CdQSy6Z+uZti7JF5irRKF8hlKfEnF/xJpcNGuuiZMBvuoYM+x9sr9iWGnzrlM0+9hvQ1kgkf1w==
+
+"@rollup/rollup-android-arm64@4.14.0":
+  version "4.14.0"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-android-arm64/-/rollup-android-arm64-4.14.0.tgz#81bba83b37382a2d0e30ceced06c8d3d85138054"
+  integrity sha512-fI9nduZhCccjzlsA/OuAwtFGWocxA4gqXGTLvOyiF8d+8o0fZUeSztixkYjcGq1fGZY3Tkq4yRvHPFxU+jdZ9Q==
+
+"@rollup/rollup-darwin-arm64@4.14.0":
+  version "4.14.0"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-darwin-arm64/-/rollup-darwin-arm64-4.14.0.tgz#a371bd723a5c4c4a33376da72abfc3938066842b"
+  integrity sha512-BcnSPRM76/cD2gQC+rQNGBN6GStBs2pl/FpweW8JYuz5J/IEa0Fr4AtrPv766DB/6b2MZ/AfSIOSGw3nEIP8SA==
+
+"@rollup/rollup-darwin-x64@4.14.0":
+  version "4.14.0"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-darwin-x64/-/rollup-darwin-x64-4.14.0.tgz#8baf2fda277c9729125017c65651296282412886"
+  integrity sha512-LDyFB9GRolGN7XI6955aFeI3wCdCUszFWumWU0deHA8VpR3nWRrjG6GtGjBrQxQKFevnUTHKCfPR4IvrW3kCgQ==
+
+"@rollup/rollup-linux-arm-gnueabihf@4.14.0":
+  version "4.14.0"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-arm-gnueabihf/-/rollup-linux-arm-gnueabihf-4.14.0.tgz#822830a8f7388d5b81d04c69415408d3bab1079b"
+  integrity sha512-ygrGVhQP47mRh0AAD0zl6QqCbNsf0eTo+vgwkY6LunBcg0f2Jv365GXlDUECIyoXp1kKwL5WW6rsO429DBY/bA==
+
+"@rollup/rollup-linux-arm64-gnu@4.14.0":
+  version "4.14.0"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-arm64-gnu/-/rollup-linux-arm64-gnu-4.14.0.tgz#e20fbe1bd4414c7119f9e0bba8ad17a6666c8365"
+  integrity sha512-x+uJ6MAYRlHGe9wi4HQjxpaKHPM3d3JjqqCkeC5gpnnI6OWovLdXTpfa8trjxPLnWKyBsSi5kne+146GAxFt4A==
+
+"@rollup/rollup-linux-arm64-musl@4.14.0":
+  version "4.14.0"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-arm64-musl/-/rollup-linux-arm64-musl-4.14.0.tgz#13f475596a62e1924f13fe1c8cf2c40e09a99b47"
+  integrity sha512-nrRw8ZTQKg6+Lttwqo6a2VxR9tOroa2m91XbdQ2sUUzHoedXlsyvY1fN4xWdqz8PKmf4orDwejxXHjh7YBGUCA==
+
+"@rollup/rollup-linux-powerpc64le-gnu@4.14.0":
+  version "4.14.0"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-powerpc64le-gnu/-/rollup-linux-powerpc64le-gnu-4.14.0.tgz#6a431c441420d1c510a205e08c6673355a0a2ea9"
+  integrity sha512-xV0d5jDb4aFu84XKr+lcUJ9y3qpIWhttO3Qev97z8DKLXR62LC3cXT/bMZXrjLF9X+P5oSmJTzAhqwUbY96PnA==
+
+"@rollup/rollup-linux-riscv64-gnu@4.14.0":
+  version "4.14.0"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-riscv64-gnu/-/rollup-linux-riscv64-gnu-4.14.0.tgz#53d9448962c3f9ed7a1672269655476ea2d67567"
+  integrity sha512-SDDhBQwZX6LPRoPYjAZWyL27LbcBo7WdBFWJi5PI9RPCzU8ijzkQn7tt8NXiXRiFMJCVpkuMkBf4OxSxVMizAw==
+
+"@rollup/rollup-linux-s390x-gnu@4.14.0":
+  version "4.14.0"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-s390x-gnu/-/rollup-linux-s390x-gnu-4.14.0.tgz#95f0c133b324da3e7e5c7d12855e0eb71d21a946"
+  integrity sha512-RxB/qez8zIDshNJDufYlTT0ZTVut5eCpAZ3bdXDU9yTxBzui3KhbGjROK2OYTTor7alM7XBhssgoO3CZ0XD3qA==
+
+"@rollup/rollup-linux-x64-gnu@4.14.0":
+  version "4.14.0"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-x64-gnu/-/rollup-linux-x64-gnu-4.14.0.tgz#820ada75c68ead1acc486e41238ca0d8f8531478"
+  integrity sha512-C6y6z2eCNCfhZxT9u+jAM2Fup89ZjiG5pIzZIDycs1IwESviLxwkQcFRGLjnDrP+PT+v5i4YFvlcfAs+LnreXg==
+
+"@rollup/rollup-linux-x64-musl@4.14.0":
+  version "4.14.0"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-linux-x64-musl/-/rollup-linux-x64-musl-4.14.0.tgz#ca74f22e125efbe94c1148d989ef93329b464443"
+  integrity sha512-i0QwbHYfnOMYsBEyjxcwGu5SMIi9sImDVjDg087hpzXqhBSosxkE7gyIYFHgfFl4mr7RrXksIBZ4DoLoP4FhJg==
+
+"@rollup/rollup-win32-arm64-msvc@4.14.0":
+  version "4.14.0"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-arm64-msvc/-/rollup-win32-arm64-msvc-4.14.0.tgz#269023332297051d037a9593dcba92c10fef726b"
+  integrity sha512-Fq52EYb0riNHLBTAcL0cun+rRwyZ10S9vKzhGKKgeD+XbwunszSY0rVMco5KbOsTlwovP2rTOkiII/fQ4ih/zQ==
+
+"@rollup/rollup-win32-ia32-msvc@4.14.0":
+  version "4.14.0"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-ia32-msvc/-/rollup-win32-ia32-msvc-4.14.0.tgz#d7701438daf964011fd7ca33e3f13f3ff5129e7b"
+  integrity sha512-e/PBHxPdJ00O9p5Ui43+vixSgVf4NlLsmV6QneGERJ3lnjIua/kim6PRFe3iDueT1rQcgSkYP8ZBBXa/h4iPvw==
+
+"@rollup/rollup-win32-x64-msvc@4.14.0":
+  version "4.14.0"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.14.0.tgz#0bb7ac3cd1c3292db1f39afdabfd03ccea3a3d34"
+  integrity sha512-aGg7iToJjdklmxlUlJh/PaPNa4PmqHfyRMLunbL3eaMO0gp656+q1zOKkpJ/CVe9CryJv6tAN1HDoR8cNGzkag==
+
 "@serialport/binding-mock@10.2.2":
   version "10.2.2"
   resolved "https://registry.yarnpkg.com/@serialport/binding-mock/-/binding-mock-10.2.2.tgz#d322a8116a97806addda13c62f50e73d16125874"
@@ -87,7 +162,7 @@
     "@serialport/bindings-interface" "^1.2.1"
     debug "^4.3.3"
 
-"@serialport/bindings-cpp@10.8.0", "@serialport/bindings-cpp@^10.7.0":
+"@serialport/bindings-cpp@10.8.0":
   version "10.8.0"
   resolved "https://registry.yarnpkg.com/@serialport/bindings-cpp/-/bindings-cpp-10.8.0.tgz#79507b57022ac264e963e7fbf3647a3821569a20"
   integrity sha512-OMQNJz5kJblbmZN5UgJXLwi2XNtVLxSKmq5VyWuXQVsUIJD4l9UGHnLPqM5LD9u3HPZgDI5w7iYN7gxkQNZJUw==
@@ -190,12 +265,31 @@
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-0.0.39.tgz#e177e699ee1b8c22d23174caaa7422644389509f"
   integrity sha512-EYNwp3bU+98cpU4lAWYYL7Zz+2gryWH1qbdDTidVd6hkiR6weksdbMadyXKXNPEkQFhXM+hVO9ZygomHXp+AIw==
 
+"@types/estree@1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@types/estree/-/estree-1.0.5.tgz#a6ce3e556e00fd9895dd872dd172ad0d4bd687f4"
+  integrity sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==
+
 "@types/johnny-five@*":
   version "1.3.7"
   resolved "https://registry.yarnpkg.com/@types/johnny-five/-/johnny-five-1.3.7.tgz#e77ac8f1034e19f61552cceaaad272efdecf7f9c"
   integrity sha512-a5KXfuUWebkMlv2LHkGujhjq1hEZkz1tvacdt8G9lge2eX9jUGE6tgXGux+mqGvcWccuSimxaa7IVe1UO15QQA==
   dependencies:
     "@types/node" "*"
+
+"@types/johnny-five@^2.1":
+  version "2.1.9"
+  resolved "https://registry.yarnpkg.com/@types/johnny-five/-/johnny-five-2.1.9.tgz#507ace9fd1d69cea2927608f3895b2d8a9b874e9"
+  integrity sha512-pBRdHrz+c5CMIlavQoh0TtPRbEr69euIxXH4hWAQaAXRcxKf3ZbGmX97L0P7Pv45eyLynDDN/TgZcCgh7oWtWg==
+  dependencies:
+    "@types/node" "*"
+
+"@types/node-pixel@^0.11.2":
+  version "0.11.2"
+  resolved "https://registry.yarnpkg.com/@types/node-pixel/-/node-pixel-0.11.2.tgz#9bab6860f3f469f7cf2e86fb20c93b8d86ea56a7"
+  integrity sha512-ZRGPVOOQOcEEczoh9Coyj/5IWV0aet3PMCzPwlD7X+7aonuhN9fm5XVPEBJOWRnFgzDZ/cC0o6AFxR5yjkv8iw==
+  dependencies:
+    "@types/johnny-five" "^2.1"
 
 "@types/node@*":
   version "18.11.19"
@@ -382,9 +476,9 @@ estree-walker@^2.0.2:
   resolved "https://registry.yarnpkg.com/estree-walker/-/estree-walker-2.0.2.tgz#52f010178c2a4c117a7757cfe942adb7d2da4cac"
   integrity sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==
 
-"firmata@https://github.com/blokdots/firmata.js.git":
+"firmata@git://github.com/blokdots/firmata.js.git":
   version "2.3.0"
-  resolved "https://github.com/blokdots/firmata.js.git#f77cee46783619940dbd9464ca89e4b04b99850b"
+  resolved "git://github.com/blokdots/firmata.js.git#f77cee46783619940dbd9464ca89e4b04b99850b"
   dependencies:
     serialport "^10.4.0"
 
@@ -475,11 +569,10 @@ is-reference@1.2.1:
   dependencies:
     "@types/estree" "*"
 
-"johnny-five@git://github.com/blokdots/johnny-five.git#serialport10":
+"johnny-five@git://github.com/blokdots/johnny-five.git":
   version "2.1.0"
-  resolved "git://github.com/blokdots/johnny-five.git#676d90b560c84a774a5650db10a798df1645325d"
+  resolved "git://github.com/blokdots/johnny-five.git#23339e740c674ba514801418e53bb16bb64ef1ea"
   dependencies:
-    "@serialport/bindings-cpp" "^10.7.0"
     chalk "2.1.0"
     color-convert "~1.2.2"
     lodash.clonedeep "^4.3.0"
@@ -488,8 +581,8 @@ is-reference@1.2.1:
     temporal latest
   optionalDependencies:
     browser-serialport latest
-    firmata "https://github.com/blokdots/firmata.js.git"
-    serialport "^10.4.0"
+    firmata "git://github.com/blokdots/firmata.js.git"
+    serialport "^10.5.0"
 
 js-tokens@^4.0.0:
   version "4.0.0"
@@ -564,10 +657,9 @@ node-gyp-build@^4.3.0:
   resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-4.6.0.tgz#0c52e4cbf54bbd28b709820ef7b6a3c2d6209055"
   integrity sha512-NTZVKn9IylLwUzaKjkas1e4u2DLNcV4rdYagA4PWdPwW87Bi7z+BznyKSRwS/761tV/lzCGXplWsiaMjLqP2zQ==
 
-node-pixel@^0.11.0:
+"node-pixel@git://github.com/blokdots/node-pixel.git":
   version "0.11.0"
-  resolved "https://registry.yarnpkg.com/node-pixel/-/node-pixel-0.11.0.tgz#e65aa44633343aee3444533ef085deb6bb93ec89"
-  integrity sha512-nVByJlbqh5rgCbjUXibAm5Z8H/+nqejPUWlF0pMX+z6CqSeHD4QOJ97JqlYY1DoQrRcWtWDizS6iOhGI2Zqgqg==
+  resolved "git://github.com/blokdots/node-pixel.git#7635e7595a731c83034bb001ebc57e4918834551"
   dependencies:
     color-string "^1.5.3"
 
@@ -641,14 +733,31 @@ rollup-plugin-dts@^6.0.2:
   optionalDependencies:
     "@babel/code-frame" "^7.22.13"
 
-rollup@^3.29.2:
-  version "3.29.2"
-  resolved "https://registry.yarnpkg.com/rollup/-/rollup-3.29.2.tgz#cbc76cd5b03b9f9e93be991d23a1dff9c6d5b740"
-  integrity sha512-CJouHoZ27v6siztc21eEQGo0kIcE5D1gVPA571ez0mMYb25LGYGKnVNXpEj5MGlepmDWGXNjDB5q7uNiPHC11A==
+rollup@^4.13.2:
+  version "4.14.0"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-4.14.0.tgz#c3e2cd479f1b2358b65c1f810fa05b51603d7be8"
+  integrity sha512-Qe7w62TyawbDzB4yt32R0+AbIo6m1/sqO7UPzFS8Z/ksL5mrfhA0v4CavfdmFav3D+ub4QeAgsGEe84DoWe/nQ==
+  dependencies:
+    "@types/estree" "1.0.5"
   optionalDependencies:
+    "@rollup/rollup-android-arm-eabi" "4.14.0"
+    "@rollup/rollup-android-arm64" "4.14.0"
+    "@rollup/rollup-darwin-arm64" "4.14.0"
+    "@rollup/rollup-darwin-x64" "4.14.0"
+    "@rollup/rollup-linux-arm-gnueabihf" "4.14.0"
+    "@rollup/rollup-linux-arm64-gnu" "4.14.0"
+    "@rollup/rollup-linux-arm64-musl" "4.14.0"
+    "@rollup/rollup-linux-powerpc64le-gnu" "4.14.0"
+    "@rollup/rollup-linux-riscv64-gnu" "4.14.0"
+    "@rollup/rollup-linux-s390x-gnu" "4.14.0"
+    "@rollup/rollup-linux-x64-gnu" "4.14.0"
+    "@rollup/rollup-linux-x64-musl" "4.14.0"
+    "@rollup/rollup-win32-arm64-msvc" "4.14.0"
+    "@rollup/rollup-win32-ia32-msvc" "4.14.0"
+    "@rollup/rollup-win32-x64-msvc" "4.14.0"
     fsevents "~2.3.2"
 
-serialport@^10.4.0:
+serialport@^10.4.0, serialport@^10.5.0:
   version "10.5.0"
   resolved "https://registry.yarnpkg.com/serialport/-/serialport-10.5.0.tgz#b85f614def6e8914e5865c798b0555330903a0f8"
   integrity sha512-7OYLDsu5i6bbv3lU81pGy076xe0JwpK6b49G6RjNvGibstUqQkI+I3/X491yBGtf4gaqUdOgoU1/5KZ/XxL4dw==
