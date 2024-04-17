@@ -32,7 +32,7 @@
     "@types/node-pixel": "^0.11.2",
     "@types/qr-image": "^3.2.7",
     "@types/ws": "^8.5.5",
-    "johnny-five": "git://github.com/blokdots/johnny-five.git",
+    "johnny-five": "https://github.com/blokdots/johnny-five",
     "prettier": "^3.0.3",
     "rollup": "^4.13.2",
     "rollup-plugin-base64": "^1.0.1",
@@ -43,13 +43,13 @@
     "ws": "^8.14.1"
   },
   "dependencies": {
-    "node-pixel": "git://github.com/blokdots/node-pixel.git",
+    "node-pixel": "https://github.com/blokdots/node-pixel",
     "oled-font-5x7": "^1.0.3",
-    "oled-js": "git://github.com/blokdots/oled-js#blokdots",
+    "oled-js": "https://github.com/blokdots/oled-js#blokdots",
     "qr-image": "^3.2.0"
   },
   "peerDependencies": {
-    "johnny-five": "git://github.com/blokdots/johnny-five.git",
+    "johnny-five": "https://github.com/blokdots/johnny-five",
     "socket.io": "^4.7.1",
     "ws": "^8.13.0"
   }

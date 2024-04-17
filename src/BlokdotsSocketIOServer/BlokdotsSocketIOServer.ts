@@ -303,6 +303,7 @@ export class BlokdotsSocketIOServer {
     // Nobody is listening anymore, remove the integration
     if (integration.handlers.length === 0) {
       integration.ioNamespace.disconnectSockets();
+      this.io?._nsps.delete("/" + integrationName);
       delete this.activeIntegrations[integrationName];
 
       this.emitInfo();

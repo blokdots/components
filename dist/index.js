@@ -277,6 +277,7 @@ class BlokdotsSocketIOServer {
         return Object.assign(Object.assign({}, integration), { connections: integration.ioNamespace.sockets.size });
     }
     unregisterIntegration({ integrationName, handlers = [], onClientConnect, onClientDisconnect, }) {
+        var _a;
         let integration = this.activeIntegrations[integrationName];
         if (!integration) {
             return;
@@ -294,6 +295,7 @@ class BlokdotsSocketIOServer {
         // Nobody is listening anymore, remove the integration
         if (integration.handlers.length === 0) {
             integration.ioNamespace.disconnectSockets();
+            (_a = this.io) === null || _a === void 0 ? void 0 : _a._nsps.delete("/" + integrationName);
             delete this.activeIntegrations[integrationName];
             this.emitInfo();
         }
@@ -6700,12 +6702,12 @@ function requireDist$6 () {
 
 var dist$4 = {};
 
-var utils$1 = {};
+var utils$2 = {};
 
 var hasRequiredUtils;
 
 function requireUtils () {
-	if (hasRequiredUtils) return utils$1;
+	if (hasRequiredUtils) return utils$2;
 	hasRequiredUtils = 1;
 	(function (exports) {
 		Object.defineProperty(exports, "__esModule", { value: true });
@@ -6751,8 +6753,8 @@ function requireUtils () {
 		    };
 		};
 		exports.convertHeaderBufferToObj = convertHeaderBufferToObj; 
-	} (utils$1));
-	return utils$1;
+	} (utils$2));
+	return utils$2;
 }
 
 var hasRequiredDist$5;
@@ -8769,7 +8771,7 @@ var serialport = {};
 
 var dist$1 = {};
 
-var darwin$1 = {};
+var darwin = {};
 
 var loadBindings = {};
 
@@ -9038,7 +9040,7 @@ function requireLoadBindings () {
 	return loadBindings;
 }
 
-var poller$1 = {};
+var poller = {};
 
 var errors = {};
 
@@ -9059,11 +9061,11 @@ function requireErrors () {
 	return errors;
 }
 
-var hasRequiredPoller$1;
+var hasRequiredPoller;
 
-function requirePoller$1 () {
-	if (hasRequiredPoller$1) return poller$1;
-	hasRequiredPoller$1 = 1;
+function requirePoller () {
+	if (hasRequiredPoller) return poller;
+	hasRequiredPoller = 1;
 	(function (exports) {
 		var __importDefault = (commonjsGlobal && commonjsGlobal.__importDefault) || function (mod) {
 		    return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -9168,17 +9170,17 @@ function requirePoller$1 () {
 		    }
 		}
 		exports.Poller = Poller; 
-	} (poller$1));
-	return poller$1;
+	} (poller));
+	return poller;
 }
 
 var unixRead = {};
 
-var hasRequiredUnixRead$1;
+var hasRequiredUnixRead;
 
-function requireUnixRead$1 () {
-	if (hasRequiredUnixRead$1) return unixRead;
-	hasRequiredUnixRead$1 = 1;
+function requireUnixRead () {
+	if (hasRequiredUnixRead) return unixRead;
+	hasRequiredUnixRead = 1;
 	(function (exports) {
 		var __importDefault = (commonjsGlobal && commonjsGlobal.__importDefault) || function (mod) {
 		    return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -9240,11 +9242,11 @@ function requireUnixRead$1 () {
 
 var unixWrite = {};
 
-var hasRequiredUnixWrite$1;
+var hasRequiredUnixWrite;
 
-function requireUnixWrite$1 () {
-	if (hasRequiredUnixWrite$1) return unixWrite;
-	hasRequiredUnixWrite$1 = 1;
+function requireUnixWrite () {
+	if (hasRequiredUnixWrite) return unixWrite;
+	hasRequiredUnixWrite = 1;
 	(function (exports) {
 		var __importDefault = (commonjsGlobal && commonjsGlobal.__importDefault) || function (mod) {
 		    return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -9305,23 +9307,23 @@ function requireUnixWrite$1 () {
 	return unixWrite;
 }
 
-var hasRequiredDarwin$1;
+var hasRequiredDarwin;
 
-function requireDarwin$1 () {
-	if (hasRequiredDarwin$1) return darwin$1;
-	hasRequiredDarwin$1 = 1;
+function requireDarwin () {
+	if (hasRequiredDarwin) return darwin;
+	hasRequiredDarwin = 1;
 	var __importDefault = (commonjsGlobal && commonjsGlobal.__importDefault) || function (mod) {
 	    return (mod && mod.__esModule) ? mod : { "default": mod };
 	};
-	Object.defineProperty(darwin$1, "__esModule", { value: true });
-	darwin$1.DarwinPortBinding = darwin$1.DarwinBinding = void 0;
+	Object.defineProperty(darwin, "__esModule", { value: true });
+	darwin.DarwinPortBinding = darwin.DarwinBinding = void 0;
 	const debug_1 = __importDefault(requireSrc());
 	const load_bindings_1 = requireLoadBindings();
-	const poller_1 = requirePoller$1();
-	const unix_read_1 = requireUnixRead$1();
-	const unix_write_1 = requireUnixWrite$1();
+	const poller_1 = requirePoller();
+	const unix_read_1 = requireUnixRead();
+	const unix_write_1 = requireUnixWrite();
 	const debug = (0, debug_1.default)('serialport/bindings-cpp');
-	darwin$1.DarwinBinding = {
+	darwin.DarwinBinding = {
 	    list() {
 	        debug('list');
 	        return (0, load_bindings_1.asyncList)();
@@ -9456,21 +9458,21 @@ function requireDarwin$1 () {
 	        await (0, load_bindings_1.asyncDrain)(this.fd);
 	    }
 	}
-	darwin$1.DarwinPortBinding = DarwinPortBinding;
-	return darwin$1;
+	darwin.DarwinPortBinding = DarwinPortBinding;
+	return darwin;
 }
 
-var linux$1 = {};
+var linux = {};
 
-var linuxList$1 = {};
+var linuxList = {};
 
-var hasRequiredLinuxList$1;
+var hasRequiredLinuxList;
 
-function requireLinuxList$1 () {
-	if (hasRequiredLinuxList$1) return linuxList$1;
-	hasRequiredLinuxList$1 = 1;
-	Object.defineProperty(linuxList$1, "__esModule", { value: true });
-	linuxList$1.linuxList = void 0;
+function requireLinuxList () {
+	if (hasRequiredLinuxList) return linuxList;
+	hasRequiredLinuxList = 1;
+	Object.defineProperty(linuxList, "__esModule", { value: true });
+	linuxList.linuxList = void 0;
 	const child_process_1 = require$$0$3;
 	const parser_readline_1 = requireDist$9();
 	// get only serial port names
@@ -9505,7 +9507,7 @@ function requireLinuxList$1 () {
 	    }
 	    return val;
 	}
-	function linuxList(spawnCmd = child_process_1.spawn) {
+	function linuxList$1(spawnCmd = child_process_1.spawn) {
 	    const ports = [];
 	    const udevadm = spawnCmd('udevadm', ['info', '-e']);
 	    const lines = udevadm.stdout.pipe(new parser_readline_1.ReadlineParser());
@@ -9573,28 +9575,28 @@ function requireLinuxList$1 () {
 	        lines.on('finish', () => resolve(ports));
 	    });
 	}
-	linuxList$1.linuxList = linuxList;
-	return linuxList$1;
+	linuxList.linuxList = linuxList$1;
+	return linuxList;
 }
 
-var hasRequiredLinux$1;
+var hasRequiredLinux;
 
-function requireLinux$1 () {
-	if (hasRequiredLinux$1) return linux$1;
-	hasRequiredLinux$1 = 1;
+function requireLinux () {
+	if (hasRequiredLinux) return linux;
+	hasRequiredLinux = 1;
 	var __importDefault = (commonjsGlobal && commonjsGlobal.__importDefault) || function (mod) {
 	    return (mod && mod.__esModule) ? mod : { "default": mod };
 	};
-	Object.defineProperty(linux$1, "__esModule", { value: true });
-	linux$1.LinuxPortBinding = linux$1.LinuxBinding = void 0;
+	Object.defineProperty(linux, "__esModule", { value: true });
+	linux.LinuxPortBinding = linux.LinuxBinding = void 0;
 	const debug_1 = __importDefault(requireSrc());
-	const linux_list_1 = requireLinuxList$1();
-	const poller_1 = requirePoller$1();
-	const unix_read_1 = requireUnixRead$1();
-	const unix_write_1 = requireUnixWrite$1();
+	const linux_list_1 = requireLinuxList();
+	const poller_1 = requirePoller();
+	const unix_read_1 = requireUnixRead();
+	const unix_write_1 = requireUnixWrite();
 	const load_bindings_1 = requireLoadBindings();
 	const debug = (0, debug_1.default)('serialport/bindings-cpp');
-	linux$1.LinuxBinding = {
+	linux.LinuxBinding = {
 	    list() {
 	        debug('list');
 	        return (0, linux_list_1.linuxList)();
@@ -9730,21 +9732,21 @@ function requireLinux$1 () {
 	        await (0, load_bindings_1.asyncDrain)(this.fd);
 	    }
 	}
-	linux$1.LinuxPortBinding = LinuxPortBinding;
-	return linux$1;
+	linux.LinuxPortBinding = LinuxPortBinding;
+	return linux;
 }
 
-var win32$1 = {};
+var win32 = {};
 
-var win32SnParser$1 = {};
+var win32SnParser = {};
 
-var hasRequiredWin32SnParser$1;
+var hasRequiredWin32SnParser;
 
-function requireWin32SnParser$1 () {
-	if (hasRequiredWin32SnParser$1) return win32SnParser$1;
-	hasRequiredWin32SnParser$1 = 1;
-	Object.defineProperty(win32SnParser$1, "__esModule", { value: true });
-	win32SnParser$1.serialNumParser = void 0;
+function requireWin32SnParser () {
+	if (hasRequiredWin32SnParser) return win32SnParser;
+	hasRequiredWin32SnParser = 1;
+	Object.defineProperty(win32SnParser, "__esModule", { value: true });
+	win32SnParser.serialNumParser = void 0;
 	const PARSERS = [/USB\\(?:.+)\\(.+)/, /FTDIBUS\\(?:.+)\+(.+?)A?\\.+/];
 	const serialNumParser = (pnpId) => {
 	    if (!pnpId) {
@@ -9758,26 +9760,26 @@ function requireWin32SnParser$1 () {
 	    }
 	    return null;
 	};
-	win32SnParser$1.serialNumParser = serialNumParser;
-	return win32SnParser$1;
+	win32SnParser.serialNumParser = serialNumParser;
+	return win32SnParser;
 }
 
-var hasRequiredWin32$1;
+var hasRequiredWin32;
 
-function requireWin32$1 () {
-	if (hasRequiredWin32$1) return win32$1;
-	hasRequiredWin32$1 = 1;
+function requireWin32 () {
+	if (hasRequiredWin32) return win32;
+	hasRequiredWin32 = 1;
 	var __importDefault = (commonjsGlobal && commonjsGlobal.__importDefault) || function (mod) {
 	    return (mod && mod.__esModule) ? mod : { "default": mod };
 	};
-	Object.defineProperty(win32$1, "__esModule", { value: true });
-	win32$1.WindowsPortBinding = win32$1.WindowsBinding = void 0;
+	Object.defineProperty(win32, "__esModule", { value: true });
+	win32.WindowsPortBinding = win32.WindowsBinding = void 0;
 	const debug_1 = __importDefault(requireSrc());
 	const _1 = requireDist$1();
 	const load_bindings_1 = requireLoadBindings();
-	const win32_sn_parser_1 = requireWin32SnParser$1();
+	const win32_sn_parser_1 = requireWin32SnParser();
 	const debug = (0, debug_1.default)('serialport/bindings-cpp');
-	win32$1.WindowsBinding = {
+	win32.WindowsBinding = {
 	    async list() {
 	        const ports = await (0, load_bindings_1.asyncList)();
 	        // Grab the serial number from the pnp id
@@ -9927,8 +9929,8 @@ function requireWin32$1 () {
 	        await (0, load_bindings_1.asyncDrain)(this.fd);
 	    }
 	}
-	win32$1.WindowsPortBinding = WindowsPortBinding;
-	return win32$1;
+	win32.WindowsPortBinding = WindowsPortBinding;
+	return win32;
 }
 
 var dist = {};
@@ -9968,14 +9970,14 @@ function requireDist$1 () {
 		exports.autoDetect = void 0;
 		/* eslint-disable @typescript-eslint/no-var-requires */
 		const debug_1 = __importDefault(requireSrc());
-		const darwin_1 = requireDarwin$1();
-		const linux_1 = requireLinux$1();
-		const win32_1 = requireWin32$1();
+		const darwin_1 = requireDarwin();
+		const linux_1 = requireLinux();
+		const win32_1 = requireWin32();
 		const debug = (0, debug_1.default)('serialport/bindings-cpp');
 		__exportStar(requireDist$2(), exports);
-		__exportStar(requireDarwin$1(), exports);
-		__exportStar(requireLinux$1(), exports);
-		__exportStar(requireWin32$1(), exports);
+		__exportStar(requireDarwin(), exports);
+		__exportStar(requireLinux(), exports);
+		__exportStar(requireWin32(), exports);
 		__exportStar(requireErrors(), exports);
 		/**
 		 * This is an auto detected binding for your current platform
@@ -10168,12 +10170,12 @@ function requireOnewireutils () {
 	return onewireutils;
 }
 
-var firmata$1;
-var hasRequiredFirmata$1;
+var firmataIo;
+var hasRequiredFirmataIo;
 
-function requireFirmata$1 () {
-	if (hasRequiredFirmata$1) return firmata$1;
-	hasRequiredFirmata$1 = 1;
+function requireFirmataIo () {
+	if (hasRequiredFirmataIo) return firmataIo;
+	hasRequiredFirmataIo = 1;
 
 	// Built-in Dependencies
 	const Emitter = EventEmitter$2;
@@ -10190,17 +10192,17 @@ function requireFirmata$1 () {
 	 */
 
 	const ANALOG_MAPPING_QUERY = 0x69;
-	const ANALOG_MAPPING_RESPONSE = 0x6A;
-	const ANALOG_MESSAGE = 0xE0;
-	const CAPABILITY_QUERY = 0x6B;
-	const CAPABILITY_RESPONSE = 0x6C;
+	const ANALOG_MAPPING_RESPONSE = 0x6a;
+	const ANALOG_MESSAGE = 0xe0;
+	const CAPABILITY_QUERY = 0x6b;
+	const CAPABILITY_RESPONSE = 0x6c;
 	const DIGITAL_MESSAGE = 0x90;
-	const END_SYSEX = 0xF7;
-	const EXTENDED_ANALOG = 0x6F;
+	const END_SYSEX = 0xf7;
+	const EXTENDED_ANALOG = 0x6f;
 	const I2C_CONFIG = 0x78;
 	const I2C_REPLY = 0x77;
 	const I2C_REQUEST = 0x76;
-	const I2C_READ_MASK = 0x18;   // 0b00011000
+	const I2C_READ_MASK = 0x18; // 0b00011000
 	// const I2C_END_TX_MASK = 0x40; // 0b01000000
 	const ONEWIRE_CONFIG_REQUEST = 0x41;
 	const ONEWIRE_DATA = 0x73;
@@ -10212,19 +10214,19 @@ function requireFirmata$1 () {
 	const ONEWIRE_SEARCH_ALARMS_REQUEST = 0x44;
 	const ONEWIRE_SEARCH_REPLY = 0x42;
 	const ONEWIRE_SEARCH_REQUEST = 0x40;
-	const ONEWIRE_WITHDATA_REQUEST_BITS = 0x3C;
+	const ONEWIRE_WITHDATA_REQUEST_BITS = 0x3c;
 	const ONEWIRE_WRITE_REQUEST_BIT = 0x20;
-	const PIN_MODE = 0xF4;
-	const PIN_STATE_QUERY = 0x6D;
-	const PIN_STATE_RESPONSE = 0x6E;
+	const PIN_MODE = 0xf4;
+	const PIN_STATE_QUERY = 0x6d;
+	const PIN_STATE_RESPONSE = 0x6e;
 	const PING_READ = 0x75;
 	// const PULSE_IN = 0x74;
 	// const PULSE_OUT = 0x73;
 	const QUERY_FIRMWARE = 0x79;
-	const REPORT_ANALOG = 0xC0;
-	const REPORT_DIGITAL = 0xD0;
-	const REPORT_VERSION = 0xF9;
-	const SAMPLING_INTERVAL = 0x7A;
+	const REPORT_ANALOG = 0xc0;
+	const REPORT_DIGITAL = 0xd0;
+	const REPORT_VERSION = 0xf9;
+	const SAMPLING_INTERVAL = 0x7a;
 	const SERVO_CONFIG = 0x70;
 	const SERIAL_MESSAGE = 0x60;
 	const SERIAL_CONFIG = 0x10;
@@ -10234,11 +10236,11 @@ function requireFirmata$1 () {
 	const SERIAL_CLOSE = 0x50;
 	const SERIAL_FLUSH = 0x60;
 	const SERIAL_LISTEN = 0x70;
-	const START_SYSEX = 0xF0;
+	const START_SYSEX = 0xf0;
 	const STEPPER = 0x72;
 	const ACCELSTEPPER = 0x62;
 	const STRING_DATA = 0x71;
-	const SYSTEM_RESET = 0xFF;
+	const SYSTEM_RESET = 0xff;
 
 	const MAX_PIN_COUNT = 128;
 
@@ -10252,7 +10254,6 @@ function requireFirmata$1 () {
 	 */
 
 	const MIDI_RESPONSE = {
-
 	  /**
 	   * Handles a REPORT_VERSION response and emits the reportversion event.
 	   * @private
@@ -10272,7 +10273,7 @@ function requireFirmata$1 () {
 	   */
 
 	  [ANALOG_MESSAGE](board) {
-	    const pin = board.buffer[0] & 0x0F;
+	    const pin = board.buffer[0] & 0x0f;
 	    const value = board.buffer[1] | (board.buffer[2] << 7);
 
 	    /* istanbul ignore else */
@@ -10299,7 +10300,7 @@ function requireFirmata$1 () {
 	   */
 
 	  [DIGITAL_MESSAGE](board) {
-	    const port = board.buffer[0] & 0x0F;
+	    const port = board.buffer[0] & 0x0f;
 	    const portValue = board.buffer[1] | (board.buffer[2] << 7);
 
 	    for (let i = 0; i < 8; i++) {
@@ -10307,7 +10308,11 @@ function requireFirmata$1 () {
 	      const pinRec = board.pins[pin];
 	      const bit = 1 << i;
 
-	      if (pinRec && (pinRec.mode === board.MODES.INPUT || pinRec.mode === board.MODES.PULLUP)) {
+	      if (
+	        pinRec &&
+	        (pinRec.mode === board.MODES.INPUT ||
+	          pinRec.mode === board.MODES.PULLUP)
+	      ) {
 	        pinRec.value = (portValue >> (i & 0x07)) & 0x01;
 
 	        if (pinRec.value) {
@@ -10316,7 +10321,7 @@ function requireFirmata$1 () {
 	          board.ports[port] &= ~bit;
 	        }
 
-	        let {value} = pinRec;
+	        let { value } = pinRec;
 
 	        board.emit(`digital-read-${pin}`, value);
 	        board.emit("digital-read", {
@@ -10335,7 +10340,6 @@ function requireFirmata$1 () {
 	 */
 
 	const SYSEX_RESPONSE = {
-
 	  /**
 	   * Handles a QUERY_FIRMWARE response and emits the "queryfirmware" event
 	   * @private
@@ -10349,19 +10353,19 @@ function requireFirmata$1 () {
 	    let offset = 0;
 
 	    for (let i = 4; i < length; i += 2) {
-	      byte = ((board.buffer[i] & 0x7F) | ((board.buffer[i + 1] & 0x7F) << 7)) & 0xFF;
+	      byte =
+	        ((board.buffer[i] & 0x7f) | ((board.buffer[i + 1] & 0x7f) << 7)) & 0xff;
 	      buffer.writeUInt8(byte, offset++);
 	    }
 
-	    board.firmware = {
+	    (board.firmware = {
 	      name: buffer.toString(),
 	      version: {
 	        major: board.buffer[2],
 	        minor: board.buffer[3],
 	      },
-	    },
-
-	    board.emit("queryfirmware");
+	    }),
+	      board.emit("queryfirmware");
 	  },
 
 	  /**
@@ -10387,7 +10391,7 @@ function requireFirmata$1 () {
 	    // Only create pins if none have been previously created on the instance.
 	    if (!board.pins.length) {
 	      for (let i = 2, n = 0; i < board.buffer.length - 1; i++) {
-	        if (board.buffer[i] === 0x7F) {
+	        if (board.buffer[i] === 0x7f) {
 	          board.pins.push({
 	            supportedModes: supportedModes(capability),
 	            mode: undefined,
@@ -10401,7 +10405,7 @@ function requireFirmata$1 () {
 	        if (n === 0) {
 	          mode = board.buffer[i];
 	          resolution = (1 << board.buffer[i + 1]) - 1;
-	          capability |= (1 << mode);
+	          capability |= 1 << mode;
 
 	          // ADC Resolution of Analog Inputs
 	          if (mode === board.MODES.ANALOG && board.RESOLUTION.ADC === null) {
@@ -10440,10 +10444,10 @@ function requireFirmata$1 () {
 	    board.pins[pin].mode = board.buffer[3];
 	    board.pins[pin].state = board.buffer[4];
 	    if (board.buffer.length > 6) {
-	      board.pins[pin].state |= (board.buffer[5] << 7);
+	      board.pins[pin].state |= board.buffer[5] << 7;
 	    }
 	    if (board.buffer.length > 7) {
-	      board.pins[pin].state |= (board.buffer[6] << 14);
+	      board.pins[pin].state |= board.buffer[6] << 14;
 	    }
 	    board.emit(`pin-state-${pin}`);
 	  },
@@ -10477,8 +10481,8 @@ function requireFirmata$1 () {
 
 	  [I2C_REPLY](board) {
 	    const reply = [];
-	    const address = (board.buffer[2] & 0x7F) | ((board.buffer[3] & 0x7F) << 7);
-	    const register = (board.buffer[4] & 0x7F) | ((board.buffer[5] & 0x7F) << 7);
+	    const address = (board.buffer[2] & 0x7f) | ((board.buffer[3] & 0x7f) << 7);
+	    const register = (board.buffer[4] & 0x7f) | ((board.buffer[5] & 0x7f) << 7);
 
 	    for (let i = 6, length = board.buffer.length - 1; i < length; i += 2) {
 	      reply.push(board.buffer[i] | (board.buffer[i + 1] << 7));
@@ -10508,7 +10512,10 @@ function requireFirmata$1 () {
 	    const pin = board.buffer[3];
 	    const buffer = board.buffer.slice(4, board.buffer.length - 1);
 
-	    board.emit(`1-wire-search-alarms-reply-${pin}`, OneWire.readDevices(buffer));
+	    board.emit(
+	      `1-wire-search-alarms-reply-${pin}`,
+	      OneWire.readDevices(buffer)
+	    );
 	  },
 
 	  [ONEWIRE_READ_REPLY](board) {
@@ -10526,7 +10533,10 @@ function requireFirmata$1 () {
 	   */
 
 	  [STRING_DATA](board) {
-	    board.emit("string", Buffer.from(board.buffer.slice(2, -1)).toString().replace(/\0/g, ""));
+	    board.emit(
+	      "string",
+	      Buffer.from(board.buffer.slice(2, -1)).toString().replace(/\0/g, "")
+	    );
 	  },
 
 	  /**
@@ -10534,17 +10544,18 @@ function requireFirmata$1 () {
 	   */
 
 	  [PING_READ](board) {
-	    const pin = (board.buffer[2] & 0x7F) | ((board.buffer[3] & 0x7F) << 7);
+	    const pin = (board.buffer[2] & 0x7f) | ((board.buffer[3] & 0x7f) << 7);
 	    const durationBuffer = [
-	      (board.buffer[4] & 0x7F) | ((board.buffer[5] & 0x7F) << 7),
-	      (board.buffer[6] & 0x7F) | ((board.buffer[7] & 0x7F) << 7),
-	      (board.buffer[8] & 0x7F) | ((board.buffer[9] & 0x7F) << 7),
-	      (board.buffer[10] & 0x7F) | ((board.buffer[11] & 0x7F) << 7),
+	      (board.buffer[4] & 0x7f) | ((board.buffer[5] & 0x7f) << 7),
+	      (board.buffer[6] & 0x7f) | ((board.buffer[7] & 0x7f) << 7),
+	      (board.buffer[8] & 0x7f) | ((board.buffer[9] & 0x7f) << 7),
+	      (board.buffer[10] & 0x7f) | ((board.buffer[11] & 0x7f) << 7),
 	    ];
-	    const duration = ((durationBuffer[0] << 24) +
+	    const duration =
+	      (durationBuffer[0] << 24) +
 	      (durationBuffer[1] << 16) +
 	      (durationBuffer[2] << 8) +
-	      (durationBuffer[3]));
+	      durationBuffer[3];
 	    board.emit(`ping-read-${pin}`, duration);
 	  },
 
@@ -10566,13 +10577,15 @@ function requireFirmata$1 () {
 	  [ACCELSTEPPER](board) {
 	    const command = board.buffer[2];
 	    const deviceNum = board.buffer[3];
-	    const value = command === 0x06 || command === 0x0A ?
-	      decode32BitSignedInteger(board.buffer.slice(4, 9)) : null;
+	    const value =
+	      command === 0x06 || command === 0x0a
+	        ? decode32BitSignedInteger(board.buffer.slice(4, 9))
+	        : null;
 
 	    if (command === 0x06) {
 	      board.emit(`stepper-position-${deviceNum}`, value);
 	    }
-	    if (command === 0x0A) {
+	    if (command === 0x0a) {
 	      board.emit(`stepper-done-${deviceNum}`, value);
 	    }
 	    if (command === 0x24) {
@@ -10590,7 +10603,7 @@ function requireFirmata$1 () {
 
 	  [SERIAL_MESSAGE](board) {
 	    const command = board.buffer[2] & START_SYSEX;
-	    const portId = board.buffer[2] & 0x0F;
+	    const portId = board.buffer[2] & 0x0f;
 	    const reply = [];
 
 	    /* istanbul ignore else */
@@ -10601,8 +10614,6 @@ function requireFirmata$1 () {
 	      board.emit(`serial-data-${portId}`, reply);
 	    }
 	  },
-
-
 	};
 
 	/**
@@ -10610,7 +10621,6 @@ function requireFirmata$1 () {
 	 */
 
 	let Transport = null;
-
 
 	/**
 	 * @class The Board object represents an arduino board.
@@ -10648,6 +10658,7 @@ function requireFirmata$1 () {
 	        baudRate: 57600,
 	        // https://github.com/node-serialport/node-serialport/blob/5.0.0/UPGRADE_GUIDE.md#open-options
 	        highWaterMark: 256,
+	        path: port,
 	      },
 	    };
 
@@ -10665,9 +10676,9 @@ function requireFirmata$1 () {
 	      I2C: 0x06,
 	      ONEWIRE: 0x07,
 	      STEPPER: 0x08,
-	      SERIAL: 0x0A,
-	      PULLUP: 0x0B,
-	      IGNORE: 0x7F,
+	      SERIAL: 0x0a,
+	      PULLUP: 0x0b,
+	      IGNORE: 0x7f,
 	      PING_READ: 0x75,
 	      UNKOWN: 0x10,
 	    };
@@ -10688,7 +10699,7 @@ function requireFirmata$1 () {
 	      },
 	      STEP_SIZE: {
 	        WHOLE: 0,
-	        HALF: 1
+	        HALF: 1,
 	      },
 	      RUN_STATE: {
 	        STOP: 0,
@@ -10763,13 +10774,13 @@ function requireFirmata$1 () {
 	      if (!Transport) {
 	        throw new Error("Missing Default Transport");
 	      }
-	      this.transport = new Transport(port, settings.serialport);
+
+	      this.transport = new Transport(settings.serialport);
 	    }
 
-	    this.transport.on("close", event => {
-
+	    this.transport.on("close", (event) => {
 	      // https://github.com/node-serialport/node-serialport/blob/5.0.0/UPGRADE_GUIDE.md#opening-and-closing
-	      if (event && event.disconnect && event.disconnected) {
+	      if (event && event.disconnected) {
 	        this.emit("disconnect");
 	        return;
 	      }
@@ -10777,13 +10788,13 @@ function requireFirmata$1 () {
 	      this.emit("close");
 	    });
 
-	    this.transport.on("open", event => {
+	    this.transport.on("open", (event) => {
 	      this.emit("open", event);
 	      // Legacy
 	      this.emit("connect", event);
 	    });
 
-	    this.transport.on("error", error => {
+	    this.transport.on("error", (error) => {
 	      if (!this.isReady && typeof callback === "function") {
 	        callback(error);
 	      } else {
@@ -10791,7 +10802,7 @@ function requireFirmata$1 () {
 	      }
 	    });
 
-	    this.transport.on("data", data => {
+	    this.transport.on("data", (data) => {
 	      for (let i = 0; i < data.length; i++) {
 	        let byte = data[i];
 	        // we dont want to push 0 as the first byte on our buffer
@@ -10805,7 +10816,6 @@ function requireFirmata$1 () {
 
 	          // [START_SYSEX, ... END_SYSEX]
 	          if (first === START_SYSEX && last === END_SYSEX) {
-
 	            let handler = SYSEX_RESPONSE[this.buffer[1]];
 
 	            // Ensure a valid SYSEX_RESPONSE handler exists
@@ -10836,11 +10846,10 @@ function requireFirmata$1 () {
 	            // until _after_ REPORT_VERSION, discard it.
 	            //
 	            this.buffer.length = 0;
-
-	          } else if (first === START_SYSEX && (this.buffer.length > 0)) {
+	          } else if (first === START_SYSEX && this.buffer.length > 0) {
 	            // we have a new command after an incomplete sysex command
 	            let currByte = data[i];
-	            if (currByte > 0x7F) {
+	            if (currByte > 0x7f) {
 	              this.buffer.length = 0;
 	              this.buffer.push(currByte);
 	            }
@@ -10850,14 +10859,16 @@ function requireFirmata$1 () {
 	              // Check if data gets out of sync: first byte in buffer
 	              // must be a valid response if not START_SYSEX
 	              // Identify response on first byte
-	              let response = first < START_SYSEX ? (first & START_SYSEX) : first;
+	              let response = first < START_SYSEX ? first & START_SYSEX : first;
 
 	              // Check if the first byte is possibly
 	              // a valid MIDI_RESPONSE (handler)
 	              /* istanbul ignore else */
-	              if (response !== REPORT_VERSION &&
-	                  response !== ANALOG_MESSAGE &&
-	                  response !== DIGITAL_MESSAGE) {
+	              if (
+	                response !== REPORT_VERSION &&
+	                response !== ANALOG_MESSAGE &&
+	                response !== DIGITAL_MESSAGE
+	              ) {
 	                // If not valid, then we received garbage and can discard
 	                // whatever bytes have been been queued.
 	                this.buffer.length = 0;
@@ -10869,7 +10880,7 @@ function requireFirmata$1 () {
 	          // Might have a MIDI Command
 	          if (this.buffer.length === 3 && first !== START_SYSEX) {
 	            // response bytes under 0xF0 we have a multi byte operation
-	            let response = first < START_SYSEX ? (first & START_SYSEX) : first;
+	            let response = first < START_SYSEX ? first & START_SYSEX : first;
 
 	            /* istanbul ignore else */
 	            if (MIDI_RESPONSE[response]) {
@@ -10898,8 +10909,8 @@ function requireFirmata$1 () {
 	    this.reportVersionTimeoutId = setTimeout(() => {
 	      /* istanbul ignore else */
 	      if (this.versionReceived === false) {
-	        this.reportVersion(function() {});
-	        this.queryFirmware(function() {});
+	        this.reportVersion(function () {});
+	        this.queryFirmware(function () {});
 	      }
 	    }, settings.reportVersionTimeout);
 
@@ -10917,7 +10928,6 @@ function requireFirmata$1 () {
 	      clearTimeout(this.reportVersionTimeoutId);
 	      this.versionReceived = true;
 	      this.once("queryfirmware", () => {
-
 	        // Only preemptively set the sampling interval if `samplingInterval`
 	        // property was _explicitly_ set as a constructor option.
 	        if (options.samplingInterval !== undefined) {
@@ -10935,7 +10945,7 @@ function requireFirmata$1 () {
 	              if (analogChannel < 0) {
 	                analogChannel = 127;
 	              }
-	              this.pins.push({supportedModes, analogChannel});
+	              this.pins.push({ supportedModes, analogChannel });
 	            }
 	          }
 
@@ -10944,8 +10954,8 @@ function requireFirmata$1 () {
 	          //
 	          // Based on ATmega328/P
 	          //
-	          this.RESOLUTION.ADC = 0x3FF;
-	          this.RESOLUTION.PWM = 0x0FF;
+	          this.RESOLUTION.ADC = 0x3ff;
+	          this.RESOLUTION.PWM = 0x0ff;
 
 	          ready();
 	        } else {
@@ -10974,14 +10984,8 @@ function requireFirmata$1 () {
 
 	  queryFirmware(callback) {
 	    this.once("queryfirmware", callback);
-	    writeToTransport(this, [
-	      START_SYSEX,
-	      QUERY_FIRMWARE,
-	      END_SYSEX
-	    ]);
+	    writeToTransport(this, [START_SYSEX, QUERY_FIRMWARE, END_SYSEX]);
 	  }
-
-
 
 	  /**
 	   * Asks the arduino to read analog data. Turn on reporting for this pin.
@@ -11010,29 +11014,25 @@ function requireFirmata$1 () {
 	        START_SYSEX,
 	        EXTENDED_ANALOG,
 	        pin,
-	        value & 0x7F,
-	        (value >> 7) & 0x7F,
+	        value & 0x7f,
+	        (value >> 7) & 0x7f,
 	      ];
 
 	      if (value > 0x00004000) {
-	        data[data.length] = (value >> 14) & 0x7F;
+	        data[data.length] = (value >> 14) & 0x7f;
 	      }
 
 	      if (value > 0x00200000) {
-	        data[data.length] = (value >> 21) & 0x7F;
+	        data[data.length] = (value >> 21) & 0x7f;
 	      }
 
 	      if (value > 0x10000000) {
-	        data[data.length] = (value >> 28) & 0x7F;
+	        data[data.length] = (value >> 28) & 0x7f;
 	      }
 
 	      data[data.length] = END_SYSEX;
 	    } else {
-	      data = [
-	        ANALOG_MESSAGE | pin,
-	        value & 0x7F,
-	        (value >> 7) & 0x7F
-	      ];
+	      data = [ANALOG_MESSAGE | pin, value & 0x7f, (value >> 7) & 0x7f];
 	    }
 
 	    writeToTransport(this, data);
@@ -11081,10 +11081,10 @@ function requireFirmata$1 () {
 	      START_SYSEX,
 	      SERVO_CONFIG,
 	      pin,
-	      min & 0x7F,
-	      (min >> 7) & 0x7F,
-	      max & 0x7F,
-	      (max >> 7) & 0x7F,
+	      min & 0x7f,
+	      (min >> 7) & 0x7f,
+	      max & 0x7f,
+	      (max >> 7) & 0x7f,
 	      END_SYSEX,
 	    ]);
 	  }
@@ -11120,11 +11120,7 @@ function requireFirmata$1 () {
 	      this.pins[this.analogPins[pin]].mode = mode;
 	    } else {
 	      this.pins[pin].mode = mode;
-	      writeToTransport(this, [
-	        PIN_MODE,
-	        pin,
-	        mode
-	      ]);
+	      writeToTransport(this, [PIN_MODE, pin, mode]);
 	    }
 	  }
 
@@ -11187,8 +11183,8 @@ function requireFirmata$1 () {
 	  writeDigitalPort(port) {
 	    writeToTransport(this, [
 	      DIGITAL_MESSAGE | port,
-	      this.ports[port] & 0x7F,
-	      (this.ports[port] >> 7) & 0x7F
+	      this.ports[port] & 0x7f,
+	      (this.ports[port] >> 7) & 0x7f,
 	    ]);
 	  }
 
@@ -11211,11 +11207,7 @@ function requireFirmata$1 () {
 
 	  queryCapabilities(callback) {
 	    this.once("capability-query", callback);
-	    writeToTransport(this, [
-	      START_SYSEX,
-	      CAPABILITY_QUERY,
-	      END_SYSEX
-	    ]);
+	    writeToTransport(this, [START_SYSEX, CAPABILITY_QUERY, END_SYSEX]);
 	  }
 
 	  /**
@@ -11225,11 +11217,7 @@ function requireFirmata$1 () {
 
 	  queryAnalogMapping(callback) {
 	    this.once("analog-mapping-query", callback);
-	    writeToTransport(this, [
-	      START_SYSEX,
-	      ANALOG_MAPPING_QUERY,
-	      END_SYSEX
-	    ]);
+	    writeToTransport(this, [START_SYSEX, ANALOG_MAPPING_QUERY, END_SYSEX]);
 	  }
 
 	  /**
@@ -11240,12 +11228,7 @@ function requireFirmata$1 () {
 
 	  queryPinState(pin, callback) {
 	    this.once(`pin-state-${pin}`, callback);
-	    writeToTransport(this, [
-	      START_SYSEX,
-	      PIN_STATE_QUERY,
-	      pin,
-	      END_SYSEX
-	    ]);
+	    writeToTransport(this, [START_SYSEX, PIN_STATE_QUERY, pin, END_SYSEX]);
 	  }
 
 	  /**
@@ -11259,10 +11242,7 @@ function requireFirmata$1 () {
 
 	    data.push(START_SYSEX, STRING_DATA);
 	    for (let i = 0, length = bytes.length; i < length; i++) {
-	      data.push(
-	        bytes[i] & 0x7F,
-	        (bytes[i] >> 7) & 0x7F
-	      );
+	      data.push(bytes[i] & 0x7f, (bytes[i] >> 7) & 0x7f);
 	    }
 	    data.push(END_SYSEX);
 
@@ -11344,8 +11324,8 @@ function requireFirmata$1 () {
 	    i2cRequest(this, [
 	      START_SYSEX,
 	      I2C_CONFIG,
-	      delay & 0xFF,
-	      (delay >> 8) & 0xFF,
+	      delay & 0xff,
+	      (delay >> 8) & 0xff,
 	      END_SYSEX,
 	    ]);
 
@@ -11371,10 +11351,7 @@ function requireFirmata$1 () {
 	    );
 
 	    for (let i = 0, length = bytes.length; i < length; i++) {
-	      data.push(
-	        bytes[i] & 0x7F,
-	        (bytes[i] >> 7) & 0x7F
-	      );
+	      data.push(bytes[i] & 0x7f, (bytes[i] >> 7) & 0x7f);
 	    }
 
 	    data.push(END_SYSEX);
@@ -11407,18 +11384,14 @@ function requireFirmata$1 () {
 	     * command [, ...]
 	     *
 	     */
-	    const data = [
-	      START_SYSEX,
-	      I2C_REQUEST,
-	      address,
-	      this.I2C_MODES.WRITE << 3
-	    ];
+	    const data = [START_SYSEX, I2C_REQUEST, address, this.I2C_MODES.WRITE << 3];
 
 	    // If i2cWrite was used for an i2cWriteReg call...
-	    if (arguments.length === 3 &&
-	        !Array.isArray(registerOrData) &&
-	        !Array.isArray(inBytes)) {
-
+	    if (
+	      arguments.length === 3 &&
+	      !Array.isArray(registerOrData) &&
+	      !Array.isArray(inBytes)
+	    ) {
 	      return this.i2cWriteReg(address, registerOrData, inBytes);
 	    }
 
@@ -11435,10 +11408,7 @@ function requireFirmata$1 () {
 	    const bytes = Buffer.from([registerOrData].concat(inBytes));
 
 	    for (var i = 0, length = bytes.length; i < length; i++) {
-	      data.push(
-	        bytes[i] & 0x7F,
-	        (bytes[i] >> 7) & 0x7F
-	      );
+	      data.push(bytes[i] & 0x7f, (bytes[i] >> 7) & 0x7f);
 	    }
 
 	    data.push(END_SYSEX);
@@ -11464,11 +11434,11 @@ function requireFirmata$1 () {
 	      address,
 	      this.I2C_MODES.WRITE << 3,
 	      // register
-	      register & 0x7F,
-	      (register >> 7) & 0x7F,
+	      register & 0x7f,
+	      (register >> 7) & 0x7f,
 	      // byte
-	      byte & 0x7F,
-	      (byte >> 7) & 0x7F,
+	      byte & 0x7f,
+	      (byte >> 7) & 0x7f,
 	      END_SYSEX,
 	    ]);
 
@@ -11488,8 +11458,8 @@ function requireFirmata$1 () {
 	      I2C_REQUEST,
 	      address,
 	      this.I2C_MODES.READ << 3,
-	      numBytes & 0x7F,
-	      (numBytes >> 7) & 0x7F,
+	      numBytes & 0x7f,
+	      (numBytes >> 7) & 0x7f,
 	      END_SYSEX,
 	    ]);
 	    this.once(`I2C-reply-${address}-0`, callback);
@@ -11508,10 +11478,11 @@ function requireFirmata$1 () {
 	   */
 
 	  i2cRead(address, register, bytesToRead, callback) {
-
-	    if (arguments.length === 3 &&
-	        typeof register === "number" &&
-	        typeof bytesToRead === "function") {
+	    if (
+	      arguments.length === 3 &&
+	      typeof register === "number" &&
+	      typeof bytesToRead === "function"
+	    ) {
 	      callback = bytesToRead;
 	      bytesToRead = register;
 	      register = null;
@@ -11526,21 +11497,14 @@ function requireFirmata$1 () {
 	    let event = `I2C-reply-${address}-`;
 
 	    if (register !== null) {
-	      data.push(
-	        register & 0x7F,
-	        (register >> 7) & 0x7F
-	      );
+	      data.push(register & 0x7f, (register >> 7) & 0x7f);
 	    } else {
 	      register = 0;
 	    }
 
 	    event += register;
 
-	    data.push(
-	      bytesToRead & 0x7F,
-	      (bytesToRead >> 7) & 0x7F,
-	      END_SYSEX
-	    );
+	    data.push(bytesToRead & 0x7f, (bytesToRead >> 7) & 0x7f, END_SYSEX);
 
 	    this.on(event, callback);
 
@@ -11570,7 +11534,7 @@ function requireFirmata$1 () {
 
 	    if (typeof options === "number") {
 	      options = {
-	        address: options
+	        address: options,
 	      };
 	    }
 
@@ -11582,7 +11546,7 @@ function requireFirmata$1 () {
 	      END_SYSEX,
 	    ]);
 
-	    Object.keys(this._events).forEach(event => {
+	    Object.keys(this._events).forEach((event) => {
 	      if (event.startsWith(`I2C-reply-${options.address}`)) {
 	        this.removeAllListeners(event);
 	      }
@@ -11603,41 +11567,29 @@ function requireFirmata$1 () {
 	   *
 	   */
 
-
 	  i2cReadOnce(address, register, bytesToRead, callback) {
-
-	    if (arguments.length === 3 &&
-	        typeof register === "number" &&
-	        typeof bytesToRead === "function") {
+	    if (
+	      arguments.length === 3 &&
+	      typeof register === "number" &&
+	      typeof bytesToRead === "function"
+	    ) {
 	      callback = bytesToRead;
 	      bytesToRead = register;
 	      register = null;
 	    }
 
-	    const data = [
-	      START_SYSEX,
-	      I2C_REQUEST,
-	      address,
-	      this.I2C_MODES.READ << 3,
-	    ];
+	    const data = [START_SYSEX, I2C_REQUEST, address, this.I2C_MODES.READ << 3];
 	    let event = `I2C-reply-${address}-`;
 
 	    if (register !== null) {
-	      data.push(
-	        register & 0x7F,
-	        (register >> 7) & 0x7F
-	      );
+	      data.push(register & 0x7f, (register >> 7) & 0x7f);
 	    } else {
 	      register = 0;
 	    }
 
 	    event += register;
 
-	    data.push(
-	      bytesToRead & 0x7F,
-	      (bytesToRead >> 7) & 0x7F,
-	      END_SYSEX
-	    );
+	    data.push(bytesToRead & 0x7f, (bytesToRead >> 7) & 0x7f, END_SYSEX);
 
 	    this.once(event, callback);
 
@@ -11697,19 +11649,17 @@ function requireFirmata$1 () {
 	  }
 
 	  [SYM_sendOneWireSearch](type, event, pin, callback) {
-	    writeToTransport(this, [
-	      START_SYSEX,
-	      ONEWIRE_DATA,
-	      type,
-	      pin,
-	      END_SYSEX
-	    ]);
+	    writeToTransport(this, [START_SYSEX, ONEWIRE_DATA, type, pin, END_SYSEX]);
 
 	    const timeout = setTimeout(() => {
 	      /* istanbul ignore next */
-	      callback(new Error("1-Wire device search timeout - are you running ConfigurableFirmata?"));
+	      callback(
+	        new Error(
+	          "1-Wire device search timeout - are you running ConfigurableFirmata?"
+	        )
+	      );
 	    }, 5000);
-	    this.once(event, devices => {
+	    this.once(event, (devices) => {
 	      clearTimeout(timeout);
 	      callback(null, devices);
 	    });
@@ -11730,7 +11680,11 @@ function requireFirmata$1 () {
 	    /* istanbul ignore next */
 	    const timeout = setTimeout(() => {
 	      /* istanbul ignore next */
-	      callback(new Error("1-Wire device read timeout - are you running ConfigurableFirmata?"));
+	      callback(
+	        new Error(
+	          "1-Wire device read timeout - are you running ConfigurableFirmata?"
+	        )
+	      );
 	    }, 5000);
 	    this[SYM_sendOneWireRequest](
 	      pin,
@@ -11741,7 +11695,7 @@ function requireFirmata$1 () {
 	      null,
 	      null,
 	      `1-wire-read-reply-${correlationId}`,
-	      data => {
+	      (data) => {
 	        clearTimeout(timeout);
 	        callback(null, data);
 	      }
@@ -11754,10 +11708,7 @@ function requireFirmata$1 () {
 	   */
 
 	  sendOneWireReset(pin) {
-	    this[SYM_sendOneWireRequest](
-	      pin,
-	      ONEWIRE_RESET_REQUEST_BIT
-	    );
+	    this[SYM_sendOneWireRequest](pin, ONEWIRE_RESET_REQUEST_BIT);
 	  }
 
 	  /**
@@ -11816,7 +11767,11 @@ function requireFirmata$1 () {
 	    /* istanbul ignore next */
 	    const timeout = setTimeout(() => {
 	      /* istanbul ignore next */
-	      callback(new Error("1-Wire device read timeout - are you running ConfigurableFirmata?"));
+	      callback(
+	        new Error(
+	          "1-Wire device read timeout - are you running ConfigurableFirmata?"
+	        )
+	      );
 	    }, 5000);
 	    this[SYM_sendOneWireRequest](
 	      pin,
@@ -11827,7 +11782,7 @@ function requireFirmata$1 () {
 	      null,
 	      Array.isArray(data) ? data : [data],
 	      `1-wire-read-reply-${correlationId}`,
-	      data => {
+	      (data) => {
 	        clearTimeout(timeout);
 	        callback(null, data);
 	      }
@@ -11835,7 +11790,17 @@ function requireFirmata$1 () {
 	  }
 
 	  // see http://firmata.org/wiki/Proposals#OneWire_Proposal
-	  [SYM_sendOneWireRequest](pin, subcommand, device, numBytesToRead, correlationId, delay, dataToWrite, event, callback) {
+	  [SYM_sendOneWireRequest](
+	    pin,
+	    subcommand,
+	    device,
+	    numBytesToRead,
+	    correlationId,
+	    delay,
+	    dataToWrite,
+	    event,
+	    callback
+	  ) {
 	    const bytes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 	    if (device || numBytesToRead || correlationId || delay || dataToWrite) {
@@ -11847,20 +11812,20 @@ function requireFirmata$1 () {
 	    }
 
 	    if (numBytesToRead) {
-	      bytes[8] = numBytesToRead & 0xFF;
-	      bytes[9] = (numBytesToRead >> 8) & 0xFF;
+	      bytes[8] = numBytesToRead & 0xff;
+	      bytes[9] = (numBytesToRead >> 8) & 0xff;
 	    }
 
 	    if (correlationId) {
-	      bytes[10] = correlationId & 0xFF;
-	      bytes[11] = (correlationId >> 8) & 0xFF;
+	      bytes[10] = correlationId & 0xff;
+	      bytes[11] = (correlationId >> 8) & 0xff;
 	    }
 
 	    if (delay) {
-	      bytes[12] = delay & 0xFF;
-	      bytes[13] = (delay >> 8) & 0xFF;
-	      bytes[14] = (delay >> 16) & 0xFF;
-	      bytes[15] = (delay >> 24) & 0xFF;
+	      bytes[12] = delay & 0xff;
+	      bytes[13] = (delay >> 8) & 0xff;
+	      bytes[14] = (delay >> 16) & 0xff;
+	      bytes[15] = (delay >> 24) & 0xff;
 	    }
 
 	    if (dataToWrite) {
@@ -11889,13 +11854,13 @@ function requireFirmata$1 () {
 	   */
 
 	  setSamplingInterval(interval) {
-	    const safeint = interval < 10 ? 10 : (interval > 65535 ? 65535 : interval);
+	    const safeint = interval < 10 ? 10 : interval > 65535 ? 65535 : interval;
 	    this.settings.samplingInterval = safeint;
 	    writeToTransport(this, [
 	      START_SYSEX,
 	      SAMPLING_INTERVAL,
-	      (safeint & 0x7F),
-	      ((safeint >> 7) & 0x7F),
+	      safeint & 0x7f,
+	      (safeint >> 7) & 0x7f,
 	      END_SYSEX,
 	    ]);
 	  }
@@ -11920,10 +11885,7 @@ function requireFirmata$1 () {
 	    /* istanbul ignore else */
 	    if (value === 0 || value === 1) {
 	      this.pins[this.analogPins[pin]].report = value;
-	      writeToTransport(this, [
-	        REPORT_ANALOG | pin,
-	        value
-	      ]);
+	      writeToTransport(this, [REPORT_ANALOG | pin, value]);
 	    }
 	  }
 
@@ -11938,10 +11900,7 @@ function requireFirmata$1 () {
 	    /* istanbul ignore else */
 	    if (value === 0 || value === 1) {
 	      this.pins[pin].report = value;
-	      writeToTransport(this, [
-	        REPORT_DIGITAL | port,
-	        value
-	      ]);
+	      writeToTransport(this, [REPORT_DIGITAL | port, value]);
 	    }
 	  }
 
@@ -11951,17 +11910,11 @@ function requireFirmata$1 () {
 	   */
 
 	  pingRead(options, callback) {
-
 	    if (!this.pins[options.pin].supportedModes.includes(PING_READ)) {
 	      throw new Error("Please upload PingFirmata to the board");
 	    }
 
-	    const {
-	      pin,
-	      value,
-	      pulseOut = 0,
-	      timeout = 1000000
-	    } = options;
+	    const { pin, value, pulseOut = 0, timeout = 1000000 } = options;
 
 	    writeToTransport(this, [
 	      START_SYSEX,
@@ -11969,16 +11922,16 @@ function requireFirmata$1 () {
 	      pin,
 	      value,
 	      ...Firmata.encode([
-	        (pulseOut >> 24) & 0xFF,
-	        (pulseOut >> 16) & 0xFF,
-	        (pulseOut >> 8) & 0xFF,
-	        (pulseOut & 0xFF),
+	        (pulseOut >> 24) & 0xff,
+	        (pulseOut >> 16) & 0xff,
+	        (pulseOut >> 8) & 0xff,
+	        pulseOut & 0xff,
 	      ]),
 	      ...Firmata.encode([
-	        (timeout >> 24) & 0xFF,
-	        (timeout >> 16) & 0xFF,
-	        (timeout >> 8) & 0xFF,
-	        (timeout & 0xFF),
+	        (timeout >> 24) & 0xff,
+	        (timeout >> 16) & 0xff,
+	        (timeout >> 8) & 0xff,
+	        timeout & 0xff,
 	      ]),
 	      END_SYSEX,
 	    ]);
@@ -12008,7 +11961,6 @@ function requireFirmata$1 () {
 	   */
 
 	  accelStepperConfig(options) {
-
 	    let {
 	      deviceNum,
 	      invertPins,
@@ -12025,7 +11977,7 @@ function requireFirmata$1 () {
 	      START_SYSEX,
 	      ACCELSTEPPER,
 	      0x00, // STEPPER_CONFIG from firmware
-	      deviceNum
+	      deviceNum,
 	    ];
 
 	    let iface = ((type & 0x07) << 4) | ((stepSize & 0x07) << 1);
@@ -12044,8 +11996,8 @@ function requireFirmata$1 () {
 	      "motorPin2",
 	      "motorPin3",
 	      "motorPin4",
-	      "enablePin"
-	    ].forEach(pin => {
+	      "enablePin",
+	    ].forEach((pin) => {
 	      if (typeof options[pin] !== "undefined") {
 	        data.push(options[pin]);
 	      }
@@ -12069,10 +12021,7 @@ function requireFirmata$1 () {
 	      }
 	    }
 
-	    data.push(
-	      pinsToInvert,
-	      END_SYSEX
-	    );
+	    data.push(pinsToInvert, END_SYSEX);
 
 	    writeToTransport(this, data);
 	  }
@@ -12101,7 +12050,6 @@ function requireFirmata$1 () {
 	   * @param {number} steps Number of steps to make
 	   */
 	  accelStepperStep(deviceNum, steps, callback) {
-
 	    writeToTransport(this, [
 	      START_SYSEX,
 	      ACCELSTEPPER,
@@ -12122,7 +12070,6 @@ function requireFirmata$1 () {
 	   * @param {number} position Desired position
 	   */
 	  accelStepperTo(deviceNum, position, callback) {
-
 	    writeToTransport(this, [
 	      START_SYSEX,
 	      ACCELSTEPPER,
@@ -12250,7 +12197,9 @@ function requireFirmata$1 () {
 
 	  multiStepperTo(groupNum, positions, callback) {
 	    if (groupNum < 0 || groupNum > 5) {
-	      throw new RangeError(`Invalid "groupNum": ${groupNum}. Expected "groupNum" between 0-5`);
+	      throw new RangeError(
+	        `Invalid "groupNum": ${groupNum}. Expected "groupNum" between 0-5`
+	      );
 	    }
 
 	    writeToTransport(this, [
@@ -12258,7 +12207,10 @@ function requireFirmata$1 () {
 	      ACCELSTEPPER,
 	      0x21, // MULTISTEPPER_TO from firmware
 	      groupNum,
-	      ...positions.reduce((a, b) => a.concat(...encode32BitSignedInteger(b)), []),
+	      ...positions.reduce(
+	        (a, b) => a.concat(...encode32BitSignedInteger(b)),
+	        []
+	      ),
 	      END_SYSEX,
 	    ]);
 
@@ -12276,7 +12228,9 @@ function requireFirmata$1 () {
 	  multiStepperStop(groupNum) {
 	    /* istanbul ignore else */
 	    if (groupNum < 0 || groupNum > 5) {
-	      throw new RangeError(`Invalid "groupNum": ${groupNum}. Expected "groupNum" between 0-5`);
+	      throw new RangeError(
+	        `Invalid "groupNum": ${groupNum}. Expected "groupNum" between 0-5`
+	      );
 	    }
 	    writeToTransport(this, [
 	      START_SYSEX,
@@ -12303,19 +12257,27 @@ function requireFirmata$1 () {
 	   * @param {number} [motorPin4] Only required if type == this.STEPPER.TYPE.FOUR_WIRE
 	   */
 
-	  stepperConfig(deviceNum, type, stepsPerRev, dirOrMotor1Pin, dirOrMotor2Pin, motorPin3, motorPin4) {
+	  stepperConfig(
+	    deviceNum,
+	    type,
+	    stepsPerRev,
+	    dirOrMotor1Pin,
+	    dirOrMotor2Pin,
+	    motorPin3,
+	    motorPin4
+	  ) {
 	    writeToTransport(this, [
 	      START_SYSEX,
 	      STEPPER,
 	      0x00, // STEPPER_CONFIG from firmware
 	      deviceNum,
 	      type,
-	      stepsPerRev & 0x7F,
-	      (stepsPerRev >> 7) & 0x7F,
+	      stepsPerRev & 0x7f,
+	      (stepsPerRev >> 7) & 0x7f,
 	      dirOrMotor1Pin,
 	      dirOrMotor2Pin,
 	      ...(type === this.STEPPER.TYPE.FOUR_WIRE ? [motorPin3, motorPin4] : []),
-	      END_SYSEX
+	      END_SYSEX,
 	    ]);
 	  }
 
@@ -12347,11 +12309,15 @@ function requireFirmata$1 () {
 	      0x01, // STEPPER_STEP from firmware
 	      deviceNum,
 	      direction, // one of this.STEPPER.DIRECTION.*
-	      steps & 0x7F, (steps >> 7) & 0x7F, (steps >> 14) & 0x7F,
-	      speed & 0x7F, (speed >> 7) & 0x7F,
+	      steps & 0x7f,
+	      (steps >> 7) & 0x7f,
+	      (steps >> 14) & 0x7f,
+	      speed & 0x7f,
+	      (speed >> 7) & 0x7f,
 
-	      ...(accel > 0 || decel > 0 ?
-	          [accel & 0x7F, (accel >> 7) & 0x7F, decel & 0x7F, (decel >> 7) & 0x7F] : []),
+	      ...(accel > 0 || decel > 0
+	        ? [accel & 0x7f, (accel >> 7) & 0x7f, decel & 0x7f, (decel >> 7) & 0x7f]
+	        : []),
 
 	      END_SYSEX,
 	    ]);
@@ -12373,7 +12339,6 @@ function requireFirmata$1 () {
 	   */
 
 	  serialConfig(options) {
-
 	    let portId;
 	    let baud;
 	    let rxPin;
@@ -12389,7 +12354,9 @@ function requireFirmata$1 () {
 
 	    /* istanbul ignore else */
 	    if (typeof portId === "undefined") {
-	      throw new Error("portId must be specified, see SERIAL_PORT_IDs for options.");
+	      throw new Error(
+	        "portId must be specified, see SERIAL_PORT_IDs for options."
+	      );
 	    }
 
 	    baud = baud || 57600;
@@ -12398,17 +12365,20 @@ function requireFirmata$1 () {
 	      START_SYSEX,
 	      SERIAL_MESSAGE,
 	      SERIAL_CONFIG | portId,
-	      baud & 0x7F,
-	      (baud >> 7) & 0x7F,
-	      (baud >> 14) & 0x7F
+	      baud & 0x7f,
+	      (baud >> 7) & 0x7f,
+	      (baud >> 14) & 0x7f,
 	    ];
-	    if (portId > 7 && typeof rxPin !== "undefined" && typeof txPin !== "undefined") {
-	      data.push(
-	        rxPin,
-	        txPin
-	      );
+	    if (
+	      portId > 7 &&
+	      typeof rxPin !== "undefined" &&
+	      typeof txPin !== "undefined"
+	    ) {
+	      data.push(rxPin, txPin);
 	    } else if (portId > 7) {
-	      throw new Error("Both RX and TX pins must be defined when using Software Serial.");
+	      throw new Error(
+	        "Both RX and TX pins must be defined when using Software Serial."
+	      );
 	    }
 
 	    data.push(END_SYSEX);
@@ -12422,16 +12392,9 @@ function requireFirmata$1 () {
 	   */
 
 	  serialWrite(portId, bytes) {
-	    const data = [
-	      START_SYSEX,
-	      SERIAL_MESSAGE,
-	      SERIAL_WRITE | portId,
-	    ];
+	    const data = [START_SYSEX, SERIAL_MESSAGE, SERIAL_WRITE | portId];
 	    for (let i = 0, len = bytes.length; i < len; i++) {
-	      data.push(
-	        bytes[i] & 0x7F,
-	        (bytes[i] >> 7) & 0x7F
-	      );
+	      data.push(bytes[i] & 0x7f, (bytes[i] >> 7) & 0x7f);
 	    }
 	    data.push(END_SYSEX);
 	    /* istanbul ignore else */
@@ -12455,16 +12418,13 @@ function requireFirmata$1 () {
 	      START_SYSEX,
 	      SERIAL_MESSAGE,
 	      SERIAL_READ | portId,
-	      this.SERIAL_MODES.CONTINUOUS_READ
+	      this.SERIAL_MODES.CONTINUOUS_READ,
 	    ];
 
 	    if (arguments.length === 2 && typeof maxBytesToRead === "function") {
 	      callback = maxBytesToRead;
 	    } else {
-	      data.push(
-	        maxBytesToRead & 0x7F,
-	        (maxBytesToRead >> 7) & 0x7F
-	      );
+	      data.push(maxBytesToRead & 0x7f, (maxBytesToRead >> 7) & 0x7f);
 	    }
 
 	    data.push(END_SYSEX);
@@ -12561,7 +12521,8 @@ function requireFirmata$1 () {
 	      throw new Error(`${commandByte} is not an available SYSEX_RESPONSE byte`);
 	    }
 
-	    Firmata.SYSEX_RESPONSE[commandByte] = board => handler.call(board, board.buffer.slice(2, -1));
+	    Firmata.SYSEX_RESPONSE[commandByte] = (board) =>
+	      handler.call(board, board.buffer.slice(2, -1));
 
 	    return this;
 	  }
@@ -12592,16 +12553,11 @@ function requireFirmata$1 () {
 	   */
 
 	  sysexCommand(message) {
-
 	    if (!message || !message.length) {
 	      throw new Error("Sysex Command cannot be empty");
 	    }
 
-	    writeToTransport(this, [
-	      START_SYSEX,
-	      ...message.slice(),
-	      END_SYSEX
-	    ]);
+	    writeToTransport(this, [START_SYSEX, ...message.slice(), END_SYSEX]);
 	    return this;
 	  }
 
@@ -12639,18 +12595,22 @@ function requireFirmata$1 () {
 	      process.nextTick(() => {
 	        callback(new Error("No Transport provided"), null);
 	      });
-	      return
+	      return;
 	    }
-	    Transport.list().then((ports) => {
-	      const port = ports.find(port => Firmata.isAcceptablePort(port) && port);
-	      if (port) {
-	        callback(null, port);
-	      } else {
-	        callback(new Error("No Acceptable Port Found"), null);
-	      }
-	    }).catch(error => {
-	      callback(error, null);
-	    });
+	    Transport.list()
+	      .then((ports) => {
+	        const port = ports.find(
+	          (port) => Firmata.isAcceptablePort(port) && port
+	        );
+	        if (port) {
+	          callback(null, port);
+	        } else {
+	          callback(new Error("No Acceptable Port Found"), null);
+	        }
+	      })
+	      .catch((error) => {
+	        callback(error, null);
+	      });
 	  }
 
 	  // Expose encode/decode for custom sysex messages
@@ -12659,10 +12619,7 @@ function requireFirmata$1 () {
 	    const length = data.length;
 
 	    for (let i = 0; i < length; i++) {
-	      encoded.push(
-	        data[i] & 0x7F,
-	        (data[i] >> 7) & 0x7F
-	      );
+	      encoded.push(data[i] & 0x7f, (data[i] >> 7) & 0x7f);
 	    }
 
 	    return encoded;
@@ -12672,7 +12629,9 @@ function requireFirmata$1 () {
 	    const decoded = [];
 
 	    if (data.length % 2 !== 0) {
-	      throw new Error("Firmata.decode(data) called with odd number of data bytes");
+	      throw new Error(
+	        "Firmata.decode(data) called with odd number of data bytes"
+	      );
 	    }
 
 	    while (data.length) {
@@ -12715,7 +12674,9 @@ function requireFirmata$1 () {
 	  const active = i2cActive.get(board);
 
 	  if (!active) {
-	    throw new Error("I2C is not enabled for this board. To enable, call the i2cConfig() method.");
+	    throw new Error(
+	      "I2C is not enabled for this board. To enable, call the i2cConfig() method."
+	    );
 	  }
 
 	  // Do not tamper with I2C_CONFIG messages
@@ -12741,18 +12702,17 @@ function requireFirmata$1 () {
 	  writeToTransport(board, bytes);
 	}
 
-
 	function encode32BitSignedInteger(data) {
 	  const negative = data < 0;
 
 	  data = Math.abs(data);
 
 	  const encoded = [
-	    data & 0x7F,
-	    (data >> 7) & 0x7F,
-	    (data >> 14) & 0x7F,
-	    (data >> 21) & 0x7F,
-	    (data >> 28) & 0x07
+	    data & 0x7f,
+	    (data >> 7) & 0x7f,
+	    (data >> 14) & 0x7f,
+	    (data >> 21) & 0x7f,
+	    (data >> 28) & 0x07,
 	  ];
 
 	  if (negative) {
@@ -12763,10 +12723,11 @@ function requireFirmata$1 () {
 	}
 
 	function decode32BitSignedInteger(bytes) {
-	  let result = (bytes[0] & 0x7F) |
-	    ((bytes[1] & 0x7F) << 7) |
-	    ((bytes[2] & 0x7F) << 14) |
-	    ((bytes[3] & 0x7F) << 21) |
+	  let result =
+	    (bytes[0] & 0x7f) |
+	    ((bytes[1] & 0x7f) << 7) |
+	    ((bytes[2] & 0x7f) << 14) |
+	    ((bytes[3] & 0x7f) << 21) |
 	    ((bytes[4] & 0x07) << 28);
 
 	  if (bytes[4] >> 3) {
@@ -12804,30 +12765,27 @@ function requireFirmata$1 () {
 	  exponent += 11;
 
 	  const encoded = [
-	    input & 0x7F,
-	    (input >> 7) & 0x7F,
-	    (input >> 14) & 0x7F,
-	    (input >> 21) & 0x03 | (exponent & 0x0F) << 2 | (sign & 0x01) << 6
+	    input & 0x7f,
+	    (input >> 7) & 0x7f,
+	    (input >> 14) & 0x7f,
+	    ((input >> 21) & 0x03) | ((exponent & 0x0f) << 2) | ((sign & 0x01) << 6),
 	  ];
 
 	  return encoded;
 	}
 
 	function decodeCustomFloat(input) {
-	  const exponent = ((input[3] >> 2) & 0x0F) - 11;
+	  const exponent = ((input[3] >> 2) & 0x0f) - 11;
 	  const sign = (input[3] >> 6) & 0x01;
 
-	  let result = input[0] |
-	    (input[1] << 7) |
-	    (input[2] << 14) |
-	    (input[3] & 0x03) << 21;
+	  let result =
+	    input[0] | (input[1] << 7) | (input[2] << 14) | ((input[3] & 0x03) << 21);
 
 	  if (sign) {
 	    result *= -1;
 	  }
 	  return result * Math.pow(10, exponent);
 	}
-
 
 	/* istanbul ignore else */
 	if (process.env.IS_TEST_MODE) {
@@ -12855,2527 +12813,19 @@ function requireFirmata$1 () {
 	    symbols: {
 	      SYM_sendOneWireRequest,
 	      SYM_sendOneWireSearch,
-	    }
+	    },
 	  };
 	}
 
-	const bindTransport = function(transport) {
+	const bindTransport = function (transport) {
 	  Transport = transport;
 	  return Firmata;
 	};
 
 	bindTransport.Firmata = Firmata;
 
-	firmata$1 = bindTransport;
-	return firmata$1;
-}
-
-var lib$b;
-var hasRequiredLib$b;
-
-function requireLib$b () {
-	if (hasRequiredLib$b) return lib$b;
-	hasRequiredLib$b = 1;
-	const stream = require$$0;
-	const util = require$$1$1;
-	const debug = requireSrc()('serialport/stream');
-
-	//  VALIDATION
-	const DATABITS = Object.freeze([5, 6, 7, 8]);
-	const STOPBITS = Object.freeze([1, 1.5, 2]);
-	const PARITY = Object.freeze(['none', 'even', 'mark', 'odd', 'space']);
-	const FLOWCONTROLS = Object.freeze(['xon', 'xoff', 'xany', 'rtscts']);
-
-	const defaultSettings = Object.freeze({
-	  autoOpen: true,
-	  endOnClose: false,
-	  baudRate: 9600,
-	  dataBits: 8,
-	  hupcl: true,
-	  lock: true,
-	  parity: 'none',
-	  rtscts: false,
-	  stopBits: 1,
-	  xany: false,
-	  xoff: false,
-	  xon: false,
-	  highWaterMark: 64 * 1024,
-	});
-
-	const defaultSetFlags = Object.freeze({
-	  brk: false,
-	  cts: false,
-	  dtr: true,
-	  dts: false,
-	  rts: true,
-	});
-
-	function allocNewReadPool(poolSize) {
-	  const pool = Buffer.allocUnsafe(poolSize);
-	  pool.used = 0;
-	  return pool
-	}
-
-	/**
-	 * A callback called with an error or null.
-	 * @typedef {function} errorCallback
-	 * @param {?error} error
-	 */
-
-	/**
-	 * A callback called with an error or an object with the modem line values (cts, dsr, dcd).
-	 * @typedef {function} modemBitsCallback
-	 * @param {?error} error
-	 * @param {?object} status
-	 * @param {boolean} [status.cts=false]
-	 * @param {boolean} [status.dsr=false]
-	 * @param {boolean} [status.dcd=false]
-	 */
-
-	/**
-	 * @typedef {Object} openOptions
-	 * @property {boolean} [autoOpen=true] Automatically opens the port on `nextTick`.
-	 * @property {number=} [baudRate=9600] The baud rate of the port to be opened. This should match one of the commonly available baud rates, such as 110, 300, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, or 115200. Custom rates are supported best effort per platform. The device connected to the serial port is not guaranteed to support the requested baud rate, even if the port itself supports that baud rate.
-	 * @property {number} [dataBits=8] Must be one of these: 8, 7, 6, or 5.
-	 * @property {number} [highWaterMark=65536] The size of the read and write buffers defaults to 64k.
-	 * @property {boolean} [lock=true] Prevent other processes from opening the port. Windows does not currently support `false`.
-	 * @property {number} [stopBits=1] Must be one of these: 1 or 2.
-	 * @property {string} [parity=none] Must be one of these: 'none', 'even', 'mark', 'odd', 'space'.
-	 * @property {boolean} [rtscts=false] flow control setting
-	 * @property {boolean} [xon=false] flow control setting
-	 * @property {boolean} [xoff=false] flow control setting
-	 * @property {boolean} [xany=false] flow control setting
-	 * @property {object=} bindingOptions sets binding-specific options
-	 * @property {Binding=} Binding The hardware access binding. `Bindings` are how Node-Serialport talks to the underlying system. By default we auto detect Windows (`WindowsBinding`), Linux (`LinuxBinding`) and OS X (`DarwinBinding`) and load the appropriate module for your system.
-	 * @property {number} [bindingOptions.vmin=1] see [`man termios`](http://linux.die.net/man/3/termios) LinuxBinding and DarwinBinding
-	 * @property {number} [bindingOptions.vtime=0] see [`man termios`](http://linux.die.net/man/3/termios) LinuxBinding and DarwinBinding
-	 */
-
-	/**
-	 * Create a new serial port object for the `path`. In the case of invalid arguments or invalid options, when constructing a new SerialPort it will throw an error. The port will open automatically by default, which is the equivalent of calling `port.open(openCallback)` in the next tick. You can disable this by setting the option `autoOpen` to `false`.
-	 * @class SerialPort
-	 * @param {string} path - The system path of the serial port you want to open. For example, `/dev/tty.XXX` on Mac/Linux, or `COM1` on Windows.
-	 * @param {openOptions=} options - Port configuration options
-	 * @param {errorCallback=} openCallback - Called after a connection is opened. If this is not provided and an error occurs, it will be emitted on the port's `error` event. The callback will NOT be called if `autoOpen` is set to `false` in the `openOptions` as the open will not be performed.
-	 * @property {number} baudRate The port's baudRate. Use `.update` to change it. Read-only.
-	 * @property {object} binding The binding object backing the port. Read-only.
-	 * @property {boolean} isOpen `true` if the port is open, `false` otherwise. Read-only. (`since 5.0.0`)
-	 * @property {string} path The system path or name of the serial port. Read-only.
-	 * @throws {TypeError} When given invalid arguments, a `TypeError` will be thrown.
-	 * @emits open
-	 * @emits data
-	 * @emits close
-	 * @emits error
-	 * @alias module:serialport
-	 */
-	function SerialPort(path, options, openCallback) {
-	  if (!(this instanceof SerialPort)) {
-	    return new SerialPort(path, options, openCallback)
-	  }
-
-	  if (options instanceof Function) {
-	    openCallback = options;
-	    options = {};
-	  }
-
-	  const settings = { ...defaultSettings, ...options };
-
-	  stream.Duplex.call(this, {
-	    highWaterMark: settings.highWaterMark,
-	  });
-
-	  const Binding = settings.binding || SerialPort.Binding;
-
-	  if (!Binding) {
-	    throw new TypeError('"Bindings" is invalid pass it as `options.binding` or set it on `SerialPort.Binding`')
-	  }
-
-	  if (!path) {
-	    throw new TypeError(`"path" is not defined: ${path}`)
-	  }
-
-	  if (settings.baudrate) {
-	    throw new TypeError(`"baudrate" is an unknown option, did you mean "baudRate"?`)
-	  }
-
-	  if (typeof settings.baudRate !== 'number') {
-	    throw new TypeError(`"baudRate" must be a number: ${settings.baudRate}`)
-	  }
-
-	  if (DATABITS.indexOf(settings.dataBits) === -1) {
-	    throw new TypeError(`"databits" is invalid: ${settings.dataBits}`)
-	  }
-
-	  if (STOPBITS.indexOf(settings.stopBits) === -1) {
-	    throw new TypeError(`"stopbits" is invalid: ${settings.stopbits}`)
-	  }
-
-	  if (PARITY.indexOf(settings.parity) === -1) {
-	    throw new TypeError(`"parity" is invalid: ${settings.parity}`)
-	  }
-
-	  FLOWCONTROLS.forEach(control => {
-	    if (typeof settings[control] !== 'boolean') {
-	      throw new TypeError(`"${control}" is not boolean: ${settings[control]}`)
-	    }
-	  });
-
-	  const binding = new Binding({
-	    bindingOptions: settings.bindingOptions,
-	  });
-
-	  Object.defineProperties(this, {
-	    binding: {
-	      enumerable: true,
-	      value: binding,
-	    },
-	    path: {
-	      enumerable: true,
-	      value: path,
-	    },
-	    settings: {
-	      enumerable: true,
-	      value: settings,
-	    },
-	  });
-
-	  this.opening = false;
-	  this.closing = false;
-	  this._pool = allocNewReadPool(this.settings.highWaterMark);
-	  this._kMinPoolSpace = 128;
-
-	  if (this.settings.autoOpen) {
-	    this.open(openCallback);
-	  }
-	}
-
-	util.inherits(SerialPort, stream.Duplex);
-
-	Object.defineProperties(SerialPort.prototype, {
-	  isOpen: {
-	    enumerable: true,
-	    get() {
-	      return this.binding.isOpen && !this.closing
-	    },
-	  },
-	  baudRate: {
-	    enumerable: true,
-	    get() {
-	      return this.settings.baudRate
-	    },
-	  },
-	});
-
-	/**
-	 * The `error` event's callback is called with an error object whenever there is an error.
-	 * @event error
-	 */
-
-	SerialPort.prototype._error = function(error, callback) {
-	  if (callback) {
-	    callback.call(this, error);
-	  } else {
-	    this.emit('error', error);
-	  }
-	};
-
-	SerialPort.prototype._asyncError = function(error, callback) {
-	  process.nextTick(() => this._error(error, callback));
-	};
-
-	/**
-	 * The `open` event's callback is called with no arguments when the port is opened and ready for writing. This happens if you have the constructor open immediately (which opens in the next tick) or if you open the port manually with `open()`. See [Useage/Opening a Port](#opening-a-port) for more information.
-	 * @event open
-	 */
-
-	/**
-	 * Opens a connection to the given serial port.
-	 * @param {errorCallback=} openCallback - Called after a connection is opened. If this is not provided and an error occurs, it will be emitted on the port's `error` event.
-	 * @emits open
-	 * @returns {undefined}
-	 */
-	SerialPort.prototype.open = function(openCallback) {
-	  if (this.isOpen) {
-	    return this._asyncError(new Error('Port is already open'), openCallback)
-	  }
-
-	  if (this.opening) {
-	    return this._asyncError(new Error('Port is opening'), openCallback)
-	  }
-
-	  this.opening = true;
-	  debug('opening', `path: ${this.path}`);
-	  this.binding.open(this.path, this.settings).then(
-	    () => {
-	      debug('opened', `path: ${this.path}`);
-	      this.opening = false;
-	      this.emit('open');
-	      if (openCallback) {
-	        openCallback.call(this, null);
-	      }
-	    },
-	    err => {
-	      this.opening = false;
-	      debug('Binding #open had an error', err);
-	      this._error(err, openCallback);
-	    }
-	  );
-	};
-
-	/**
-	 * Changes the baud rate for an open port. Throws if you provide a bad argument. Emits an error or calls the callback if the baud rate isn't supported.
-	 * @param {object=} options Only supports `baudRate`.
-	 * @param {number=} [options.baudRate] The baud rate of the port to be opened. This should match one of the commonly available baud rates, such as 110, 300, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, or 115200. Custom rates are supported best effort per platform. The device connected to the serial port is not guaranteed to support the requested baud rate, even if the port itself supports that baud rate.
-	 * @param {errorCallback=} [callback] Called once the port's baud rate changes. If `.update` is called without a callback, and there is an error, an error event is emitted.
-	 * @returns {undefined}
-	 */
-	SerialPort.prototype.update = function(options, callback) {
-	  if (typeof options !== 'object') {
-	    throw TypeError('"options" is not an object')
-	  }
-
-	  if (!this.isOpen) {
-	    debug('update attempted, but port is not open');
-	    return this._asyncError(new Error('Port is not open'), callback)
-	  }
-
-	  const settings = { ...defaultSettings, ...options };
-	  this.settings.baudRate = settings.baudRate;
-
-	  debug('update', `baudRate: ${settings.baudRate}`);
-	  this.binding.update(this.settings).then(
-	    () => {
-	      debug('binding.update', 'finished');
-	      if (callback) {
-	        callback.call(this, null);
-	      }
-	    },
-	    err => {
-	      debug('binding.update', 'error', err);
-	      return this._error(err, callback)
-	    }
-	  );
-	};
-
-	/**
-	 * Writes data to the given serial port. Buffers written data if the port is not open.
-
-	The write operation is non-blocking. When it returns, data might still not have been written to the serial port. See `drain()`.
-
-	Some devices, like the Arduino, reset when you open a connection to them. In such cases, immediately writing to the device will cause lost data as they wont be ready to receive the data. This is often worked around by having the Arduino send a "ready" byte that your Node program waits for before writing. You can also often get away with waiting around 400ms.
-
-	If a port is disconnected during a write, the write will error in addition to the `close` event.
-
-	From the [stream docs](https://nodejs.org/api/stream.html#stream_writable_write_chunk_encoding_callback) write errors don't always provide the error in the callback, sometimes they use the error event.
-	> If an error occurs, the callback may or may not be called with the error as its first argument. To reliably detect write errors, add a listener for the 'error' event.
-
-	In addition to the usual `stream.write` arguments (`String` and `Buffer`), `write()` can accept arrays of bytes (positive numbers under 256) which is passed to `Buffer.from([])` for conversion. This extra functionality is pretty sweet.
-	 * @method SerialPort.prototype.write
-	 * @param  {(string|array|buffer)} data Accepts a [`Buffer` ](http://nodejs.org/api/buffer.html) object, or a type that is accepted by the `Buffer` constructor (e.g. an array of bytes or a string).
-	 * @param  {string=} encoding The encoding, if chunk is a string. Defaults to `'utf8'`. Also accepts `'ascii'`, `'base64'`, `'binary'`, and `'hex'` See [Buffers and Character Encodings](https://nodejs.org/api/buffer.html#buffer_buffers_and_character_encodings) for all available options.
-	 * @param  {function=} callback Called once the write operation finishes. Data may not yet be flushed to the underlying port. No arguments.
-	 * @returns {boolean} `false` if the stream wishes for the calling code to wait for the `'drain'` event to be emitted before continuing to write additional data; otherwise `true`.
-	 * @since 5.0.0
-	 */
-	const superWrite = SerialPort.prototype.write;
-	SerialPort.prototype.write = function(data, encoding, callback) {
-	  if (Array.isArray(data)) {
-	    data = Buffer.from(data);
-	  }
-	  return superWrite.call(this, data, encoding, callback)
-	};
-
-	SerialPort.prototype._write = function(data, encoding, callback) {
-	  if (!this.isOpen) {
-	    return this.once('open', function afterOpenWrite() {
-	      this._write(data, encoding, callback);
-	    })
-	  }
-	  debug('_write', `${data.length} bytes of data`);
-	  this.binding.write(data).then(
-	    () => {
-	      debug('binding.write', 'write finished');
-	      callback(null);
-	    },
-	    err => {
-	      debug('binding.write', 'error', err);
-	      if (!err.canceled) {
-	        this._disconnected(err);
-	      }
-	      callback(err);
-	    }
-	  );
-	};
-
-	SerialPort.prototype._writev = function(data, callback) {
-	  debug('_writev', `${data.length} chunks of data`);
-	  const dataV = data.map(write => write.chunk);
-	  this._write(Buffer.concat(dataV), null, callback);
-	};
-
-	/**
-	 * Request a number of bytes from the SerialPort. The `read()` method pulls some data out of the internal buffer and returns it. If no data is available to be read, null is returned. By default, the data is returned as a `Buffer` object unless an encoding has been specified using the `.setEncoding()` method.
-	 * @method SerialPort.prototype.read
-	 * @param {number=} size Specify how many bytes of data to return, if available
-	 * @returns {(string|Buffer|null)} The data from internal buffers
-	 * @since 5.0.0
-	 */
-
-	/**
-	 * Listening for the `data` event puts the port in flowing mode. Data is emitted as soon as it's received. Data is a `Buffer` object with a varying amount of data in it. The `readLine` parser converts the data into string lines. See the [parsers](https://serialport.io/docs/api-parsers-overview) section for more information on parsers, and the [Node.js stream documentation](https://nodejs.org/api/stream.html#stream_event_data) for more information on the data event.
-	 * @event data
-	 */
-
-	SerialPort.prototype._read = function(bytesToRead) {
-	  if (!this.isOpen) {
-	    debug('_read', 'queueing _read for after open');
-	    this.once('open', () => {
-	      this._read(bytesToRead);
-	    });
-	    return
-	  }
-
-	  if (!this._pool || this._pool.length - this._pool.used < this._kMinPoolSpace) {
-	    debug('_read', 'discarding the read buffer pool because it is below kMinPoolSpace');
-	    this._pool = allocNewReadPool(this.settings.highWaterMark);
-	  }
-
-	  // Grab another reference to the pool in the case that while we're
-	  // in the thread pool another read() finishes up the pool, and
-	  // allocates a new one.
-	  const pool = this._pool;
-	  // Read the smaller of rest of the pool or however many bytes we want
-	  const toRead = Math.min(pool.length - pool.used, bytesToRead);
-	  const start = pool.used;
-
-	  // the actual read.
-	  debug('_read', `reading`, { start, toRead });
-	  this.binding.read(pool, start, toRead).then(
-	    ({ bytesRead }) => {
-	      debug('binding.read', `finished`, { bytesRead });
-	      // zero bytes means read means we've hit EOF? Maybe this should be an error
-	      if (bytesRead === 0) {
-	        debug('binding.read', 'Zero bytes read closing readable stream');
-	        this.push(null);
-	        return
-	      }
-	      pool.used += bytesRead;
-	      this.push(pool.slice(start, start + bytesRead));
-	    },
-	    err => {
-	      debug('binding.read', `error`, err);
-	      if (!err.canceled) {
-	        this._disconnected(err);
-	      }
-	      this._read(bytesToRead); // prime to read more once we're reconnected
-	    }
-	  );
-	};
-
-	SerialPort.prototype._disconnected = function(err) {
-	  if (!this.isOpen) {
-	    debug('disconnected aborted because already closed', err);
-	    return
-	  }
-	  debug('disconnected', err);
-	  err.disconnected = true;
-	  this.close(null, err);
-	};
-
-	/**
-	 * The `close` event's callback is called with no arguments when the port is closed. In the case of a disconnect it will be called with a Disconnect Error object (`err.disconnected == true`). In the event of a close error (unlikely), an error event is triggered.
-	 * @event close
-	 */
-
-	/**
-	 * Closes an open connection.
-	 *
-	 * If there are in progress writes when the port is closed the writes will error.
-	 * @param {errorCallback} callback Called once a connection is closed.
-	 * @param {Error} disconnectError used internally to propagate a disconnect error
-	 * @emits close
-	 * @returns {undefined}
-	 */
-	SerialPort.prototype.close = function(callback, disconnectError) {
-	  disconnectError = disconnectError || null;
-
-	  if (!this.isOpen) {
-	    debug('close attempted, but port is not open');
-	    return this._asyncError(new Error('Port is not open'), callback)
-	  }
-
-	  this.closing = true;
-	  debug('#close');
-	  this.binding.close().then(
-	    () => {
-	      this.closing = false;
-	      debug('binding.close', 'finished');
-	      this.emit('close', disconnectError);
-	      if (this.settings.endOnClose) {
-	        this.emit('end');
-	      }
-	      if (callback) {
-	        callback.call(this, disconnectError);
-	      }
-	    },
-	    err => {
-	      this.closing = false;
-	      debug('binding.close', 'had an error', err);
-	      return this._error(err, callback)
-	    }
-	  );
-	};
-
-	/**
-	 * Set control flags on an open port. Uses [`SetCommMask`](https://msdn.microsoft.com/en-us/library/windows/desktop/aa363257(v=vs.85).aspx) for Windows and [`ioctl`](http://linux.die.net/man/4/tty_ioctl) for OS X and Linux.
-	 * @param {object=} options All options are operating system default when the port is opened. Every flag is set on each call to the provided or default values. If options isn't provided default options is used.
-	 * @param {Boolean} [options.brk=false] sets the brk flag
-	 * @param {Boolean} [options.cts=false] sets the cts flag
-	 * @param {Boolean} [options.dsr=false] sets the dsr flag
-	 * @param {Boolean} [options.dtr=true] sets the dtr flag
-	 * @param {Boolean} [options.rts=true] sets the rts flag
-	 * @param {errorCallback=} callback Called once the port's flags have been set.
-	 * @since 5.0.0
-	 * @returns {undefined}
-	 */
-	SerialPort.prototype.set = function(options, callback) {
-	  if (typeof options !== 'object') {
-	    throw TypeError('"options" is not an object')
-	  }
-
-	  if (!this.isOpen) {
-	    debug('set attempted, but port is not open');
-	    return this._asyncError(new Error('Port is not open'), callback)
-	  }
-
-	  const settings = { ...defaultSetFlags, ...options };
-	  debug('#set', settings);
-	  this.binding.set(settings).then(
-	    () => {
-	      debug('binding.set', 'finished');
-	      if (callback) {
-	        callback.call(this, null);
-	      }
-	    },
-	    err => {
-	      debug('binding.set', 'had an error', err);
-	      return this._error(err, callback)
-	    }
-	  );
-	};
-
-	/**
-	 * Returns the control flags (CTS, DSR, DCD) on the open port.
-	 * Uses [`GetCommModemStatus`](https://msdn.microsoft.com/en-us/library/windows/desktop/aa363258(v=vs.85).aspx) for Windows and [`ioctl`](http://linux.die.net/man/4/tty_ioctl) for mac and linux.
-	 * @param {modemBitsCallback=} callback Called once the modem bits are retrieved.
-	 * @returns {undefined}
-	 */
-	SerialPort.prototype.get = function(callback) {
-	  if (!this.isOpen) {
-	    debug('get attempted, but port is not open');
-	    return this._asyncError(new Error('Port is not open'), callback)
-	  }
-
-	  debug('#get');
-	  this.binding.get().then(
-	    status => {
-	      debug('binding.get', 'finished');
-	      if (callback) {
-	        callback.call(this, null, status);
-	      }
-	    },
-	    err => {
-	      debug('binding.get', 'had an error', err);
-	      return this._error(err, callback)
-	    }
-	  );
-	};
-
-	/**
-	 * Flush discards data received but not read, and written but not transmitted by the operating system. For more technical details, see [`tcflush(fd, TCIOFLUSH)`](http://linux.die.net/man/3/tcflush) for Mac/Linux and [`FlushFileBuffers`](http://msdn.microsoft.com/en-us/library/windows/desktop/aa364439) for Windows.
-	 * @param  {errorCallback=} callback Called once the flush operation finishes.
-	 * @returns {undefined}
-	 */
-	SerialPort.prototype.flush = function(callback) {
-	  if (!this.isOpen) {
-	    debug('flush attempted, but port is not open');
-	    return this._asyncError(new Error('Port is not open'), callback)
-	  }
-
-	  debug('#flush');
-	  this.binding.flush().then(
-	    () => {
-	      debug('binding.flush', 'finished');
-	      if (callback) {
-	        callback.call(this, null);
-	      }
-	    },
-	    err => {
-	      debug('binding.flush', 'had an error', err);
-	      return this._error(err, callback)
-	    }
-	  );
-	};
-
-	/**
-	 * Waits until all output data is transmitted to the serial port. After any pending write has completed it calls [`tcdrain()`](http://linux.die.net/man/3/tcdrain) or [FlushFileBuffers()](https://msdn.microsoft.com/en-us/library/windows/desktop/aa364439(v=vs.85).aspx) to ensure it has been written to the device.
-	 * @param {errorCallback=} callback Called once the drain operation returns.
-	 * @returns {undefined}
-	 * @example
-	Write the `data` and wait until it has finished transmitting to the target serial port before calling the callback. This will queue until the port is open and writes are finished.
-
-	```js
-	function writeAndDrain (data, callback) {
-	  port.write(data);
-	  port.drain(callback);
-	}
-	```
-	 */
-	SerialPort.prototype.drain = function(callback) {
-	  debug('drain');
-	  if (!this.isOpen) {
-	    debug('drain queuing on port open');
-	    return this.once('open', () => {
-	      this.drain(callback);
-	    })
-	  }
-	  this.binding.drain().then(
-	    () => {
-	      debug('binding.drain', 'finished');
-	      if (callback) {
-	        callback.call(this, null);
-	      }
-	    },
-	    err => {
-	      debug('binding.drain', 'had an error', err);
-	      return this._error(err, callback)
-	    }
-	  );
-	};
-
-	/**
-	 * The `pause()` method causes a stream in flowing mode to stop emitting 'data' events, switching out of flowing mode. Any data that becomes available remains in the internal buffer.
-	 * @method SerialPort.prototype.pause
-	 * @see resume
-	 * @since 5.0.0
-	 * @returns `this`
-	 */
-
-	/**
-	 * The `resume()` method causes an explicitly paused, `Readable` stream to resume emitting 'data' events, switching the stream into flowing mode.
-	 * @method SerialPort.prototype.resume
-	 * @see pause
-	 * @since 5.0.0
-	 * @returns `this`
-	 */
-
-	/**
-	 * Retrieves a list of available serial ports with metadata. Only the `path` is guaranteed. If unavailable the other fields will be undefined. The `path` is either the path or an identifier (eg `COM1`) used to open the SerialPort.
-	 *
-	 * We make an effort to identify the hardware attached and have consistent results between systems. Linux and OS X are mostly consistent. Windows relies on 3rd party device drivers for the information and is unable to guarantee the information. On windows If you have a USB connected device can we provide a serial number otherwise it will be `undefined`. The `pnpId` and `locationId` are not the same or present on all systems. The examples below were run with the same Arduino Uno.
-	 * @type {function}
-	 * @returns {Promise} Resolves with the list of available serial ports.
-	 * @example
-	```js
-	// OSX example port
-	{
-	  path: '/dev/tty.usbmodem1421',
-	  manufacturer: 'Arduino (www.arduino.cc)',
-	  serialNumber: '752303138333518011C1',
-	  pnpId: undefined,
-	  locationId: '14500000',
-	  productId: '0043',
-	  vendorId: '2341'
-	}
-
-	// Linux example port
-	{
-	  path: '/dev/ttyACM0',
-	  manufacturer: 'Arduino (www.arduino.cc)',
-	  serialNumber: '752303138333518011C1',
-	  pnpId: 'usb-Arduino__www.arduino.cc__0043_752303138333518011C1-if00',
-	  locationId: undefined,
-	  productId: '0043',
-	  vendorId: '2341'
-	}
-
-	// Windows example port
-	{
-	  path: 'COM3',
-	  manufacturer: 'Arduino LLC (www.arduino.cc)',
-	  serialNumber: '752303138333518011C1',
-	  pnpId: 'USB\\VID_2341&PID_0043\\752303138333518011C1',
-	  locationId: 'Port_#0003.Hub_#0001',
-	  productId: '0043',
-	  vendorId: '2341'
-	}
-	```
-
-	```js
-	var SerialPort = require('serialport');
-
-	// promise approach
-	SerialPort.list()
-	  .then(ports) {...});
-	  .catch(err) {...});
-	```
-	 */
-	SerialPort.list = async function(callback) {
-	  debug('.list');
-	  if (!SerialPort.Binding) {
-	    throw new TypeError('No Binding set on `SerialPort.Binding`')
-	  }
-	  if (callback) {
-	    throw new TypeError('SerialPort.list no longer takes a callback and only returns a promise')
-	  }
-	  return SerialPort.Binding.list()
-	};
-
-	lib$b = SerialPort;
-	return lib$b;
-}
-
-var lib$a = {exports: {}};
-
-var bindings = {exports: {}};
-
-var fileUriToPath_1;
-var hasRequiredFileUriToPath;
-
-function requireFileUriToPath () {
-	if (hasRequiredFileUriToPath) return fileUriToPath_1;
-	hasRequiredFileUriToPath = 1;
-	/**
-	 * Module dependencies.
-	 */
-
-	var sep = require$$2.sep || '/';
-
-	/**
-	 * Module exports.
-	 */
-
-	fileUriToPath_1 = fileUriToPath;
-
-	/**
-	 * File URI to Path function.
-	 *
-	 * @param {String} uri
-	 * @return {String} path
-	 * @api public
-	 */
-
-	function fileUriToPath (uri) {
-	  if ('string' != typeof uri ||
-	      uri.length <= 7 ||
-	      'file://' != uri.substring(0, 7)) {
-	    throw new TypeError('must pass in a file:// URI to convert to a file path');
-	  }
-
-	  var rest = decodeURI(uri.substring(7));
-	  var firstSlash = rest.indexOf('/');
-	  var host = rest.substring(0, firstSlash);
-	  var path = rest.substring(firstSlash + 1);
-
-	  // 2.  Scheme Definition
-	  // As a special case, <host> can be the string "localhost" or the empty
-	  // string; this is interpreted as "the machine from which the URL is
-	  // being interpreted".
-	  if ('localhost' == host) host = '';
-
-	  if (host) {
-	    host = sep + sep + host;
-	  }
-
-	  // 3.2  Drives, drive letters, mount points, file system root
-	  // Drive letters are mapped into the top of a file URI in various ways,
-	  // depending on the implementation; some applications substitute
-	  // vertical bar ("|") for the colon after the drive letter, yielding
-	  // "file:///c|/tmp/test.txt".  In some cases, the colon is left
-	  // unchanged, as in "file:///c:/tmp/test.txt".  In other cases, the
-	  // colon is simply omitted, as in "file:///c/tmp/test.txt".
-	  path = path.replace(/^(.+)\|/, '$1:');
-
-	  // for Windows, we need to invert the path separators from what a URI uses
-	  if (sep == '\\') {
-	    path = path.replace(/\//g, '\\');
-	  }
-
-	  if (/^.+\:/.test(path)) ; else {
-	    // unix path…
-	    path = sep + path;
-	  }
-
-	  return host + path;
-	}
-	return fileUriToPath_1;
-}
-
-/**
- * Module dependencies.
- */
-
-var hasRequiredBindings;
-
-function requireBindings () {
-	if (hasRequiredBindings) return bindings.exports;
-	hasRequiredBindings = 1;
-	(function (module, exports) {
-		var fs = require$$0$2,
-		  path = require$$2,
-		  fileURLToPath = requireFileUriToPath(),
-		  join = path.join,
-		  dirname = path.dirname,
-		  exists =
-		    (fs.accessSync &&
-		      function(path) {
-		        try {
-		          fs.accessSync(path);
-		        } catch (e) {
-		          return false;
-		        }
-		        return true;
-		      }) ||
-		    fs.existsSync ||
-		    path.existsSync,
-		  defaults = {
-		    arrow: process.env.NODE_BINDINGS_ARROW || ' → ',
-		    compiled: process.env.NODE_BINDINGS_COMPILED_DIR || 'compiled',
-		    platform: process.platform,
-		    arch: process.arch,
-		    nodePreGyp:
-		      'node-v' +
-		      process.versions.modules +
-		      '-' +
-		      process.platform +
-		      '-' +
-		      process.arch,
-		    version: process.versions.node,
-		    bindings: 'bindings.node',
-		    try: [
-		      // node-gyp's linked version in the "build" dir
-		      ['module_root', 'build', 'bindings'],
-		      // node-waf and gyp_addon (a.k.a node-gyp)
-		      ['module_root', 'build', 'Debug', 'bindings'],
-		      ['module_root', 'build', 'Release', 'bindings'],
-		      // Debug files, for development (legacy behavior, remove for node v0.9)
-		      ['module_root', 'out', 'Debug', 'bindings'],
-		      ['module_root', 'Debug', 'bindings'],
-		      // Release files, but manually compiled (legacy behavior, remove for node v0.9)
-		      ['module_root', 'out', 'Release', 'bindings'],
-		      ['module_root', 'Release', 'bindings'],
-		      // Legacy from node-waf, node <= 0.4.x
-		      ['module_root', 'build', 'default', 'bindings'],
-		      // Production "Release" buildtype binary (meh...)
-		      ['module_root', 'compiled', 'version', 'platform', 'arch', 'bindings'],
-		      // node-qbs builds
-		      ['module_root', 'addon-build', 'release', 'install-root', 'bindings'],
-		      ['module_root', 'addon-build', 'debug', 'install-root', 'bindings'],
-		      ['module_root', 'addon-build', 'default', 'install-root', 'bindings'],
-		      // node-pre-gyp path ./lib/binding/{node_abi}-{platform}-{arch}
-		      ['module_root', 'lib', 'binding', 'nodePreGyp', 'bindings']
-		    ]
-		  };
-
-		/**
-		 * The main `bindings()` function loads the compiled bindings for a given module.
-		 * It uses V8's Error API to determine the parent filename that this function is
-		 * being invoked from, which is then used to find the root directory.
-		 */
-
-		function bindings(opts) {
-		  // Argument surgery
-		  if (typeof opts == 'string') {
-		    opts = { bindings: opts };
-		  } else if (!opts) {
-		    opts = {};
-		  }
-
-		  // maps `defaults` onto `opts` object
-		  Object.keys(defaults).map(function(i) {
-		    if (!(i in opts)) opts[i] = defaults[i];
-		  });
-
-		  // Get the module root
-		  if (!opts.module_root) {
-		    opts.module_root = exports.getRoot(exports.getFileName());
-		  }
-
-		  // Ensure the given bindings name ends with .node
-		  if (path.extname(opts.bindings) != '.node') {
-		    opts.bindings += '.node';
-		  }
-
-		  // https://github.com/webpack/webpack/issues/4175#issuecomment-342931035
-		  var requireFunc =
-		    typeof __webpack_require__ === 'function'
-		      ? __non_webpack_require__
-		      : commonjsRequire;
-
-		  var tries = [],
-		    i = 0,
-		    l = opts.try.length,
-		    n,
-		    b,
-		    err;
-
-		  for (; i < l; i++) {
-		    n = join.apply(
-		      null,
-		      opts.try[i].map(function(p) {
-		        return opts[p] || p;
-		      })
-		    );
-		    tries.push(n);
-		    try {
-		      b = opts.path ? requireFunc.resolve(n) : requireFunc(n);
-		      if (!opts.path) {
-		        b.path = n;
-		      }
-		      return b;
-		    } catch (e) {
-		      if (e.code !== 'MODULE_NOT_FOUND' &&
-		          e.code !== 'QUALIFIED_PATH_RESOLUTION_FAILED' &&
-		          !/not find/i.test(e.message)) {
-		        throw e;
-		      }
-		    }
-		  }
-
-		  err = new Error(
-		    'Could not locate the bindings file. Tried:\n' +
-		      tries
-		        .map(function(a) {
-		          return opts.arrow + a;
-		        })
-		        .join('\n')
-		  );
-		  err.tries = tries;
-		  throw err;
-		}
-		module.exports = exports = bindings;
-
-		/**
-		 * Gets the filename of the JavaScript file that invokes this function.
-		 * Used to help find the root directory of a module.
-		 * Optionally accepts an filename argument to skip when searching for the invoking filename
-		 */
-
-		exports.getFileName = function getFileName(calling_file) {
-		  var origPST = Error.prepareStackTrace,
-		    origSTL = Error.stackTraceLimit,
-		    dummy = {},
-		    fileName;
-
-		  Error.stackTraceLimit = 10;
-
-		  Error.prepareStackTrace = function(e, st) {
-		    for (var i = 0, l = st.length; i < l; i++) {
-		      fileName = st[i].getFileName();
-		      if (fileName !== __filename) {
-		        if (calling_file) {
-		          if (fileName !== calling_file) {
-		            return;
-		          }
-		        } else {
-		          return;
-		        }
-		      }
-		    }
-		  };
-
-		  // run the 'prepareStackTrace' function above
-		  Error.captureStackTrace(dummy);
-		  dummy.stack;
-
-		  // cleanup
-		  Error.prepareStackTrace = origPST;
-		  Error.stackTraceLimit = origSTL;
-
-		  // handle filename that starts with "file://"
-		  var fileSchema = 'file://';
-		  if (fileName.indexOf(fileSchema) === 0) {
-		    fileName = fileURLToPath(fileName);
-		  }
-
-		  return fileName;
-		};
-
-		/**
-		 * Gets the root directory of a module, given an arbitrary filename
-		 * somewhere in the module tree. The "root directory" is the directory
-		 * containing the `package.json` file.
-		 *
-		 *   In:  /home/nate/node-native-module/lib/index.js
-		 *   Out: /home/nate/node-native-module
-		 */
-
-		exports.getRoot = function getRoot(file) {
-		  var dir = dirname(file),
-		    prev;
-		  while (true) {
-		    if (dir === '.') {
-		      // Avoids an infinite loop in rare cases, like the REPL
-		      dir = process.cwd();
-		    }
-		    if (
-		      exists(join(dir, 'package.json')) ||
-		      exists(join(dir, 'node_modules'))
-		    ) {
-		      // Found the 'package.json' file or 'node_modules' dir; we're done
-		      return dir;
-		    }
-		    if (prev === dir) {
-		      // Got to the top
-		      throw new Error(
-		        'Could not find module root given file: "' +
-		          file +
-		          '". Do you have a `package.json` file? '
-		      );
-		    }
-		    // Try the parent dir next
-		    prev = dir;
-		    dir = join(dir, '..');
-		  }
-		}; 
-	} (bindings, bindings.exports));
-	return bindings.exports;
-}
-
-var lib$9;
-var hasRequiredLib$a;
-
-function requireLib$a () {
-	if (hasRequiredLib$a) return lib$9;
-	hasRequiredLib$a = 1;
-	const debug = requireSrc()('serialport/binding-abstract');
-
-	/**
-	 * @name Binding
-	 * @type {AbstractBinding}
-	 * @since 5.0.0
-	 * @description The `Binding` is how Node-SerialPort talks to the underlying system. By default, we auto detect Windows, Linux and OS X, and load the appropriate module for your system. You can assign `SerialPort.Binding` to any binding you like. Find more by searching at [npm](https://npmjs.org/).
-	  Prevent auto loading the default bindings by requiring SerialPort with:
-	  ```js
-	  var SerialPort = require('@serialport/stream');
-	  SerialPort.Binding = MyBindingClass;
-	  ```
-	 */
-
-	/**
-	 * You never have to use `Binding` objects directly. SerialPort uses them to access the underlying hardware. This documentation is geared towards people who are making bindings for different platforms. This class can be inherited from to get type checking for each method.
-	 * @class AbstractBinding
-	 * @param {object} options options for the binding
-	 * @property {boolean} isOpen Required property. `true` if the port is open, `false` otherwise. Should be read-only.
-	 * @throws {TypeError} When given invalid arguments, a `TypeError` is thrown.
-	 * @since 5.0.0
-	 */
-	class AbstractBinding {
-	  /**
-	   * Retrieves a list of available serial ports with metadata. The `path` must be guaranteed, and all other fields should be undefined if unavailable. The `path` is either the path or an identifier (eg `COM1`) used to open the serialport.
-	   * @returns {Promise} resolves to an array of port [info objects](#module_serialport--SerialPort.list).
-	   */
-	  static async list() {
-	    debug('list');
-	  }
-
-	  constructor(opt = {}) {
-	    if (typeof opt !== 'object') {
-	      throw new TypeError('"options" is not an object')
-	    }
-	  }
-
-	  /**
-	   * Opens a connection to the serial port referenced by the path.
-	   * @param {string} path the path or com port to open
-	   * @param {openOptions} options openOptions for the serialport
-	   * @returns {Promise} Resolves after the port is opened and configured.
-	   * @rejects {TypeError} When given invalid arguments, a `TypeError` is rejected.
-	   */
-	  async open(path, options) {
-	    if (!path) {
-	      throw new TypeError('"path" is not a valid port')
-	    }
-
-	    if (typeof options !== 'object') {
-	      throw new TypeError('"options" is not an object')
-	    }
-	    debug('open');
-
-	    if (this.isOpen) {
-	      throw new Error('Already open')
-	    }
-	  }
-
-	  /**
-	   * Closes an open connection
-	   * @returns {Promise} Resolves once the connection is closed.
-	   * @rejects {TypeError} When given invalid arguments, a `TypeError` is rejected.
-	   */
-	  async close() {
-	    debug('close');
-	    if (!this.isOpen) {
-	      throw new Error('Port is not open')
-	    }
-	  }
-
-	  /**
-	   * Request a number of bytes from the SerialPort. This function is similar to Node's [`fs.read`](http://nodejs.org/api/fs.html#fs_fs_read_fd_buffer_offset_length_position_callback) except it will always return at least one byte.
-
-	The in progress reads must error when the port is closed with an error object that has the property `canceled` equal to `true`. Any other error will cause a disconnection.
-
-	   * @param {buffer} buffer Accepts a [`Buffer`](http://nodejs.org/api/buffer.html) object.
-	   * @param {integer} offset The offset in the buffer to start writing at.
-	   * @param {integer} length Specifies the maximum number of bytes to read.
-	   * @returns {Promise} Resolves with the number of bytes read after a read operation.
-	   * @rejects {TypeError} When given invalid arguments, a `TypeError` is rejected.
-	   */
-	  async read(buffer, offset, length) {
-	    if (!Buffer.isBuffer(buffer)) {
-	      throw new TypeError('"buffer" is not a Buffer')
-	    }
-
-	    if (typeof offset !== 'number' || isNaN(length)) {
-	      throw new TypeError(`"offset" is not an integer got "${isNaN(length) ? 'NaN' : typeof offset}"`)
-	    }
-
-	    if (typeof length !== 'number' || isNaN(length)) {
-	      throw new TypeError(`"length" is not an integer got "${isNaN(length) ? 'NaN' : typeof length}"`)
-	    }
-
-	    debug('read');
-	    if (buffer.length < offset + length) {
-	      throw new Error('buffer is too small')
-	    }
-
-	    if (!this.isOpen) {
-	      throw new Error('Port is not open')
-	    }
-	  }
-
-	  /**
-	   * Write bytes to the SerialPort. Only called when there is no pending write operation.
-
-	The in progress writes must error when the port is closed with an error object that has the property `canceled` equal to `true`. Any other error will cause a disconnection.
-
-	   * @param {buffer} buffer - Accepts a [`Buffer`](http://nodejs.org/api/buffer.html) object.
-	   * @returns {Promise} Resolves after the data is passed to the operating system for writing.
-	   * @rejects {TypeError} When given invalid arguments, a `TypeError` is rejected.
-	   */
-	  async write(buffer) {
-	    if (!Buffer.isBuffer(buffer)) {
-	      throw new TypeError('"buffer" is not a Buffer')
-	    }
-
-	    debug('write', buffer.length, 'bytes');
-	    if (!this.isOpen) {
-	      debug('write', 'error port is not open');
-
-	      throw new Error('Port is not open')
-	    }
-	  }
-
-	  /**
-	   * Changes connection settings on an open port. Only `baudRate` is supported.
-	   * @param {object=} options Only supports `baudRate`.
-	   * @param {number=} [options.baudRate] If provided a baud rate that the bindings do not support, it should reject.
-	   * @returns {Promise} Resolves once the port's baud rate changes.
-	   * @rejects {TypeError} When given invalid arguments, a `TypeError` is rejected.
-	   */
-	  async update(options) {
-	    if (typeof options !== 'object') {
-	      throw TypeError('"options" is not an object')
-	    }
-
-	    if (typeof options.baudRate !== 'number') {
-	      throw new TypeError('"options.baudRate" is not a number')
-	    }
-
-	    debug('update');
-	    if (!this.isOpen) {
-	      throw new Error('Port is not open')
-	    }
-	  }
-
-	  /**
-	   * Set control flags on an open port.
-	   * @param {object=} options All options are operating system default when the port is opened. Every flag is set on each call to the provided or default values. All options are always provided.
-	   * @param {Boolean} [options.brk=false] flag for brk
-	   * @param {Boolean} [options.cts=false] flag for cts
-	   * @param {Boolean} [options.dsr=false] flag for dsr
-	   * @param {Boolean} [options.dtr=true] flag for dtr
-	   * @param {Boolean} [options.rts=true] flag for rts
-	   * @returns {Promise} Resolves once the port's flags are set.
-	   * @rejects {TypeError} When given invalid arguments, a `TypeError` is rejected.
-	   */
-	  async set(options) {
-	    if (typeof options !== 'object') {
-	      throw new TypeError('"options" is not an object')
-	    }
-	    debug('set');
-	    if (!this.isOpen) {
-	      throw new Error('Port is not open')
-	    }
-	  }
-
-	  /**
-	   * Get the control flags (CTS, DSR, DCD) on the open port.
-	   * @returns {Promise} Resolves with the retrieved flags.
-	   * @rejects {TypeError} When given invalid arguments, a `TypeError` is rejected.
-	   */
-	  async get() {
-	    debug('get');
-	    if (!this.isOpen) {
-	      throw new Error('Port is not open')
-	    }
-	  }
-
-	  /**
-	   * Get the OS reported baud rate for the open port.
-	   * Used mostly for debugging custom baud rates.
-	   * @returns {Promise} Resolves with the current baud rate.
-	   * @rejects {TypeError} When given invalid arguments, a `TypeError` is rejected.
-	   */
-	  async getBaudRate() {
-	    debug('getbaudRate');
-	    if (!this.isOpen) {
-	      throw new Error('Port is not open')
-	    }
-	  }
-
-	  /**
-	   * Flush (discard) data received but not read, and written but not transmitted.
-	   * @returns {Promise} Resolves once the flush operation finishes.
-	   * @rejects {TypeError} When given invalid arguments, a `TypeError` is rejected.
-	   */
-	  async flush() {
-	    debug('flush');
-	    if (!this.isOpen) {
-	      throw new Error('Port is not open')
-	    }
-	  }
-
-	  /**
-	   * Drain waits until all output data is transmitted to the serial port. An in progress write should be completed before this returns.
-	   * @returns {Promise} Resolves once the drain operation finishes.
-	   * @rejects {TypeError} When given invalid arguments, a `TypeError` is rejected.
-	   */
-	  async drain() {
-	    debug('drain');
-	    if (!this.isOpen) {
-	      throw new Error('Port is not open')
-	    }
-	  }
-	}
-
-	lib$9 = AbstractBinding;
-	return lib$9;
-}
-
-var win32SnParser;
-var hasRequiredWin32SnParser;
-
-function requireWin32SnParser () {
-	if (hasRequiredWin32SnParser) return win32SnParser;
-	hasRequiredWin32SnParser = 1;
-	const PARSERS = [/USB\\(?:.+)\\(.+)/, /FTDIBUS\\(?:.+)\+(.+?)A?\\.+/];
-
-	win32SnParser = function(pnpId) {
-	  if (!pnpId) {
-	    return null
-	  }
-	  for (const parser of PARSERS) {
-	    const sn = pnpId.match(parser);
-	    if (sn) {
-	      return sn[1]
-	    }
-	  }
-	  return null
-	};
-	return win32SnParser;
-}
-
-var legacy;
-var hasRequiredLegacy;
-
-function requireLegacy () {
-	if (hasRequiredLegacy) return legacy;
-	hasRequiredLegacy = 1;
-	let warningSent = false;
-
-	const wrapWithHiddenComName = async portsPromise => {
-	  const ports = await portsPromise;
-	  return ports.map(port => {
-	    const newPort = { ...port };
-	    return Object.defineProperties(newPort, {
-	      comName: {
-	        get() {
-	          if (!warningSent) {
-	            warningSent = true;
-	            console.warn(
-	              `"PortInfo.comName" has been deprecated. You should now use "PortInfo.path". The property will be removed in the next major release.`
-	            );
-	          }
-	          return newPort.path
-	        },
-	        enumerable: false,
-	      },
-	    })
-	  })
-	};
-
-	legacy = {
-	  wrapWithHiddenComName,
-	};
-	return legacy;
-}
-
-var win32;
-var hasRequiredWin32;
-
-function requireWin32 () {
-	if (hasRequiredWin32) return win32;
-	hasRequiredWin32 = 1;
-	const binding = requireBindings()('bindings.node');
-	const AbstractBinding = requireLib$a();
-	const { promisify } = require$$1$1;
-	const serialNumParser = requireWin32SnParser();
-
-	const asyncList = promisify(binding.list);
-	const asyncOpen = promisify(binding.open);
-	const asyncClose = promisify(binding.close);
-	const asyncRead = promisify(binding.read);
-	const asyncWrite = promisify(binding.write);
-	const asyncUpdate = promisify(binding.update);
-	const asyncSet = promisify(binding.set);
-	const asyncGet = promisify(binding.get);
-	const asyncGetBaudRate = promisify(binding.getBaudRate);
-	const asyncDrain = promisify(binding.drain);
-	const asyncFlush = promisify(binding.flush);
-	const { wrapWithHiddenComName } = requireLegacy();
-
-	/**
-	 * The Windows binding layer
-	 */
-	class WindowsBinding extends AbstractBinding {
-	  static async list() {
-	    const ports = await asyncList();
-	    // Grab the serial number from the pnp id
-	    return wrapWithHiddenComName(
-	      ports.map(port => {
-	        if (port.pnpId && !port.serialNumber) {
-	          const serialNumber = serialNumParser(port.pnpId);
-	          if (serialNumber) {
-	            return {
-	              ...port,
-	              serialNumber,
-	            }
-	          }
-	        }
-	        return port
-	      })
-	    )
-	  }
-
-	  constructor(opt = {}) {
-	    super(opt);
-	    this.bindingOptions = { ...opt.bindingOptions };
-	    this.fd = null;
-	    this.writeOperation = null;
-	  }
-
-	  get isOpen() {
-	    return this.fd !== null
-	  }
-
-	  async open(path, options) {
-	    await super.open(path, options);
-	    this.openOptions = { ...this.bindingOptions, ...options };
-	    const fd = await asyncOpen(path, this.openOptions);
-	    this.fd = fd;
-	  }
-
-	  async close() {
-	    await super.close();
-	    const fd = this.fd;
-	    this.fd = null;
-	    return asyncClose(fd)
-	  }
-
-	  async read(buffer, offset, length) {
-	    await super.read(buffer, offset, length);
-	    try {
-	      const bytesRead = await asyncRead(this.fd, buffer, offset, length);
-	      return { bytesRead, buffer }
-	    } catch (err) {
-	      if (!this.isOpen) {
-	        err.canceled = true;
-	      }
-	      throw err
-	    }
-	  }
-
-	  async write(buffer) {
-	    this.writeOperation = super.write(buffer).then(async () => {
-	      if (buffer.length === 0) {
-	        return
-	      }
-	      await asyncWrite(this.fd, buffer);
-	      this.writeOperation = null;
-	    });
-	    return this.writeOperation
-	  }
-
-	  async update(options) {
-	    await super.update(options);
-	    return asyncUpdate(this.fd, options)
-	  }
-
-	  async set(options) {
-	    await super.set(options);
-	    return asyncSet(this.fd, options)
-	  }
-
-	  async get() {
-	    await super.get();
-	    return asyncGet(this.fd)
-	  }
-
-	  async getBaudRate() {
-	    await super.get();
-	    return asyncGetBaudRate(this.fd)
-	  }
-
-	  async drain() {
-	    await super.drain();
-	    await this.writeOperation;
-	    return asyncDrain(this.fd)
-	  }
-
-	  async flush() {
-	    await super.flush();
-	    return asyncFlush(this.fd)
-	  }
-	}
-
-	win32 = WindowsBinding;
-	return win32;
-}
-
-var poller;
-var hasRequiredPoller;
-
-function requirePoller () {
-	if (hasRequiredPoller) return poller;
-	hasRequiredPoller = 1;
-	const debug = requireSrc();
-	const logger = debug('serialport/bindings/poller');
-	const EventEmitter = EventEmitter$2;
-	const PollerBindings = requireBindings()('bindings.node').Poller;
-
-	const EVENTS = {
-	  UV_READABLE: 0b0001,
-	  UV_WRITABLE: 0b0010,
-	  UV_DISCONNECT: 0b0100,
-	};
-
-	function handleEvent(error, eventFlag) {
-	  if (error) {
-	    logger('error', error);
-	    this.emit('readable', error);
-	    this.emit('writable', error);
-	    this.emit('disconnect', error);
-	    return
-	  }
-	  if (eventFlag & EVENTS.UV_READABLE) {
-	    logger('received "readable"');
-	    this.emit('readable', null);
-	  }
-	  if (eventFlag & EVENTS.UV_WRITABLE) {
-	    logger('received "writable"');
-	    this.emit('writable', null);
-	  }
-	  if (eventFlag & EVENTS.UV_DISCONNECT) {
-	    logger('received "disconnect"');
-	    this.emit('disconnect', null);
-	  }
-	}
-
-	/**
-	 * Polls unix systems for readable or writable states of a file or serialport
-	 */
-	class Poller extends EventEmitter {
-	  constructor(fd, FDPoller = PollerBindings) {
-	    logger('Creating poller');
-	    super();
-	    this.poller = new FDPoller(fd, handleEvent.bind(this));
-	  }
-	  /**
-	   * Wait for the next event to occur
-	   * @param {string} event ('readable'|'writable'|'disconnect')
-	   * @returns {Poller} returns itself
-	   */
-	  once(event, callback) {
-	    switch (event) {
-	      case 'readable':
-	        this.poll(EVENTS.UV_READABLE);
-	        break
-	      case 'writable':
-	        this.poll(EVENTS.UV_WRITABLE);
-	        break
-	      case 'disconnect':
-	        this.poll(EVENTS.UV_DISCONNECT);
-	        break
-	    }
-	    return super.once(event, callback)
-	  }
-
-	  /**
-	   * Ask the bindings to listen for an event, it is recommend to use `.once()` for easy use
-	   * @param {EVENTS} eventFlag polls for an event or group of events based upon a flag.
-	   * @returns {undefined}
-	   */
-	  poll(eventFlag) {
-	    eventFlag = eventFlag || 0;
-
-	    if (eventFlag & EVENTS.UV_READABLE) {
-	      logger('Polling for "readable"');
-	    }
-	    if (eventFlag & EVENTS.UV_WRITABLE) {
-	      logger('Polling for "writable"');
-	    }
-	    if (eventFlag & EVENTS.UV_DISCONNECT) {
-	      logger('Polling for "disconnect"');
-	    }
-
-	    this.poller.poll(eventFlag);
-	  }
-
-	  /**
-	   * Stop listening for events and cancel all outstanding listening with an error
-	   * @returns {undefined}
-	   */
-	  stop() {
-	    logger('Stopping poller');
-	    this.poller.stop();
-	    this.emitCanceled();
-	  }
-
-	  destroy() {
-	    logger('Destroying poller');
-	    this.poller.destroy();
-	    this.emitCanceled();
-	  }
-
-	  emitCanceled() {
-	    const err = new Error('Canceled');
-	    err.canceled = true;
-	    this.emit('readable', err);
-	    this.emit('writable', err);
-	    this.emit('disconnect', err);
-	  }
-	}
-
-	Poller.EVENTS = EVENTS;
-
-	poller = Poller;
-	return poller;
-}
-
-var unixRead_1;
-var hasRequiredUnixRead;
-
-function requireUnixRead () {
-	if (hasRequiredUnixRead) return unixRead_1;
-	hasRequiredUnixRead = 1;
-	const fs = require$$0$2;
-	const debug = requireSrc();
-	const logger = debug('serialport/bindings/unixRead');
-	const { promisify } = require$$1$1;
-
-	const readAsync = promisify(fs.read);
-
-	const readable = binding => {
-	  return new Promise((resolve, reject) => {
-	    binding.poller.once('readable', err => (err ? reject(err) : resolve()));
-	  })
-	};
-
-	const unixRead = async ({ binding, buffer, offset, length, fsReadAsync = readAsync }) => {
-	  logger('Starting read');
-	  if (!binding.isOpen) {
-	    const err = new Error('Port is not open');
-	    err.canceled = true;
-	    throw err
-	  }
-
-	  try {
-	    const { bytesRead } = await fsReadAsync(binding.fd, buffer, offset, length, null);
-	    if (bytesRead === 0) {
-	      return unixRead({ binding, buffer, offset, length, fsReadAsync })
-	    }
-	    logger('Finished read', bytesRead, 'bytes');
-	    return { bytesRead, buffer }
-	  } catch (err) {
-	    logger('read error', err);
-	    if (err.code === 'EAGAIN' || err.code === 'EWOULDBLOCK' || err.code === 'EINTR') {
-	      if (!binding.isOpen) {
-	        const err = new Error('Port is not open');
-	        err.canceled = true;
-	        throw err
-	      }
-	      logger('waiting for readable because of code:', err.code);
-	      await readable(binding);
-	      return unixRead({ binding, buffer, offset, length, fsReadAsync })
-	    }
-
-	    const disconnectError =
-	      err.code === 'EBADF' || // Bad file number means we got closed
-	      err.code === 'ENXIO' || // No such device or address probably usb disconnect
-	      err.code === 'UNKNOWN' ||
-	      err.errno === -1; // generic error
-
-	    if (disconnectError) {
-	      err.canceled = true;
-	      logger('disconnecting', err);
-	    }
-
-	    throw err
-	  }
-	};
-
-	unixRead_1 = unixRead;
-	return unixRead_1;
-}
-
-var unixWrite_1;
-var hasRequiredUnixWrite;
-
-function requireUnixWrite () {
-	if (hasRequiredUnixWrite) return unixWrite_1;
-	hasRequiredUnixWrite = 1;
-	const fs = require$$0$2;
-	const debug = requireSrc();
-	const logger = debug('serialport/bindings/unixWrite');
-	const { promisify } = require$$1$1;
-
-	const writeAsync = promisify(fs.write);
-
-	const writable = binding => {
-	  return new Promise((resolve, reject) => {
-	    binding.poller.once('writable', err => (err ? reject(err) : resolve()));
-	  })
-	};
-
-	const unixWrite = async ({ binding, buffer, offset = 0, fsWriteAsync = writeAsync }) => {
-	  const bytesToWrite = buffer.length - offset;
-	  logger('Starting write', buffer.length, 'bytes offset', offset, 'bytesToWrite', bytesToWrite);
-	  if (!binding.isOpen) {
-	    throw new Error('Port is not open')
-	  }
-	  try {
-	    const { bytesWritten } = await fsWriteAsync(binding.fd, buffer, offset, bytesToWrite);
-	    logger('write returned: wrote', bytesWritten, 'bytes');
-	    if (bytesWritten + offset < buffer.length) {
-	      if (!binding.isOpen) {
-	        throw new Error('Port is not open')
-	      }
-	      return unixWrite({ binding, buffer, offset: bytesWritten + offset, fsWriteAsync })
-	    }
-
-	    logger('Finished writing', bytesWritten + offset, 'bytes');
-	  } catch (err) {
-	    logger('write errored', err);
-	    if (err.code === 'EAGAIN' || err.code === 'EWOULDBLOCK' || err.code === 'EINTR') {
-	      if (!binding.isOpen) {
-	        throw new Error('Port is not open')
-	      }
-	      logger('waiting for writable because of code:', err.code);
-	      await writable(binding);
-	      return unixWrite({ binding, buffer, offset, fsWriteAsync })
-	    }
-
-	    const disconnectError =
-	      err.code === 'EBADF' || // Bad file number means we got closed
-	      err.code === 'ENXIO' || // No such device or address probably usb disconnect
-	      err.code === 'UNKNOWN' ||
-	      err.errno === -1; // generic error
-
-	    if (disconnectError) {
-	      err.disconnect = true;
-	      logger('disconnecting', err);
-	    }
-
-	    logger('error', err);
-	    throw err
-	  }
-	};
-	unixWrite_1 = unixWrite;
-	return unixWrite_1;
-}
-
-var darwin;
-var hasRequiredDarwin;
-
-function requireDarwin () {
-	if (hasRequiredDarwin) return darwin;
-	hasRequiredDarwin = 1;
-	const { promisify } = require$$1$1;
-	const binding = requireBindings()('bindings.node');
-	const AbstractBinding = requireLib$a();
-	const Poller = requirePoller();
-	const unixRead = requireUnixRead();
-	const unixWrite = requireUnixWrite();
-	const { wrapWithHiddenComName } = requireLegacy();
-
-	const defaultBindingOptions = Object.freeze({
-	  vmin: 1,
-	  vtime: 0,
-	});
-
-	const asyncList = promisify(binding.list);
-	const asyncOpen = promisify(binding.open);
-	const asyncClose = promisify(binding.close);
-	const asyncUpdate = promisify(binding.update);
-	const asyncSet = promisify(binding.set);
-	const asyncGet = promisify(binding.get);
-	const asyncGetBaudRate = promisify(binding.getBaudRate);
-	const asyncDrain = promisify(binding.drain);
-	const asyncFlush = promisify(binding.flush);
-
-	/**
-	 * The Darwin binding layer for OSX
-	 */
-	class DarwinBinding extends AbstractBinding {
-	  static list() {
-	    return wrapWithHiddenComName(asyncList())
-	  }
-
-	  constructor(opt = {}) {
-	    super(opt);
-	    this.bindingOptions = { ...defaultBindingOptions, ...opt.bindingOptions };
-	    this.fd = null;
-	    this.writeOperation = null;
-	  }
-
-	  get isOpen() {
-	    return this.fd !== null
-	  }
-
-	  async open(path, options) {
-	    await super.open(path, options);
-	    this.openOptions = { ...this.bindingOptions, ...options };
-	    const fd = await asyncOpen(path, this.openOptions);
-	    this.fd = fd;
-	    this.poller = new Poller(fd);
-	  }
-
-	  async close() {
-	    await super.close();
-	    const fd = this.fd;
-	    this.poller.stop();
-	    this.poller.destroy();
-	    this.poller = null;
-	    this.openOptions = null;
-	    this.fd = null;
-	    return asyncClose(fd)
-	  }
-
-	  async read(buffer, offset, length) {
-	    await super.read(buffer, offset, length);
-	    return unixRead({ binding: this, buffer, offset, length })
-	  }
-
-	  async write(buffer) {
-	    this.writeOperation = super.write(buffer).then(async () => {
-	      if (buffer.length === 0) {
-	        return
-	      }
-	      await unixWrite({ binding: this, buffer });
-	      this.writeOperation = null;
-	    });
-	    return this.writeOperation
-	  }
-
-	  async update(options) {
-	    await super.update(options);
-	    return asyncUpdate(this.fd, options)
-	  }
-
-	  async set(options) {
-	    await super.set(options);
-	    return asyncSet(this.fd, options)
-	  }
-
-	  async get() {
-	    await super.get();
-	    return asyncGet(this.fd)
-	  }
-
-	  async getBaudRate() {
-	    await super.get();
-	    return asyncGetBaudRate(this.fd)
-	  }
-
-	  async drain() {
-	    await super.drain();
-	    await this.writeOperation;
-	    return asyncDrain(this.fd)
-	  }
-
-	  async flush() {
-	    await super.flush();
-	    return asyncFlush(this.fd)
-	  }
-	}
-
-	darwin = DarwinBinding;
-	return darwin;
-}
-
-var lib$8;
-var hasRequiredLib$9;
-
-function requireLib$9 () {
-	if (hasRequiredLib$9) return lib$8;
-	hasRequiredLib$9 = 1;
-	const { Transform } = require$$0;
-
-	/**
-	 * A transform stream that emits data each time a byte sequence is received.
-	 * @extends Transform
-	 * @summary To use the `Delimiter` parser, provide a delimiter as a string, buffer, or array of bytes. Runs in O(n) time.
-	 * @example
-	const SerialPort = require('serialport')
-	const Delimiter = require('@serialport/parser-delimiter')
-	const port = new SerialPort('/dev/tty-usbserial1')
-	const parser = port.pipe(new Delimiter({ delimiter: '\n' }))
-	parser.on('data', console.log)
-	 */
-	class DelimiterParser extends Transform {
-	  constructor(options = {}) {
-	    super(options);
-
-	    if (options.delimiter === undefined) {
-	      throw new TypeError('"delimiter" is not a bufferable object')
-	    }
-
-	    if (options.delimiter.length === 0) {
-	      throw new TypeError('"delimiter" has a 0 or undefined length')
-	    }
-
-	    this.includeDelimiter = options.includeDelimiter !== undefined ? options.includeDelimiter : false;
-	    this.delimiter = Buffer.from(options.delimiter);
-	    this.buffer = Buffer.alloc(0);
-	  }
-
-	  _transform(chunk, encoding, cb) {
-	    let data = Buffer.concat([this.buffer, chunk]);
-	    let position;
-	    while ((position = data.indexOf(this.delimiter)) !== -1) {
-	      this.push(data.slice(0, position + (this.includeDelimiter ? this.delimiter.length : 0)));
-	      data = data.slice(position + this.delimiter.length);
-	    }
-	    this.buffer = data;
-	    cb();
-	  }
-
-	  _flush(cb) {
-	    this.push(this.buffer);
-	    this.buffer = Buffer.alloc(0);
-	    cb();
-	  }
-	}
-
-	lib$8 = DelimiterParser;
-	return lib$8;
-}
-
-var lib$7;
-var hasRequiredLib$8;
-
-function requireLib$8 () {
-	if (hasRequiredLib$8) return lib$7;
-	hasRequiredLib$8 = 1;
-	const DelimiterParser = requireLib$9();
-
-	/**
-	 *  A transform stream that emits data after a newline delimiter is received.
-	 * @summary To use the `Readline` parser, provide a delimiter (defaults to `\n`). Data is emitted as string controllable by the `encoding` option (defaults to `utf8`).
-	 * @extends DelimiterParser
-	 * @example
-	const SerialPort = require('serialport')
-	const Readline = require('@serialport/parser-readline')
-	const port = new SerialPort('/dev/tty-usbserial1')
-	const parser = port.pipe(new Readline({ delimiter: '\r\n' }))
-	parser.on('data', console.log)
-	*/
-	class ReadLineParser extends DelimiterParser {
-	  constructor(options) {
-	    const opts = {
-	      delimiter: Buffer.from('\n', 'utf8'),
-	      encoding: 'utf8',
-	      ...options,
-	    };
-
-	    if (typeof opts.delimiter === 'string') {
-	      opts.delimiter = Buffer.from(opts.delimiter, opts.encoding);
-	    }
-
-	    super(opts);
-	  }
-	}
-
-	lib$7 = ReadLineParser;
-	return lib$7;
-}
-
-var linuxList;
-var hasRequiredLinuxList;
-
-function requireLinuxList () {
-	if (hasRequiredLinuxList) return linuxList;
-	hasRequiredLinuxList = 1;
-	const childProcess = require$$0$3;
-	const Readline = requireLib$8();
-
-	// get only serial port names
-	function checkPathOfDevice(path) {
-	  return /(tty(S|WCH|ACM|USB|AMA|MFD|O|XRUSB)|rfcomm)/.test(path) && path
-	}
-
-	function propName(name) {
-	  return {
-	    DEVNAME: 'path',
-	    ID_VENDOR_ENC: 'manufacturer',
-	    ID_SERIAL_SHORT: 'serialNumber',
-	    ID_VENDOR_ID: 'vendorId',
-	    ID_MODEL_ID: 'productId',
-	    DEVLINKS: 'pnpId',
-	  }[name.toUpperCase()]
-	}
-
-	function decodeHexEscape(str) {
-	  return str.replace(/\\x([a-fA-F0-9]{2})/g, (a, b) => {
-	    return String.fromCharCode(parseInt(b, 16))
-	  })
-	}
-
-	function propVal(name, val) {
-	  if (name === 'pnpId') {
-	    const match = val.match(/\/by-id\/([^\s]+)/);
-	    return (match && match[1]) || undefined
-	  }
-	  if (name === 'manufacturer') {
-	    return decodeHexEscape(val)
-	  }
-	  if (/^0x/.test(val)) {
-	    return val.substr(2)
-	  }
-	  return val
-	}
-
-	function listLinux() {
-	  return new Promise((resolve, reject) => {
-	    const ports = [];
-	    const ude = childProcess.spawn('udevadm', ['info', '-e']);
-	    const lines = ude.stdout.pipe(new Readline());
-	    ude.on('close', code => code && reject(new Error(`Error listing ports udevadm exited with error code: ${code}`)));
-	    ude.on('error', reject);
-	    lines.on('error', reject);
-
-	    let port = {};
-	    let skipPort = false;
-	    lines.on('data', line => {
-	      const lineType = line.slice(0, 1);
-	      const data = line.slice(3);
-	      // new port entry
-	      if (lineType === 'P') {
-	        port = {
-	          manufacturer: undefined,
-	          serialNumber: undefined,
-	          pnpId: undefined,
-	          locationId: undefined,
-	          vendorId: undefined,
-	          productId: undefined,
-	        };
-	        skipPort = false;
-	        return
-	      }
-
-	      if (skipPort) {
-	        return
-	      }
-
-	      // Check dev name and save port if it matches flag to skip the rest of the data if not
-	      if (lineType === 'N') {
-	        if (checkPathOfDevice(data)) {
-	          ports.push(port);
-	        } else {
-	          skipPort = true;
-	        }
-	        return
-	      }
-
-	      // parse data about each port
-	      if (lineType === 'E') {
-	        const keyValue = data.match(/^(.+)=(.*)/);
-	        if (!keyValue) {
-	          return
-	        }
-	        const key = propName(keyValue[1]);
-	        if (!key) {
-	          return
-	        }
-	        port[key] = propVal(key, keyValue[2]);
-	      }
-	    });
-
-	    lines.on('finish', () => resolve(ports));
-	  })
-	}
-
-	linuxList = listLinux;
-	return linuxList;
-}
-
-var linux;
-var hasRequiredLinux;
-
-function requireLinux () {
-	if (hasRequiredLinux) return linux;
-	hasRequiredLinux = 1;
-	const { promisify } = require$$1$1;
-	const binding = requireBindings()('bindings.node');
-	const AbstractBinding = requireLib$a();
-	const linuxList = requireLinuxList();
-	const Poller = requirePoller();
-	const unixRead = requireUnixRead();
-	const unixWrite = requireUnixWrite();
-	const { wrapWithHiddenComName } = requireLegacy();
-
-	const defaultBindingOptions = Object.freeze({
-	  vmin: 1,
-	  vtime: 0,
-	});
-
-	const asyncOpen = promisify(binding.open);
-	const asyncClose = promisify(binding.close);
-	const asyncUpdate = promisify(binding.update);
-	const asyncSet = promisify(binding.set);
-	const asyncGet = promisify(binding.get);
-	const asyncGetBaudRate = promisify(binding.getBaudRate);
-	const asyncDrain = promisify(binding.drain);
-	const asyncFlush = promisify(binding.flush);
-
-	/**
-	 * The linux binding layer
-	 */
-	class LinuxBinding extends AbstractBinding {
-	  static list() {
-	    return wrapWithHiddenComName(linuxList())
-	  }
-
-	  constructor(opt = {}) {
-	    super(opt);
-	    this.bindingOptions = { ...defaultBindingOptions, ...opt.bindingOptions };
-	    this.fd = null;
-	    this.writeOperation = null;
-	  }
-
-	  get isOpen() {
-	    return this.fd !== null
-	  }
-
-	  async open(path, options) {
-	    await super.open(path, options);
-	    this.openOptions = { ...this.bindingOptions, ...options };
-	    const fd = await asyncOpen(path, this.openOptions);
-	    this.fd = fd;
-	    this.poller = new Poller(fd);
-	  }
-
-	  async close() {
-	    await super.close();
-	    const fd = this.fd;
-	    this.poller.stop();
-	    this.poller.destroy();
-	    this.poller = null;
-	    this.openOptions = null;
-	    this.fd = null;
-	    return asyncClose(fd)
-	  }
-
-	  async read(buffer, offset, length) {
-	    await super.read(buffer, offset, length);
-	    return unixRead({ binding: this, buffer, offset, length })
-	  }
-
-	  async write(buffer) {
-	    this.writeOperation = super.write(buffer).then(async () => {
-	      if (buffer.length === 0) {
-	        return
-	      }
-	      await unixWrite({ binding: this, buffer });
-	      this.writeOperation = null;
-	    });
-	    return this.writeOperation
-	  }
-
-	  async update(options) {
-	    await super.update(options);
-	    return asyncUpdate(this.fd, options)
-	  }
-
-	  async set(options) {
-	    await super.set(options);
-	    return asyncSet(this.fd, options)
-	  }
-
-	  async get() {
-	    await super.get();
-	    return asyncGet(this.fd)
-	  }
-
-	  async getBaudRate() {
-	    await super.get();
-	    return asyncGetBaudRate(this.fd)
-	  }
-
-	  async drain() {
-	    await super.drain();
-	    await this.writeOperation;
-	    return asyncDrain(this.fd)
-	  }
-
-	  async flush() {
-	    await super.flush();
-	    return asyncFlush(this.fd)
-	  }
-	}
-
-	linux = LinuxBinding;
-	return linux;
-}
-
-var hasRequiredLib$7;
-
-function requireLib$7 () {
-	if (hasRequiredLib$7) return lib$a.exports;
-	hasRequiredLib$7 = 1;
-	const debug = requireSrc()('serialport/bindings');
-
-	switch (process.platform) {
-	  case 'win32':
-	    debug('loading WindowsBinding');
-	    lib$a.exports = requireWin32();
-	    break
-	  case 'darwin':
-	    debug('loading DarwinBinding');
-	    lib$a.exports = requireDarwin();
-	    break
-	  default:
-	    debug('loading LinuxBinding');
-	    lib$a.exports = requireLinux();
-	}
-	return lib$a.exports;
-}
-
-var lib$6;
-var hasRequiredLib$6;
-
-function requireLib$6 () {
-	if (hasRequiredLib$6) return lib$6;
-	hasRequiredLib$6 = 1;
-	const { Transform } = require$$0;
-
-	/**
-	 * Emit data every number of bytes
-	 * @extends Transform
-	 * @param {Object} options parser options object
-	 * @param {Number} options.length the number of bytes on each data event
-	 * @summary A transform stream that emits data as a buffer after a specific number of bytes are received. Runs in O(n) time.
-	 * @example
-	const SerialPort = require('serialport')
-	const ByteLength = require('@serialport/parser-byte-length')
-	const port = new SerialPort('/dev/tty-usbserial1')
-	const parser = port.pipe(new ByteLength({length: 8}))
-	parser.on('data', console.log) // will have 8 bytes per data event
-	 */
-	class ByteLengthParser extends Transform {
-	  constructor(options = {}) {
-	    super(options);
-
-	    if (typeof options.length !== 'number') {
-	      throw new TypeError('"length" is not a number')
-	    }
-
-	    if (options.length < 1) {
-	      throw new TypeError('"length" is not greater than 0')
-	    }
-
-	    this.length = options.length;
-	    this.position = 0;
-	    this.buffer = Buffer.alloc(this.length);
-	  }
-
-	  _transform(chunk, encoding, cb) {
-	    let cursor = 0;
-	    while (cursor < chunk.length) {
-	      this.buffer[this.position] = chunk[cursor];
-	      cursor++;
-	      this.position++;
-	      if (this.position === this.length) {
-	        this.push(this.buffer);
-	        this.buffer = Buffer.alloc(this.length);
-	        this.position = 0;
-	      }
-	    }
-	    cb();
-	  }
-
-	  _flush(cb) {
-	    this.push(this.buffer.slice(0, this.position));
-	    this.buffer = Buffer.alloc(this.length);
-	    cb();
-	  }
-	}
-
-	lib$6 = ByteLengthParser;
-	return lib$6;
-}
-
-var lib$5;
-var hasRequiredLib$5;
-
-function requireLib$5 () {
-	if (hasRequiredLib$5) return lib$5;
-	hasRequiredLib$5 = 1;
-	const { Transform } = require$$0;
-
-	/**
-	 * Parse the CCTalk protocol
-	 * @extends Transform
-	 * @summary A transform stream that emits CCTalk packets as they are received.
-	 * @example
-	const SerialPort = require('serialport')
-	const CCTalk = require('@serialport/parser-cctalk')
-	const port = new SerialPort('/dev/ttyUSB0')
-	const parser = port.pipe(new CCtalk())
-	parser.on('data', console.log)
-	 */
-	class CCTalkParser extends Transform {
-	  constructor(maxDelayBetweenBytesMs = 50) {
-	    super();
-	    this.array = [];
-	    this.cursor = 0;
-	    this.lastByteFetchTime = 0;
-	    this.maxDelayBetweenBytesMs = maxDelayBetweenBytesMs;
-	  }
-	  _transform(buffer, _, cb) {
-	    if (this.maxDelayBetweenBytesMs > 0) {
-	      const now = Date.now();
-	      if (now - this.lastByteFetchTime > this.maxDelayBetweenBytesMs) {
-	        this.array = [];
-	        this.cursor = 0;
-	      }
-	      this.lastByteFetchTime = now;
-	    }
-
-	    this.cursor += buffer.length;
-	    // TODO: Better Faster es7 no supported by node 4
-	    // ES7 allows directly push [...buffer]
-	    // this.array = this.array.concat(Array.from(buffer)) //Slower ?!?
-	    Array.from(buffer).map(byte => this.array.push(byte));
-	    while (this.cursor > 1 && this.cursor >= this.array[1] + 5) {
-	      // full frame accumulated
-	      // copy command from the array
-	      const FullMsgLength = this.array[1] + 5;
-
-	      const frame = Buffer.from(this.array.slice(0, FullMsgLength));
-	      // Preserve Extra Data
-	      this.array = this.array.slice(frame.length, this.array.length);
-	      this.cursor -= FullMsgLength;
-	      this.push(frame);
-	    }
-	    cb();
-	  }
-	}
-
-	lib$5 = CCTalkParser;
-	return lib$5;
-}
-
-var lib$4;
-var hasRequiredLib$4;
-
-function requireLib$4 () {
-	if (hasRequiredLib$4) return lib$4;
-	hasRequiredLib$4 = 1;
-	const { Transform } = require$$0;
-
-	/**
-	 * A transform stream that emits data each time a byte sequence is received.
-	 * @extends Transform
-	 * @summary To use the `Delimiter` parser, provide a delimiter as a string, buffer, or array of bytes. Runs in O(n) time.
-	 * @example
-	const SerialPort = require('serialport')
-	const Delimiter = require('@serialport/parser-delimiter')
-	const port = new SerialPort('/dev/tty-usbserial1')
-	const parser = port.pipe(new Delimiter({ delimiter: '\n' }))
-	parser.on('data', console.log)
-	 */
-	class DelimiterParser extends Transform {
-	  constructor(options = {}) {
-	    super(options);
-
-	    if (options.delimiter === undefined) {
-	      throw new TypeError('"delimiter" is not a bufferable object')
-	    }
-
-	    if (options.delimiter.length === 0) {
-	      throw new TypeError('"delimiter" has a 0 or undefined length')
-	    }
-
-	    this.includeDelimiter = options.includeDelimiter !== undefined ? options.includeDelimiter : false;
-	    this.delimiter = Buffer.from(options.delimiter);
-	    this.buffer = Buffer.alloc(0);
-	  }
-
-	  _transform(chunk, encoding, cb) {
-	    let data = Buffer.concat([this.buffer, chunk]);
-	    let position;
-	    while ((position = data.indexOf(this.delimiter)) !== -1) {
-	      this.push(data.slice(0, position + (this.includeDelimiter ? this.delimiter.length : 0)));
-	      data = data.slice(position + this.delimiter.length);
-	    }
-	    this.buffer = data;
-	    cb();
-	  }
-
-	  _flush(cb) {
-	    this.push(this.buffer);
-	    this.buffer = Buffer.alloc(0);
-	    cb();
-	  }
-	}
-
-	lib$4 = DelimiterParser;
-	return lib$4;
-}
-
-var lib$3;
-var hasRequiredLib$3;
-
-function requireLib$3 () {
-	if (hasRequiredLib$3) return lib$3;
-	hasRequiredLib$3 = 1;
-	const DelimiterParser = requireLib$4();
-
-	/**
-	 *  A transform stream that emits data after a newline delimiter is received.
-	 * @summary To use the `Readline` parser, provide a delimiter (defaults to `\n`). Data is emitted as string controllable by the `encoding` option (defaults to `utf8`).
-	 * @extends DelimiterParser
-	 * @example
-	const SerialPort = require('serialport')
-	const Readline = require('@serialport/parser-readline')
-	const port = new SerialPort('/dev/tty-usbserial1')
-	const parser = port.pipe(new Readline({ delimiter: '\r\n' }))
-	parser.on('data', console.log)
-	*/
-	class ReadLineParser extends DelimiterParser {
-	  constructor(options) {
-	    const opts = {
-	      delimiter: Buffer.from('\n', 'utf8'),
-	      encoding: 'utf8',
-	      ...options,
-	    };
-
-	    if (typeof opts.delimiter === 'string') {
-	      opts.delimiter = Buffer.from(opts.delimiter, opts.encoding);
-	    }
-
-	    super(opts);
-	  }
-	}
-
-	lib$3 = ReadLineParser;
-	return lib$3;
-}
-
-var lib$2;
-var hasRequiredLib$2;
-
-function requireLib$2 () {
-	if (hasRequiredLib$2) return lib$2;
-	hasRequiredLib$2 = 1;
-	const { Transform } = require$$0;
-
-	/**
-	 * A transform stream that waits for a sequence of "ready" bytes before emitting a ready event and emitting data events
-	 * @summary To use the `Ready` parser provide a byte start sequence. After the bytes have been received a ready event is fired and data events are passed through.
-	 * @extends Transform
-	 * @example
-	const SerialPort = require('serialport')
-	const Ready = require('@serialport/parser-ready')
-	const port = new SerialPort('/dev/tty-usbserial1')
-	const parser = port.pipe(new Ready({ delimiter: 'READY' }))
-	parser.on('ready', () => console.log('the ready byte sequence has been received'))
-	parser.on('data', console.log) // all data after READY is received
-	 */
-	class ReadyParser extends Transform {
-	  /**
-	   *
-	   * @param {object} options options for the parser
-	   * @param {string|Buffer|array} options.delimiter data to look for before emitted "ready"
-	   */
-	  constructor(options = {}) {
-	    if (options.delimiter === undefined) {
-	      throw new TypeError('"delimiter" is not a bufferable object')
-	    }
-
-	    if (options.delimiter.length === 0) {
-	      throw new TypeError('"delimiter" has a 0 or undefined length')
-	    }
-
-	    super(options);
-	    this.delimiter = Buffer.from(options.delimiter);
-	    this.readOffset = 0;
-	    this.ready = false;
-	  }
-
-	  _transform(chunk, encoding, cb) {
-	    if (this.ready) {
-	      this.push(chunk);
-	      return cb()
-	    }
-	    const delimiter = this.delimiter;
-	    let chunkOffset = 0;
-	    while (this.readOffset < delimiter.length && chunkOffset < chunk.length) {
-	      if (delimiter[this.readOffset] === chunk[chunkOffset]) {
-	        this.readOffset++;
-	      } else {
-	        this.readOffset = 0;
-	      }
-	      chunkOffset++;
-	    }
-	    if (this.readOffset === delimiter.length) {
-	      this.ready = true;
-	      this.emit('ready');
-	      const chunkRest = chunk.slice(chunkOffset);
-	      if (chunkRest.length > 0) {
-	        this.push(chunkRest);
-	      }
-	    }
-	    cb();
-	  }
-	}
-
-	lib$2 = ReadyParser;
-	return lib$2;
-}
-
-var lib$1;
-var hasRequiredLib$1;
-
-function requireLib$1 () {
-	if (hasRequiredLib$1) return lib$1;
-	hasRequiredLib$1 = 1;
-	const { Transform } = require$$0;
-
-	/**
-	 * A transform stream that uses a regular expression to split the incoming text upon.
-	 *
-	 * To use the `Regex` parser provide a regular expression to split the incoming text upon. Data is emitted as string controllable by the `encoding` option (defaults to `utf8`).
-	 * @extends Transform
-	 * @example
-	const SerialPort = require('serialport')
-	const Regex = require('@serialport/parser-regex')
-	const port = new SerialPort('/dev/tty-usbserial1')
-	const parser = port.pipe(new Regex({ regex: /[\r\n]+/ }))
-	parser.on('data', console.log)
-	 */
-	class RegexParser extends Transform {
-	  constructor(options) {
-	    const opts = {
-	      encoding: 'utf8',
-	      ...options,
-	    };
-
-	    if (opts.regex === undefined) {
-	      throw new TypeError('"options.regex" must be a regular expression pattern or object')
-	    }
-
-	    if (!(opts.regex instanceof RegExp)) {
-	      opts.regex = new RegExp(opts.regex);
-	    }
-	    super(opts);
-
-	    this.regex = opts.regex;
-	    this.data = '';
-	  }
-
-	  _transform(chunk, encoding, cb) {
-	    const data = this.data + chunk;
-	    const parts = data.split(this.regex);
-	    this.data = parts.pop();
-
-	    parts.forEach(part => {
-	      this.push(part);
-	    });
-	    cb();
-	  }
-
-	  _flush(cb) {
-	    this.push(this.data);
-	    this.data = '';
-	    cb();
-	  }
-	}
-
-	lib$1 = RegexParser;
-	return lib$1;
-}
-
-var parsers;
-var hasRequiredParsers;
-
-function requireParsers () {
-	if (hasRequiredParsers) return parsers;
-	hasRequiredParsers = 1;
-	parsers = {
-	  ByteLength: requireLib$6(),
-	  CCTalk: requireLib$5(),
-	  Delimiter: requireLib$4(),
-	  Readline: requireLib$3(),
-	  Ready: requireLib$2(),
-	  Regex: requireLib$1(),
-	};
-	return parsers;
-}
-
-var lib;
-var hasRequiredLib;
-
-function requireLib () {
-	if (hasRequiredLib) return lib;
-	hasRequiredLib = 1;
-	const SerialPort = requireLib$b();
-	const Binding = requireLib$7();
-	const parsers = requireParsers();
-
-	/**
-	 * @type {AbstractBinding}
-	 */
-	SerialPort.Binding = Binding;
-
-	/**
-	 * @type {Parsers}
-	 */
-	SerialPort.parsers = parsers;
-
-	lib = SerialPort;
-	return lib;
+	firmataIo = bindTransport;
+	return firmataIo;
 }
 
 var com_1;
@@ -15388,7 +12838,7 @@ function requireCom () {
 	const Emitter = EventEmitter$2;
 
 	class TransportStub extends Emitter {
-	  constructor(path/*, options, openCallback*/) {
+	  constructor(path /*, options, openCallback*/) {
 	    super();
 	    this.isOpen = true;
 	    this.baudRate = 0;
@@ -15426,7 +12876,7 @@ function requireCom () {
 	  if (process.env.IS_TEST_MODE) {
 	    com = TransportStub;
 	  } else {
-	    SerialPort = requireLib();
+	    SerialPort = requireDist().SerialPort;
 	    com = SerialPort;
 	  }
 	} catch (err) {
@@ -15440,7 +12890,9 @@ function requireCom () {
 	    com = TransportStub;
 	  } else {
 	    console.log("It looks like serialport didn't install properly.");
-	    console.log("More information can be found here https://serialport.io/docs/guide-installation");
+	    console.log(
+	      "More information can be found here https://serialport.io/docs/guide-installation"
+	    );
 	    console.log(`The result of requiring the package is: ${SerialPort}`);
 	    console.log(error);
 	    throw "Missing serialport dependency";
@@ -15451,15 +12903,15 @@ function requireCom () {
 	return com_1;
 }
 
-var firmata;
+var firmata$1;
 var hasRequiredFirmata;
 
 function requireFirmata () {
-	if (hasRequiredFirmata) return firmata;
+	if (hasRequiredFirmata) return firmata$1;
 	hasRequiredFirmata = 1;
 
-	firmata = requireFirmata$1()(requireCom());
-	return firmata;
+	firmata$1 = requireFirmataIo()(requireCom());
+	return firmata$1;
 }
 
 /**
@@ -23604,6 +21056,170 @@ function requireThermometer () {
 	return thermometer;
 }
 
+var blokdots_colorsensor;
+var hasRequiredBlokdots_colorsensor;
+
+function requireBlokdots_colorsensor () {
+	if (hasRequiredBlokdots_colorsensor) return blokdots_colorsensor;
+	hasRequiredBlokdots_colorsensor = 1;
+	const Board = requireBoard();
+	const Emitter = EventEmitter$2;
+	const { toFixed, map } = fn;
+
+	const Controllers = {
+	  TCS3472: {
+	    initialize: {
+	      value(options, callback) {
+	        // const state = priv.get(this);
+	        // state.gain = options.gain || 16;
+	        // state.integrationTime = options.integrationTime || 700;
+	        const { Drivers } = requireSip();
+	        Drivers.get(this.board, "TCS3472", options).on("data", (data) =>
+	          callback(data),
+	        );
+	      },
+	    },
+	  },
+	};
+
+	class ColorSensor extends Emitter {
+	  constructor(options) {
+	    super();
+
+	    Board.Component.call(this, (options = Board.Options(options)));
+	    Board.Controller.call(this, Controllers, options);
+
+	    // this.calibration = {
+	    //   white: {
+	    //     r: 65535,
+	    //     g: 65535,
+	    //     b: 65535,
+	    //   },
+	    //   black: {
+	    //     r: 8546,
+	    //     g: 11065,
+	    //     b: 9999,
+	    //   },
+	    // };
+
+	    const freq = options.freq || 250;
+	    let last = null;
+	    let raw = null;
+
+	    if (typeof this.initialize === "function") {
+	      this.initialize(options, (data) => {
+	        raw = data;
+	      });
+	    }
+
+	    Object.defineProperties(this, {
+	      raw: {
+	        get() {
+	          return raw;
+	        },
+	      },
+	      rgb: {
+	        get() {
+	          // https://forums.adafruit.com/viewtopic.php?t=140172
+
+	          const r = Math.floor(raw.r / 256);
+	          const g = Math.floor(raw.g / 256);
+	          const b = Math.floor(raw.b / 256);
+
+	          return {
+	            r: r,
+	            g: g,
+	            b: b,
+	          };
+	        },
+	      },
+	      lux: {
+	        get() {
+	          /* This only uses RGB ... how can we integrate clear or calculate lux */
+	          /* based exclusively on clear since this might be more reliable?      */
+	          let illuminance =
+	            -0.32466 * raw.r + 1.57837 * raw.g + -0.73191 * raw.b;
+
+	          return toFixed(illuminance, 0);
+	        },
+	      },
+	      temp: {
+	        get() {
+	          let X, Y, Z; /* RGB to XYZ correlation      */
+	          let xc, yc; /* Chromaticity co-ordinates   */
+	          let n; /* McCamy's formula            */
+	          let cct;
+
+	          /* 1. Map RGB values to their XYZ counterparts.    */
+	          /* Based on 6500K fluorescent, 3000K fluorescent   */
+	          /* and 60W incandescent values for a wide range.   */
+	          /* Note: Y = Illuminance or lux                    */
+	          X = -0.14282 * raw.r + 1.54924 * raw.g + -0.95641 * raw.b;
+	          Y = -0.32466 * raw.r + 1.57837 * raw.g + -0.73191 * raw.b;
+	          Z = -0.68202 * raw.r + 0.77073 * raw.g + 0.56332 * raw.b;
+
+	          /* 2. Calculate the chromaticity co-ordinates      */
+	          xc = X / (X + Y + Z);
+	          yc = Y / (X + Y + Z);
+
+	          /* 3. Use McCamy's formula to determine the CCT    */
+	          n = (xc - 0.332) / (0.1858 - yc);
+
+	          /* Calculate the final CCT */
+	          cct =
+	            449.0 * Math.pow(n, 3) +
+	            3525.0 * Math.pow(n, 2) +
+	            6823.3 * n +
+	            5520.33;
+
+	          /* Return the results in degrees Kelvin */
+	          return toFixed(cct, 0);
+	        },
+	      },
+	    });
+
+	    setInterval(() => {
+	      if (raw === null) {
+	        return;
+	      }
+
+	      const data = {
+	        c: this.raw.c,
+	        r: this.raw.r,
+	        g: this.raw.g,
+	        b: this.raw.b,
+	      };
+
+	      this.emit("data", data);
+
+	      if (
+	        last === null ||
+	        this.raw.c !== last.c ||
+	        this.raw.r !== last.r ||
+	        this.raw.g !== last.g ||
+	        this.raw.b !== last.b
+	      ) {
+	        // only emit if has values
+	        if (last !== null) {
+	          this.emit("change", data);
+	        }
+
+	        last = { ...data };
+	      }
+	    }, freq);
+	  }
+	}
+
+	/* istanbul ignore else */
+	if (!!process.env.IS_TEST_MODE) {
+	  ColorSensor.Controllers = Controllers;
+	  ColorSensor.purge = function () {};
+	}
+
+	blokdots_colorsensor = ColorSensor;
+	return blokdots_colorsensor;
+}
+
 var sip;
 var hasRequiredSip;
 
@@ -23615,13 +21231,7 @@ function requireSip () {
 	const Fn = fn;
 	const priv = new Map();
 	const activeDrivers = new Map();
-	const {
-	  int16,
-	  uint16,
-	  uint24,
-	  s32,
-	  u32,
-	} = Fn;
+	const { int16, uint16, uint24, s32, u32 } = Fn;
 
 	const ACCELEROMETER = "accelerometer";
 	const ALTIMETER = "altimeter";
@@ -23640,22 +21250,26 @@ function requireSip () {
 	    // TODO: Can this be put inside the get accessor?
 	    // - Lazy init?
 	    state[component] = new Components[component](
-	      Object.assign({
-	        controller: options.controller || controller,
-	        freq: options.freq,
-	        board: this.board,
-	      }, options)
+	      Object.assign(
+	        {
+	          controller: options.controller || controller,
+	          freq: options.freq,
+	          board: this.board,
+	        },
+	        options,
+	      ),
 	    );
 
 	    descriptors[component] = {
 	      get() {
 	        return state[component];
-	      }
+	      },
 	    };
 
 	    // TODO: Get rid of this trash
 	    if (backwardCompatibilityGarbageHacks[component]) {
-	      descriptors[backwardCompatibilityGarbageHacks[component]] = descriptors[component];
+	      descriptors[backwardCompatibilityGarbageHacks[component]] =
+	        descriptors[component];
 	    }
 	  }
 
@@ -23671,32 +21285,32 @@ function requireSip () {
 	Components.orientation = requireOrientation();
 	Components.thermometer = requireThermometer();
 	Components.sunlight = requireBlokdots_sunlight();
+	Components.colorSensor = requireBlokdots_colorsensor();
 
 	const backwardCompatibilityGarbageHacks = {
 	  thermometer: "temperature",
 	};
 
 	const Drivers = {
-
 	  // blokdots ————————————————————
 	  SI1145: {
 	    ADDRESSES: {
-	      value: [0x60]
+	      value: [0x60],
 	    },
 	    REGISTER: {
 	      value: {
 	        ALS_VIS: 0x22, // Visible Light Ambient
 	        ALS_IR: 0x24, // Infrared Light Ambient
-	        AUX_UV: 0x2C, // UV
+	        AUX_UV: 0x2c, // UV
 
 	        INT_CFG: 0x03,
 	        IRQ_ENABLE: 0x04,
 	        IRQMODE1: 0x05,
 	        IRQMODE2: 0x06,
 	        HW_KEY: 0x07,
-	        MEAS_RATE0: 0x08, 
+	        MEAS_RATE0: 0x08,
 	        MEAS_RATE1: 0x09,
-	        PSALS_AUTO: 0x0F,
+	        PSALS_AUTO: 0x0f,
 	        UCOEF0: 0x13,
 	        UCOEF1: 0x14,
 	        UCOEF2: 0x15,
@@ -23706,56 +21320,54 @@ function requireSip () {
 	        IRQ_STATUS: 0x21,
 
 	        PARAM_WR: 0x17,
-	        PARAM_RD: 0x2E,
-	        PARAM_SET: 0xA0,
+	        PARAM_RD: 0x2e,
+	        PARAM_SET: 0xa0,
 
-	        PSLED21: 0x0F,
-	      }
+	        PSLED21: 0x0f,
+	      },
 	    },
 	    COMMANDS: {
 	      value: {
 	        RESET: 0x01,
-	      }
+	      },
 	    },
 	    PARAMS: {
 	      value: {
 	        CHLIST: 0x01,
-	        CHLIST_ENUV:0x80,
-	        CHLIST_ENALSIR:0x20,
-	        CHLIST_ENALSVIS:0x10,
-	        CHLIST_ENPS1:0x01,
+	        CHLIST_ENUV: 0x80,
+	        CHLIST_ENALSIR: 0x20,
+	        CHLIST_ENALSVIS: 0x10,
+	        CHLIST_ENPS1: 0x01,
 
-	        PS1ADCMUX:0x07,
-	        ADCMUX_LARGEIR:0x03,
-	        PSLED12SEL:0x02,
-	        PSLED12SEL_PS1LED1:0x10,
-	        PSADCGAIN:0x0B,
-	        PSADCOUNTER:0x0A,
-	        PSADCMISC:0x0C,
-	        PSADCMISC_RANGE:0x20, 
-	        PSADCMISC_PSMODE:0x04,
+	        PS1ADCMUX: 0x07,
+	        ADCMUX_LARGEIR: 0x03,
+	        PSLED12SEL: 0x02,
+	        PSLED12SEL_PS1LED1: 0x10,
+	        PSADCGAIN: 0x0b,
+	        PSADCOUNTER: 0x0a,
+	        PSADCMISC: 0x0c,
+	        PSADCMISC_RANGE: 0x20,
+	        PSADCMISC_PSMODE: 0x04,
 
-	        ALSIRADCMUX:0x0E,
-	        ADCMUX_SMALLIR:0x00,
-	        ALSIRADCGAIN:0x1E,
-	        ALSIRADCOUNTER:0x1D,
+	        ALSIRADCMUX: 0x0e,
+	        ADCMUX_SMALLIR: 0x00,
+	        ALSIRADCGAIN: 0x1e,
+	        ALSIRADCOUNTER: 0x1d,
 
-	        ALSIRADCMISC:0x1F,
-	        ALSIRADCMISC_RANGE:0x20,
-	        ALSVISADCGAIN:0x11,
-	        ALSVISADCOUNTER:0x10,
-	        ADCCOUNTER_511CLK:0x70,
-	        ALSVISADCMISC:0x12,
-	        ALSVISADCMISC_VISRANGE:0x20,
-	      }
+	        ALSIRADCMISC: 0x1f,
+	        ALSIRADCMISC_RANGE: 0x20,
+	        ALSVISADCGAIN: 0x11,
+	        ALSVISADCOUNTER: 0x10,
+	        ADCCOUNTER_511CLK: 0x70,
+	        ALSVISADCMISC: 0x12,
+	        ALSVISADCMISC_VISRANGE: 0x20,
+	      },
 	    },
 	    initialize: {
 	      value(board, options) {
-
-
-	        // SOURCES 
+	        // SOURCES
 	        // ###############
-	        // Registers -> https://files.seeedstudio.com/wiki/Grove-Sunlight_Sensor/res/Si1145-46-47.pdf 
+	        // Registers -> https://files.seeedstudio.com/wiki/Grove-Sunlight_Sensor/res/Si1145-46-47.pdf
 	        // Code -> https://github.com/adafruit/Adafruit_SI1145_Library/blob/master/Adafruit_SI1145.cpp
 
 	        const io = board.io;
@@ -23764,9 +21376,9 @@ function requireSip () {
 	        const computed = {
 	          ir: null,
 	          uv: null,
-	          vis: null
+	          vis: null,
 	        };
-	  
+
 	        io.i2cConfig(options);
 
 	        const reset = () => {
@@ -23776,26 +21388,29 @@ function requireSip () {
 	          io.i2cWriteReg(address, this.REGISTER.IRQMODE1, 0);
 	          io.i2cWriteReg(address, this.REGISTER.IRQMODE2, 0);
 	          io.i2cWriteReg(address, this.REGISTER.INT_CFG, 0);
-	          io.i2cWriteReg(address, this.REGISTER.IRQ_STATUS, 0xFF);
+	          io.i2cWriteReg(address, this.REGISTER.IRQ_STATUS, 0xff);
 
 	          // setTimeout(()=>{
-	            io.i2cWriteReg(address, this.REGISTER.COMMAND, this.COMMANDS.RESET);
-	            setTimeout(()=>{
-	              io.i2cWriteReg(address, this.REGISTER.HW_KEY, 0x17);
-	            },50);
+	          io.i2cWriteReg(address, this.REGISTER.COMMAND, this.COMMANDS.RESET);
+	          setTimeout(() => {
+	            io.i2cWriteReg(address, this.REGISTER.HW_KEY, 0x17);
+	          }, 50);
 	          // },50)
 	        };
 
 	        reset();
 
-	        const writeParam = (p,v) => {
+	        const writeParam = (p, v) => {
 	          io.i2cWriteReg(address, this.REGISTER.PARAM_WR, v);
-	          io.i2cWriteReg(address, this.REGISTER.COMMAND, p | this.REGISTER.PARAM_SET);
+	          io.i2cWriteReg(
+	            address,
+	            this.REGISTER.COMMAND,
+	            p | this.REGISTER.PARAM_SET,
+	          );
 	          // return io.i2cReadOnce(address, this.REGISTER.PARAM_RD, 1,console.log);
 	        };
 
-	        setTimeout(()=>{
-
+	        setTimeout(() => {
 	          // enable UVindex measurement coefficients!
 	          io.i2cWriteReg(address, this.REGISTER.UCOEF0, 0x29);
 	          io.i2cWriteReg(address, this.REGISTER.UCOEF1, 0x89);
@@ -23803,11 +21418,25 @@ function requireSip () {
 	          io.i2cWriteReg(address, this.REGISTER.UCOEF3, 0x00);
 
 	          // Enable UV Sensor
-	          writeParam(this.PARAMS.CHLIST, this.PARAMS.CHLIST_ENUV | this.PARAMS.CHLIST_ENALSIR | this.PARAMS.CHLIST_ENALSVIS | this.PARAMS.CHLIST_ENPS1);
+	          writeParam(
+	            this.PARAMS.CHLIST,
+	            this.PARAMS.CHLIST_ENUV |
+	              this.PARAMS.CHLIST_ENALSIR |
+	              this.PARAMS.CHLIST_ENALSVIS |
+	              this.PARAMS.CHLIST_ENPS1,
+	          );
 
 	          // enable interrupt on every sample
-	          io.i2cWriteReg(address, this.REGISTER.INTCFG, this.REGISTER.INTCFG_INTOE);
-	          io.i2cWriteReg(address, this.REGISTER.IRQEN, this.REGISTER.IRQEN_ALSEVERYSAMPLE);
+	          io.i2cWriteReg(
+	            address,
+	            this.REGISTER.INTCFG,
+	            this.REGISTER.INTCFG_INTOE,
+	          );
+	          io.i2cWriteReg(
+	            address,
+	            this.REGISTER.IRQEN,
+	            this.REGISTER.IRQEN_ALSEVERYSAMPLE,
+	          );
 
 	          // Prox Sense 1 ————————————————————
 
@@ -23821,8 +21450,10 @@ function requireSip () {
 	          // take 511 clocks to measure
 	          writeParam(this.PARAMS.PSADCOUNTER, this.PARAMS.ADCCOUNTER_511CLK);
 	          // in prox mode, high range
-	          writeParam(this.PARAMS.PSADCMISC,
-	                     this.PARAMS.PSADCMISC_RANGE | this.PARAMS.PSADCMISC_PSMODE);
+	          writeParam(
+	            this.PARAMS.PSADCMISC,
+	            this.PARAMS.PSADCMISC_RANGE | this.PARAMS.PSADCMISC_PSMODE,
+	          );
 
 	          writeParam(this.PARAMS.ALSIRADCMUX, this.PARAMS.ADCMUX_SMALLIR);
 	          // fastest clocks, clock div 1
@@ -23835,83 +21466,348 @@ function requireSip () {
 	          // fastest clocks, clock div 1
 	          writeParam(this.PARAMS.ALSVISADCGAIN, 0);
 	          // take 511 clocks to measure
-	          writeParam(this.PARAMS.ALSVISADCOUNTER, this.PARAMS.ADCCOUNTER_511CLK);
+	          writeParam(
+	            this.PARAMS.ALSVISADCOUNTER,
+	            this.PARAMS.ADCCOUNTER_511CLK,
+	          );
 	          // in high range mode (not normal signal)
-	          writeParam(this.PARAMS.ALSVISADCMISC, this.PARAMS.ALSVISADCMISC_VISRANGE);
+	          writeParam(
+	            this.PARAMS.ALSVISADCMISC,
+	            this.PARAMS.ALSVISADCMISC_VISRANGE,
+	          );
 
 	          // Prox Sense 1 # END ————————————————————
 
-
 	          // measurement rate for auto —————————————
-	          io.i2cWriteReg(address, this.REGISTER.MEAS_RATE0, 0xFF);
+	          io.i2cWriteReg(address, this.REGISTER.MEAS_RATE0, 0xff);
 	          // 255 * 31.25uS = 8ms
 
 	          // auto run
-	          io.i2cWriteReg(address, this.REGISTER.COMMAND, this.REGISTER.PSALS_AUTO);
+	          io.i2cWriteReg(
+	            address,
+	            this.REGISTER.COMMAND,
+	            this.REGISTER.PSALS_AUTO,
+	          );
 
 	          readCycle();
 
-	        // Wait until after reset
-	        }, 500); 
+	          // Wait until after reset
+	        }, 500);
 
-	        
 	        const handler = (data, type) => {
-
 	          // console.log(type, data)
 
 	          const compVal = uint16(data[1], data[0]);
 
 	          // const compVal = parseInt( data[0], 16 );
-	          
-	          switch( type ){
-	            case 'uv':
+
+	          switch (type) {
+	            case "uv":
 	              computed.uv = compVal;
 	              break;
-	            case 'ir':
+	            case "ir":
 	              computed.ir = compVal;
 	              break;
-	            case 'vis':
+	            case "vis":
 	              computed.vis = compVal;
 	              break;
 	          }
-	          
 	        };
 
 	        const readCycle = () => {
-	          
 	          // io.i2cWriteReg(address, this.REGISTER.COMMAND, 0x00);
-	          
+
 	          // io.i2cRead(address, this.REGISTER.AUX_UV, 2, handler);
-	          io.i2cReadOnce(address, this.REGISTER.AUX_UV, 2, (arr)=>handler(arr,'uv'));
-	          io.i2cReadOnce(address, this.REGISTER.ALS_IR, 2, (arr)=>handler(arr,'ir'));
+	          io.i2cReadOnce(address, this.REGISTER.AUX_UV, 2, (arr) =>
+	            handler(arr, "uv"),
+	          );
+	          io.i2cReadOnce(address, this.REGISTER.ALS_IR, 2, (arr) =>
+	            handler(arr, "ir"),
+	          );
 	          // io.i2cReadOnce(address, this.REGISTER.ALS_VIS, 2, (arr)=>handler(arr,'vis'));
 
 	          // io.i2cWrite(address, this.REGISTER.ALS_VIS, [0x00, 0x00])
 	          // io.i2cReadOnce(address, 2, (arr)=>handler(arr,'vis'));
 
-	          io.i2cReadOnce(address, this.REGISTER.ALS_VIS, 2, (arr)=>handler(arr,'vis'));
-	          
+	          io.i2cReadOnce(address, this.REGISTER.ALS_VIS, 2, (arr) =>
+	            handler(arr, "vis"),
+	          );
+
 	          // console.log( computed )
 	          this.emit("data", computed);
 
 	          // start again
 	          setTimeout(readCycle, 500);
 	        };
-	      }
+	      },
 	    },
 	    identifier: {
 	      value(options) {
 	        const address = Drivers.addressResolver(Drivers.SI1145, options);
 	        return `SI1145-${address}`;
-	      }
-	    }
+	      },
+	    },
+	  },
+
+	  TCS3472: {
+	    ADDRESSES: {
+	      value: [0x29],
+	    },
+	    REGISTER: {
+	      value: {
+	        COMMAND_BIT: 0x80,
+	        ENABLE: 0x00,
+	        ENABLE_AIEN: 0x10 /* RGBC Interrupt Enable */,
+	        ENABLE_WEN: 0x08 /* Wait enable - Writing 1 activates the wait timer */,
+	        ENABLE_AEN: 0x02 /* RGBC Enable - Writing 1 actives the ADC, 0 disables it */,
+	        ENABLE_PON: 0x01 /* Power on - Writing 1 activates the internal oscillator, 0 disables it */,
+	        ATIME: 0x01 /* Integration time */,
+	        WTIME: 0x03 /* Wait time :ifENABLE_WEN is asserted, */,
+	        WTIME_2_4MS: 0xff /* WLONG0 = 2.4ms   WLONG1 = 0.029s */,
+	        WTIME_204MS: 0xab /* WLONG0 = 204ms   WLONG1 = 2.45s  */,
+	        WTIME_614MS: 0x00 /* WLONG0 = 614ms   WLONG1 = 7.4s   */,
+	        AILTL: 0x04 /* Clear channel lower interrupt threshold */,
+	        AILTH: 0x05,
+	        AIHTL: 0x06 /* Clear channel upper interrupt threshold */,
+	        AIHTH: 0x07,
+	        PERS: 0x0c /* Persistence register - basic SW filtering mechanism for interrupts */,
+	        PERS_NONE: 0b0000 /* Every RGBC cycle generates an interrupt                                */,
+	        PERS_1_CYCLE: 0b0001 /* 1 clean channel value outside threshold range generates an interrupt   */,
+	        PERS_2_CYCLE: 0b0010 /* 2 clean channel values outside threshold range generates an interrupt  */,
+	        PERS_3_CYCLE: 0b0011 /* 3 clean channel values outside threshold range generates an interrupt  */,
+	        PERS_5_CYCLE: 0b0100 /* 5 clean channel values outside threshold range generates an interrupt  */,
+	        PERS_10_CYCLE: 0b0101 /* 10 clean channel values outside threshold range generates an interrupt */,
+	        PERS_15_CYCLE: 0b0110 /* 15 clean channel values outside threshold range generates an interrupt */,
+	        PERS_20_CYCLE: 0b0111 /* 20 clean channel values outside threshold range generates an interrupt */,
+	        PERS_25_CYCLE: 0b1000 /* 25 clean channel values outside threshold range generates an interrupt */,
+	        PERS_30_CYCLE: 0b1001 /* 30 clean channel values outside threshold range generates an interrupt */,
+	        PERS_35_CYCLE: 0b1010 /* 35 clean channel values outside threshold range generates an interrupt */,
+	        PERS_40_CYCLE: 0b1011 /* 40 clean channel values outside threshold range generates an interrupt */,
+	        PERS_45_CYCLE: 0b1100 /* 45 clean channel values outside threshold range generates an interrupt */,
+	        PERS_50_CYCLE: 0b1101 /* 50 clean channel values outside threshold range generates an interrupt */,
+	        PERS_55_CYCLE: 0b1110 /* 55 clean channel values outside threshold range generates an interrupt */,
+	        PERS_60_CYCLE: 0b1111 /* 60 clean channel values outside threshold range generates an interrupt */,
+	        CONFIG: 0x0d,
+	        CONFIG_WLONG: 0x02 /* Choose between short and long :12x, wait times viaWTIME */,
+	        CONTROL: 0x0f /* Set the gain level for the sensor */,
+	        ID: 0x12 /* 0x44 = TCS34721/TCS34725, 0x4D = TCS34723/TCS34727 */,
+	        STATUS: 0x13,
+	        STATUS_AINT: 0x10 /* RGBC Clean channel interrupt */,
+	        STATUS_AVALID: 0x01 /* Indicates that the RGBC channels have completed an integration cycle */,
+	        CDATAL: 0x14 /* Clear channel data */,
+	        CDATAH: 0x15,
+	        RDATAL: 0x16 /* Red channel data */,
+	        RDATAH: 0x17,
+	        GDATAL: 0x18 /* Green channel data */,
+	        GDATAH: 0x19,
+	        BDATAL: 0x1a /* Blue channel data */,
+	        BDATAH: 0x1b,
+	      },
+	    },
+	    COMMANDS: {
+	      value: {
+	        RESET: 0x01,
+	      },
+	    },
+	    PARAMS: {
+	      value: {
+	        INTEGRATIONTIME_2_4MS: 0xff /**<  2.4ms - 1 cycle    - Max Count: 1024  */,
+	        INTEGRATIONTIME_24MS: 0xf6 /**<  24ms  - 10 cycles  - Max Count: 10240 */,
+	        INTEGRATIONTIME_50MS: 0xeb /**<  50ms  - 20 cycles  - Max Count: 20480 */,
+	        INTEGRATIONTIME_101MS: 0xd5 /**<  101ms - 42 cycles  - Max Count: 43008 */,
+	        INTEGRATIONTIME_154MS: 0xc0 /**<  154ms - 64 cycles  - Max Count: 65535 */,
+	        INTEGRATIONTIME_700MS: 0x00 /**<  700ms - 256 cycles - Max Count: 65535 */,
+
+	        GAIN_1X: 0x00 /**<  No gain  */,
+	        GAIN_4X: 0x01 /**<  4x gain  */,
+	        GAIN_16X: 0x02 /**<  16x gain */,
+	        GAIN_60X: 0x03 /**<  60x gain */,
+	      },
+	    },
+	    initialize: {
+	      value(board, options) {
+	        // SOURCES
+	        // ###############
+	        // Code -> https://github.com/Seeed-Studio/Grove_I2C_Color_Sensor_TCS3472
+
+	        // https://forums.adafruit.com/viewtopic.php?t=140172
+
+	        const io = board.io;
+	        const address = Drivers.addressResolver(this, options);
+
+	        // "shutter time"
+	        let integrationTimeReg;
+	        let integrationTime;
+	        switch (options.integrationTime) {
+	          case 2.4:
+	            integrationTimeReg = this.PARAMS.INTEGRATIONTIME_2_4MS;
+	            integrationTime = 2.4;
+	            break;
+	          case 24:
+	            integrationTimeReg = this.PARAMS.INTEGRATIONTIME_24MS;
+	            integrationTime = 24;
+	            break;
+	          case 50:
+	            integrationTimeReg = this.PARAMS.INTEGRATIONTIME_50MS;
+	            integrationTime = 50;
+	            break;
+	          case 101:
+	            integrationTimeReg = this.PARAMS.INTEGRATIONTIME_101MS;
+	            integrationTime = 101;
+	            break;
+	          case 154:
+	            integrationTimeReg = this.PARAMS.INTEGRATIONTIME_154MS;
+	            integrationTime = 154;
+	            break;
+	          case 700:
+	          default:
+	            integrationTimeReg = this.PARAMS.INTEGRATIONTIME_700MS;
+	            integrationTime = 700;
+	            break;
+	        }
+	        const integrationTimeDelay = integrationTime * 1.1;
+
+	        // "ISO"
+	        let gainReg;
+	        let gain;
+	        switch (options.gain) {
+	          case 1:
+	            gainReg = this.PARAMS.GAIN_1X;
+	            gain = 1;
+	            break;
+	          case 4:
+	            gainReg = this.PARAMS.GAIN_4X;
+	            gain = 4;
+	            break;
+	          case 60:
+	            gainReg = this.PARAMS.GAIN_60X;
+	            gain = 60;
+	            break;
+	          case 16:
+	          default:
+	            gainReg = this.PARAMS.GAIN_16X;
+	            gain = 16;
+	            break;
+	        }
+
+	        console.log("integrationTime", integrationTime);
+	        console.log("gain", gain);
+
+	        io.i2cConfig(options);
+
+	        const computed = {
+	          c: null,
+	          r: null,
+	          g: null,
+	          b: null,
+	        };
+
+	        const write8 = (reg, value) => {
+	          io.i2cWriteReg(
+	            address,
+	            this.REGISTER.COMMAND_BIT | reg,
+	            value & 0xff,
+	          );
+	        };
+
+	        const enable = () => {
+	          write8(this.REGISTER.ENABLE, this.REGISTER.ENABLE_PON);
+	          setTimeout(() => {
+	            write8(
+	              this.REGISTER.ENABLE,
+	              this.REGISTER.ENABLE_PON | this.REGISTER.ENABLE_AEN,
+	            );
+	          }, 100);
+	        };
+
+	        const readColor16 = (val) => {
+	          let register;
+
+	          switch (val) {
+	            case "c":
+	              register = this.REGISTER.CDATAL;
+	              break;
+	            case "r":
+	              register = this.REGISTER.RDATAL;
+	              break;
+	            case "g":
+	              register = this.REGISTER.GDATAL;
+	              break;
+	            case "b":
+	              register = this.REGISTER.BDATAL;
+	              break;
+	          }
+
+	          // new Promise((resolve) => {
+	          io.i2cReadOnce(
+	            address,
+	            this.REGISTER.COMMAND_BIT | register,
+	            2,
+	            (data) => {
+	              const t = data[0];
+	              let x = data[1];
+
+	              x = x <<= 8;
+	              x = x |= t;
+
+	              computed[val] = x;
+	            },
+	          );
+	          // });
+	        };
+
+	        const getColor = () => {
+	          // turn on LED
+	          // setInterrupt(false);
+
+	          // get raw data
+	          readColor16("c");
+	          readColor16("r");
+	          readColor16("g");
+	          readColor16("b");
+
+	          // turn off LED
+	          // setInterrupt(true);
+	        };
+
+	        const readCycle = () => {
+	          getColor();
+	          this.emit("data", computed);
+
+	          // start next cycle
+	          setTimeout(readCycle, integrationTimeDelay);
+	        };
+
+	        const beginColorSensor = () => {
+	          /* Set default integration time and gain */
+	          write8(this.REGISTER.ATIME, integrationTimeReg);
+
+	          // setGain(_tcs34725Gain);
+	          write8(this.REGISTER.CONTROL, gainReg);
+
+	          /* Note: by default, the device is in power down mode on bootup */
+	          enable();
+
+	          // start reading cycle after is enabled
+	          setTimeout(readCycle, 500);
+	        };
+
+	        beginColorSensor();
+	      },
+	    },
+	    identifier: {
+	      value(options) {
+	        const address = Drivers.addressResolver(Drivers.TCS3472, options);
+	        return `TCS3472-${address}`;
+	      },
+	    },
 	  },
 
 	  // ————————————————————————————————
 
 	  SHT31D: {
 	    ADDRESSES: {
-	      value: [0x44]
+	      value: [0x44],
 	    },
 	    REGISTER: {
 	      value: {
@@ -23919,9 +21815,7 @@ function requireSip () {
 	        SOFT_RESET: 0x22,
 	        // Table 8
 	        MEASURE_HIGH_REPEATABILITY: 0x2400,
-
-
-	      }
+	      },
 	    },
 	    initialize: {
 	      value(board, options) {
@@ -23933,7 +21827,7 @@ function requireSip () {
 	        io.i2cWrite(address, [
 	          // Page 12, Table 13
 	          this.REGISTER.SOFT_RESET >> 8,
-	          this.REGISTER.SOFT_RESET & 0xFF,
+	          this.REGISTER.SOFT_RESET & 0xff,
 	        ]);
 
 	        const computed = {
@@ -23947,11 +21841,11 @@ function requireSip () {
 	          // Send high repeatability measurement command
 	          io.i2cWrite(address, [
 	            this.REGISTER.MEASURE_HIGH_REPEATABILITY >> 8,
-	            this.REGISTER.MEASURE_HIGH_REPEATABILITY & 0xFF,
+	            this.REGISTER.MEASURE_HIGH_REPEATABILITY & 0xff,
 	          ]);
 
 	          setTimeout(() => {
-	            io.i2cReadOnce(address, READLENGTH, data => {
+	            io.i2cReadOnce(address, READLENGTH, (data) => {
 	              computed.temperature = uint16(data[0], data[1]);
 	              computed.humidity = uint16(data[3], data[4]);
 	              this.emit("data", computed);
@@ -23961,26 +21855,26 @@ function requireSip () {
 	        };
 
 	        readCycle();
-	      }
+	      },
 	    },
 	    identifier: {
 	      value(options) {
 	        const address = Drivers.addressResolver(Drivers.SHT31D, options);
 	        return `sht-31d-${address}`;
-	      }
-	    }
+	      },
+	    },
 	  },
 
 	  HTU21D: {
 	    ADDRESSES: {
-	      value: [0x40]
+	      value: [0x40],
 	    },
 	    REGISTER: {
 	      value: {
-	        HUMIDITY: 0xE5,
-	        TEMPERATURE: 0xE3,
-	        SOFT_RESET: 0xFE,
-	      }
+	        HUMIDITY: 0xe5,
+	        TEMPERATURE: 0xe3,
+	        SOFT_RESET: 0xfe,
+	      },
 	    },
 	    initialize: {
 	      value(board, options) {
@@ -24006,9 +21900,11 @@ function requireSip () {
 	          // does not like when 5 bytes are requested, so we put
 	          // the two data sources on their own read channels.
 	          const isTemperatureCycle = cycle === 0;
-	          const register = isTemperatureCycle ? this.REGISTER.TEMPERATURE : this.REGISTER.HUMIDITY;
+	          const register = isTemperatureCycle
+	            ? this.REGISTER.TEMPERATURE
+	            : this.REGISTER.HUMIDITY;
 
-	          io.i2cReadOnce(address, register, 2, data => {
+	          io.i2cReadOnce(address, register, 2, (data) => {
 	            if (isTemperatureCycle) {
 	              computed.temperature = uint16(data[0], data[1]);
 	            } else {
@@ -24025,18 +21921,18 @@ function requireSip () {
 	        };
 
 	        readCycle();
-	      }
+	      },
 	    },
 	    identifier: {
 	      value(options) {
 	        const address = Drivers.addressResolver(Drivers.HTU21D, options);
 	        return `htu-s1d-${address}`;
-	      }
-	    }
+	      },
+	    },
 	  },
 	  HIH6130: {
 	    ADDRESSES: {
-	      value: [0x27]
+	      value: [0x27],
 	    },
 	    initialize: {
 	      value(board, options) {
@@ -24055,17 +21951,17 @@ function requireSip () {
 	          // The most common use cases involve continuous
 	          // sampling of sensor data, so that's what this
 	          // controller-driver will provide.
-	          io.i2cWrite(address, 0xA0, [0x00, 0x00]);
+	          io.i2cWrite(address, 0xa0, [0x00, 0x00]);
 
 	          setTimeout(() => {
 	            io.i2cWrite(address, 0x80, [0x00, 0x00]);
-	            io.i2cReadOnce(address, 4, data => {
+	            io.i2cReadOnce(address, 4, (data) => {
 	              // Page 2, Figure 4.
 	              // Humidity and Temperature Data Fetch, Four Byte Data Read
 	              // B7:6 Contain status bits
 	              const status = data[0] >> 6;
 	              // Mask out B7:6 status bits from H MSB
-	              computed.humidity = int16(data[0] & 0x3F, data[1]);
+	              computed.humidity = int16(data[0] & 0x3f, data[1]);
 	              // Shift off B1:0 (which are empty)
 	              computed.temperature = int16(data[2], data[3] >> 2);
 
@@ -24095,31 +21991,31 @@ function requireSip () {
 
 	              measureCycle();
 	            });
-	          // Page 3
-	          // 3.0 Measurement Cycle
-	          // The measurement cycle duration is typically
-	          // 36.65 ms for temperature and humidity readings.
+	            // Page 3
+	            // 3.0 Measurement Cycle
+	            // The measurement cycle duration is typically
+	            // 36.65 ms for temperature and humidity readings.
 	          }, delay);
 	        };
 
 	        measureCycle();
-	      }
+	      },
 	    },
 	    identifier: {
 	      value(options) {
 	        const address = Drivers.addressResolver(Drivers.HIH6130, options);
 	        return `hih6130-${address}`;
-	      }
-	    }
+	      },
+	    },
 	  },
 	  DHT_I2C_NANO_BACKPACK: {
 	    ADDRESSES: {
-	      value: [0x0A]
+	      value: [0x0a],
 	    },
 	    REGISTER: {
 	      value: {
 	        READ: 0x00,
-	      }
+	      },
 	    },
 	    initialize: {
 	      value(board, options) {
@@ -24132,7 +22028,8 @@ function requireSip () {
 	        io.i2cConfig(options);
 
 	        const dhtVariantExec = /(\d{2})/.exec(options.controller);
-	        const dhtVariant = dhtVariantExec && dhtVariantExec.length && dhtVariantExec[0];
+	        const dhtVariant =
+	          dhtVariantExec && dhtVariantExec.length && dhtVariantExec[0];
 
 	        if (dhtVariant) {
 	          dhtType = +dhtVariant;
@@ -24148,29 +22045,32 @@ function requireSip () {
 	        };
 
 	        io.i2cWrite(address, [dhtPin, dhtType]);
-	        io.i2cRead(address, 4, data => {
+	        io.i2cRead(address, 4, (data) => {
 	          computed.humidity = int16(data[0], data[1]);
 	          computed.temperature = int16(data[2], data[3]);
 	          this.emit("data", computed);
 	        });
-	      }
+	      },
 	    },
 	    identifier: {
 	      value(options) {
-	        const address = Drivers.addressResolver(Drivers.DHT_I2C_NANO_BACKPACK, options);
+	        const address = Drivers.addressResolver(
+	          Drivers.DHT_I2C_NANO_BACKPACK,
+	          options,
+	        );
 	        return `dht_i2c_nano_backpack-${address}`;
-	      }
-	    }
+	      },
+	    },
 	  },
 	  MPU6050: {
 	    ADDRESSES: {
-	      value: [0x68, 0x69]
+	      value: [0x68, 0x69],
 	    },
 	    REGISTER: {
 	      value: {
-	        SETUP: [0x6B, 0x00],
-	        READ: 0x3B
-	      }
+	        SETUP: [0x6b, 0x00],
+	        READ: 0x3b,
+	      },
 	    },
 	    initialize: {
 	      value(board, options) {
@@ -24180,17 +22080,17 @@ function requireSip () {
 	        const computed = {
 	          accelerometer: {},
 	          temperature: {},
-	          gyro: {}
+	          gyro: {},
 	        };
 
 	        io.i2cConfig(options);
 	        io.i2cWrite(address, this.REGISTER.SETUP);
 
-	        io.i2cRead(address, this.REGISTER.READ, READLENGTH, data => {
+	        io.i2cRead(address, this.REGISTER.READ, READLENGTH, (data) => {
 	          computed.accelerometer = {
 	            x: int16(data[0], data[1]),
 	            y: int16(data[2], data[3]),
-	            z: int16(data[4], data[5])
+	            z: int16(data[4], data[5]),
 	          };
 
 	          computed.temperature = int16(data[6], data[7]);
@@ -24198,7 +22098,7 @@ function requireSip () {
 	          computed.gyro = {
 	            x: int16(data[8], data[9]),
 	            y: int16(data[10], data[11]),
-	            z: int16(data[12], data[13])
+	            z: int16(data[12], data[13]),
 	          };
 
 	          this.emit("data", computed);
@@ -24209,12 +22109,12 @@ function requireSip () {
 	      value(options) {
 	        const address = Drivers.addressResolver(Drivers.MPU6050, options);
 	        return `mpu-6050-${address}`;
-	      }
-	    }
+	      },
+	    },
 	  },
 	  BNO055: {
 	    ADDRESSES: {
-	      value: [0x28, 0x29]
+	      value: [0x28, 0x29],
 	    },
 	    REGISTER: {
 	      value: {
@@ -24247,13 +22147,13 @@ function requireSip () {
 	          ACCEL: 0x08, // X LSB
 
 	          // ? by default
-	          MAG: 0x0E, // X LSB
+	          MAG: 0x0e, // X LSB
 
 	          // dps by default
 	          GYRO: 0x14, // X LSB
 
 	          //euler angles - degrees
-	          EULER: 0x1A, // heading LSB
+	          EULER: 0x1a, // heading LSB
 
 	          //quarternion
 	          QUARTERNION: 0x20, // W LSB
@@ -24271,7 +22171,7 @@ function requireSip () {
 	          TEMP: 1,
 	        },
 
-	        OPR_MODE_ADDR: 0x3D,
+	        OPR_MODE_ADDR: 0x3d,
 	        OPR_MODES: {
 	          CONFIG: 0x00,
 	          ACCONLY: 0x01,
@@ -24283,12 +22183,12 @@ function requireSip () {
 	          AMG: 0x07,
 	          IMUPLUS: 0x08,
 	          COMPASS: 0x09,
-	          M4G: 0x0A,
-	          NDOF_FMC_OFF: 0x0B,
-	          NDOF: 0x0C,
+	          M4G: 0x0a,
+	          NDOF_FMC_OFF: 0x0b,
+	          NDOF: 0x0c,
 	        },
 
-	        PWR_MODE_ADDR: 0x3E,
+	        PWR_MODE_ADDR: 0x3e,
 	        PWR_MODES: {
 	          NORMAL: 0x00,
 	          LOW: 0x01,
@@ -24301,13 +22201,13 @@ function requireSip () {
 	        },
 
 	        CALIBRATION: 0x35,
-	        SYS_TRIGGER: 0x3F,
+	        SYS_TRIGGER: 0x3f,
 
-	        UNIT_SEL_ADDR: 0x3B,
+	        UNIT_SEL_ADDR: 0x3b,
 
 	        AXIS_MAP_CONFIG_ADDR: 0x41,
 	        AXIS_MAP_SIGN_ADDR: 0x42,
-	      }
+	      },
 	    },
 	    initialize: {
 	      value(board, options) {
@@ -24316,7 +22216,7 @@ function requireSip () {
 	        // Page 67 4.3.54
 	        // a value for what we use to consider the system calibrated,
 	        // 0xC0 represents the just fusion algorithm/system
-	        const calibrationMask = options.calibrationMask || 0xC0;
+	        const calibrationMask = options.calibrationMask || 0xc0;
 
 	        const address = Drivers.addressResolver(this, options);
 	        const computed = {
@@ -24355,10 +22255,18 @@ function requireSip () {
 	        io.i2cConfig(options);
 
 	        // Put chip into CONFIG operation mode
-	        io.i2cWriteReg(address, this.REGISTER.OPR_MODE_ADDR, this.REGISTER.OPR_MODES.CONFIG);
+	        io.i2cWriteReg(
+	          address,
+	          this.REGISTER.OPR_MODE_ADDR,
+	          this.REGISTER.OPR_MODES.CONFIG,
+	        );
 
 	        // Set register page to 0
-	        io.i2cWriteReg(address, this.REGISTER.PAGE_ID_ADDR, this.REGISTER.PAGE_STATES.ZERO);
+	        io.i2cWriteReg(
+	          address,
+	          this.REGISTER.PAGE_ID_ADDR,
+	          this.REGISTER.PAGE_STATES.ZERO,
+	        );
 
 	        // Page 70, 4.3.63 SYS_TRIGGER
 	        //
@@ -24369,11 +22277,14 @@ function requireSip () {
 	        //
 	        io.i2cWriteReg(address, this.REGISTER.SYS_TRIGGER, 0x20);
 
-	        const por = new Promise(resolve => {
+	        const por = new Promise((resolve) => {
 	          setTimeout(() => {
-
 	            // Normal power mode
-	            io.i2cWriteReg(address, this.REGISTER.PWR_MODE_ADDR, this.REGISTER.PWR_MODES.NORMAL);
+	            io.i2cWriteReg(
+	              address,
+	              this.REGISTER.PWR_MODE_ADDR,
+	              this.REGISTER.PWR_MODES.NORMAL,
+	            );
 
 	            // Page 70, 4.3.63 SYS_TRIGGER
 	            //
@@ -24384,7 +22295,11 @@ function requireSip () {
 	            //
 	            //io.i2cWriteReg(address, this.REGISTER.SYS_TRIGGER, 0x00);
 	            // do we want to enable an external crystal??
-	            io.i2cWriteReg(address, this.REGISTER.SYS_TRIGGER, options.enableExternalCrystal ? 0x80 : 0x00);
+	            io.i2cWriteReg(
+	              address,
+	              this.REGISTER.SYS_TRIGGER,
+	              options.enableExternalCrystal ? 0x80 : 0x00,
+	            );
 
 	            // AF Page 24 3.4, Axis remap
 	            //
@@ -24399,7 +22314,11 @@ function requireSip () {
 	            // see also the defaults starting on Page 50
 	            //
 	            const axisMap = options.axisMap || 0x24;
-	            io.i2cWriteReg(address, this.REGISTER.AXIS_MAP_CONFIG_ADDR, axisMap);
+	            io.i2cWriteReg(
+	              address,
+	              this.REGISTER.AXIS_MAP_CONFIG_ADDR,
+	              axisMap,
+	            );
 
 	            // AF Page 24 3.4, Axis remap
 	            //
@@ -24416,7 +22335,11 @@ function requireSip () {
 
 	            // Set operational mode to "nine degrees of freedom"
 	            setTimeout(() => {
-	              io.i2cWriteReg(address, this.REGISTER.OPR_MODE_ADDR, this.REGISTER.OPR_MODES.NDOF);
+	              io.i2cWriteReg(
+	                address,
+	                this.REGISTER.OPR_MODE_ADDR,
+	                this.REGISTER.OPR_MODES.NDOF,
+	              );
 	              resolve();
 	            }, 10);
 
@@ -24425,117 +22348,118 @@ function requireSip () {
 	          }, 650);
 	        });
 
-	        por.then(() => new Promise(resolve => {
-	          const readCalibration = () => {
-	            io.i2cReadOnce(address, this.REGISTER.CALIBRATION, 1, data => {
+	        por
+	          .then(
+	            () =>
+	              new Promise((resolve) => {
+	                const readCalibration = () => {
+	                  io.i2cReadOnce(
+	                    address,
+	                    this.REGISTER.CALIBRATION,
+	                    1,
+	                    (data) => {
+	                      const calibration = data[0];
+	                      const didCalibrationChange =
+	                        computed.calibration !== calibration;
 
-	              const calibration = data[0];
-	              const didCalibrationChange = computed.calibration !== calibration;
+	                      computed.calibration = calibration;
 
+	                      // It is useful, possibly to know when the calibration state changes
+	                      // some of the calibrations are a little picky to get right, so emitting
+	                      // the calibration state as it changes is useful.
+	                      if (didCalibrationChange) {
+	                        this.emit("calibration", computed.calibration);
+	                      }
 
-	              computed.calibration = calibration;
+	                      if ((calibration & calibrationMask) === calibrationMask) {
+	                        // Emit the calibration state so we can work out in our userspace if
+	                        // we are good to go, and for when we are performing the calibration steps
+	                        // let everyone know we are calibrated.
+	                        this.emit("calibrated");
 
-	              // It is useful, possibly to know when the calibration state changes
-	              // some of the calibrations are a little picky to get right, so emitting
-	              // the calibration state as it changes is useful.
+	                        resolve();
+	                      } else {
+	                        readCalibration();
+	                      }
+	                    },
+	                  );
+	                };
+
+	                readCalibration();
+	              }),
+	          )
+	          .then(() => {
+	            // Temperature requires no calibration, begin reading immediately
+	            // here we read out temp, and the calibration state since they are back to back
+	            // and the device can, has been observed to go out of calibration and we may want to check
+	            io.i2cRead(address, this.REGISTER.READ.TEMP, 2, (data) => {
+	              computed.temperature = data[0];
+
+	              const didCalibrationChange = computed.calibration !== data[1];
+	              computed.calibration = data[1];
+
+	              this.emit("data", computed);
 	              if (didCalibrationChange) {
 	                this.emit("calibration", computed.calibration);
 	              }
-
-	              if ((calibration & calibrationMask) === calibrationMask) {
-
-	                // Emit the calibration state so we can work out in our userspace if
-	                // we are good to go, and for when we are performing the calibration steps
-	                // let everyone know we are calibrated.
-	                this.emit("calibrated");
-
-	                resolve();
-	              } else {
-	                readCalibration();
-	              }
-
 	            });
-	          };
 
-	          readCalibration();
+	            // ACCEL, MAG and GYRO are 6 bytes each => 18 bytes total
+	            io.i2cRead(address, this.REGISTER.READ.ACCEL, 18, (data) => {
+	              computed.accelerometer = {
+	                x: int16(data[1], data[0]),
+	                y: int16(data[3], data[2]),
+	                z: int16(data[5], data[4]),
+	              };
 
-	        })).then(() => {
+	              computed.magnetometer = {
+	                x: int16(data[7], data[6]),
+	                y: int16(data[9], data[8]),
+	                z: int16(data[11], data[10]),
+	              };
 
-	          // Temperature requires no calibration, begin reading immediately
-	          // here we read out temp, and the calibration state since they are back to back
-	          // and the device can, has been observed to go out of calibration and we may want to check
-	          io.i2cRead(address, this.REGISTER.READ.TEMP, 2, data => {
-	            computed.temperature = data[0];
+	              computed.gyro = {
+	                x: int16(data[13], data[12]),
+	                y: int16(data[15], data[14]),
+	                z: int16(data[17], data[16]),
+	              };
 
-	            const didCalibrationChange = computed.calibration !== data[1];
-	            computed.calibration = data[1];
+	              this.emit("data", computed);
+	            });
 
-	            this.emit("data", computed);
-	            if (didCalibrationChange) {
-	              this.emit("calibration", computed.calibration);
-	            }
+	            // Moved the ndof/quarternions to their own read.. bytes go missing, lots of 32 byte buffers everywhere
+	            io.i2cRead(address, this.REGISTER.READ.EULER, 14, (data) => {
+	              // raw euler
+	              computed.orientation.euler = {
+	                heading: int16(data[1], data[0]),
+	                roll: int16(data[3], data[2]),
+	                pitch: int16(data[5], data[4]),
+	              };
+
+	              // scaled quarternion - unitless
+	              computed.orientation.quarternion = {
+	                w: int16(data[7], data[6]),
+	                x: int16(data[9], data[8]),
+	                y: int16(data[11], data[10]),
+	                z: int16(data[13], data[12]),
+	              };
+
+	              this.emit("data", computed);
+	            });
 	          });
-
-
-	          // ACCEL, MAG and GYRO are 6 bytes each => 18 bytes total
-	          io.i2cRead(address, this.REGISTER.READ.ACCEL, 18, data => {
-
-	            computed.accelerometer = {
-	              x: int16(data[1], data[0]),
-	              y: int16(data[3], data[2]),
-	              z: int16(data[5], data[4])
-	            };
-
-	            computed.magnetometer = {
-	              x: int16(data[7], data[6]),
-	              y: int16(data[9], data[8]),
-	              z: int16(data[11], data[10])
-	            };
-
-	            computed.gyro = {
-	              x: int16(data[13], data[12]),
-	              y: int16(data[15], data[14]),
-	              z: int16(data[17], data[16])
-	            };
-
-	            this.emit("data", computed);
-	          });
-
-	          // Moved the ndof/quarternions to their own read.. bytes go missing, lots of 32 byte buffers everywhere
-	          io.i2cRead(address, this.REGISTER.READ.EULER, 14, data => {
-
-	            // raw euler
-	            computed.orientation.euler = {
-	              heading: int16(data[1], data[0]),
-	              roll: int16(data[3], data[2]),
-	              pitch: int16(data[5], data[4])
-	            };
-
-	            // scaled quarternion - unitless
-	            computed.orientation.quarternion = {
-	              w: int16(data[7], data[6]),
-	              x: int16(data[9], data[8]),
-	              y: int16(data[11], data[10]),
-	              z: int16(data[13], data[12])
-	            };
-
-	            this.emit("data", computed);
-	          });
-
-	        });
 	      },
 	    },
 	    identifier: {
 	      value(options) {
 	        const address = Drivers.addressResolver(Drivers.BNO055, options);
 	        return `bno055-${address}`;
-	      }
-	    }
+	      },
+	    },
 	  },
 
 	  MPL115A2: {
 	    ADDRESSES: {
-	      value: [0x60]
+	      value: [0x60],
 	    },
 	    REGISTER: {
 	      value: {
@@ -24544,7 +22468,7 @@ function requireSip () {
 	        COEFFICIENTS: 0x04,
 	        PADC_MSB: 0x00,
 	        CONVERT: 0x12,
-	      }
+	      },
 	    },
 	    initialize: {
 	      value(board, options) {
@@ -24561,11 +22485,10 @@ function requireSip () {
 	          a0: null,
 	          b1: null,
 	          b2: null,
-	          c12: null
+	          c12: null,
 	        };
 
-	        const handler = data => {
-
+	        const handler = (data) => {
 	          // Page 5
 	          // 3.1 Pressure, Temperature and Coefficient Bit-Width Specifications
 	          const Padc = uint16(data[0], data[1]) >> 6;
@@ -24573,7 +22496,8 @@ function requireSip () {
 
 	          // Page 6
 	          // 3.2 Compensation
-	          computed.pressure = cof.a0 + (cof.b1 + cof.c12 * Tadc) * Padc + cof.b2 * Tadc;
+	          computed.pressure =
+	            cof.a0 + (cof.b1 + cof.c12 * Tadc) * Padc + cof.b2 * Tadc;
 	          computed.temperature = Tadc;
 
 	          this.emit("data", computed);
@@ -24597,8 +22521,8 @@ function requireSip () {
 	          // TODO: User specified "frequency" needs to be applied here.
 	        };
 
-	        const pCoefficients = new Promise(resolve => {
-	          io.i2cReadOnce(address, this.REGISTER.COEFFICIENTS, 8, data => {
+	        const pCoefficients = new Promise((resolve) => {
+	          io.i2cReadOnce(address, this.REGISTER.COEFFICIENTS, 8, (data) => {
 	            const A0 = int16(data[0], data[1]);
 	            const B1 = int16(data[2], data[3]);
 	            const B2 = int16(data[4], data[5]);
@@ -24626,14 +22550,14 @@ function requireSip () {
 	      value(options) {
 	        const address = Drivers.addressResolver(Drivers.MPL115A2, options);
 	        return `mpl115a2-${address}`;
-	      }
-	    }
+	      },
+	    },
 	  },
 	  // Based off of the AdaFruit Arduino library for this chip
 	  // https://github.com/adafruit/Adafruit_MPL3115A2_Library
 	  MPL3115A2: {
 	    ADDRESSES: {
-	      value: [0x60]
+	      value: [0x60],
 	    },
 	    REGISTER: {
 	      // Page 18
@@ -24645,25 +22569,25 @@ function requireSip () {
 	        BAR_IN_MSB: 0x14,
 	        BAR_IN_LSB: 0x15,
 	        CONTROL: 0x26,
-	      }
+	      },
 	    },
 	    MASK: {
 	      value: {
 	        STATUS: {
-	          PRESSURE_DATA_READ: 0x04
+	          PRESSURE_DATA_READ: 0x04,
 	        },
 	        CONTROL: {
 	          SBYB: 0x01,
 	          OS128: 0x38,
 	          ALTIMETER: 0x80,
-	          PRESSURE: 0x00
+	          PRESSURE: 0x00,
 	        },
 	        CONFIG: {
 	          TDEFE: 0x01,
 	          PDEFE: 0x02,
-	          DREM: 0x04
-	        }
-	      }
+	          DREM: 0x04,
+	        },
+	      },
 	    },
 	    initialize: {
 	      value(board, options) {
@@ -24680,7 +22604,7 @@ function requireSip () {
 	        const computed = {
 	          pressure: 0,
 	          altitude: 0,
-	          temperature: 0
+	          temperature: 0,
 	        };
 
 	        if (typeof options.elevation !== "undefined") {
@@ -24692,8 +22616,8 @@ function requireSip () {
 	          elevation = 1;
 	        }
 
-	        const waitForReady = next => {
-	          io.i2cReadOnce(address, this.REGISTER.STATUS, 1, data => {
+	        const waitForReady = (next) => {
+	          io.i2cReadOnce(address, this.REGISTER.STATUS, 1, (data) => {
 	            if (data[0] & this.MASK.STATUS.PRESSURE_DATA_READ) {
 	              next();
 	            } else {
@@ -24705,134 +22629,164 @@ function requireSip () {
 	        };
 
 	        const readValues = () => {
-	          const modeMask = isPressure ? this.MASK.CONTROL.PRESSURE : this.MASK.CONTROL.ALTIMETER;
-	          const mode = this.MASK.CONTROL.SBYB | this.MASK.CONTROL.OS128 | modeMask;
+	          const modeMask = isPressure
+	            ? this.MASK.CONTROL.PRESSURE
+	            : this.MASK.CONTROL.ALTIMETER;
+	          const mode =
+	            this.MASK.CONTROL.SBYB | this.MASK.CONTROL.OS128 | modeMask;
 
 	          io.i2cWrite(address, this.REGISTER.CONTROL, mode);
 
 	          waitForReady(() => {
-	            io.i2cReadOnce(address, this.REGISTER.PRESSURE, READLENGTH, data => {
-	              const value = uint24(data[1], data[2], data[3]) >> 4;
-	              const temperature = uint16(data[4], data[5]) >> 4;
-	              let altVal;
+	            io.i2cReadOnce(
+	              address,
+	              this.REGISTER.PRESSURE,
+	              READLENGTH,
+	              (data) => {
+	                const value = uint24(data[1], data[2], data[3]) >> 4;
+	                const temperature = uint16(data[4], data[5]) >> 4;
+	                let altVal;
 
-	              computed.temperature = temperature;
+	                computed.temperature = temperature;
 
-	              if (isPressure) {
-	                computed.pressure = value;
-	                this.emit("data", computed);
-	              } else {
-	                const m = data[1];
-	                const c = data[2];
-	                const l = data[3];
-	                const fl = (l >> 4) / 16;
+	                if (isPressure) {
+	                  computed.pressure = value;
+	                  this.emit("data", computed);
+	                } else {
+	                  const m = data[1];
+	                  const c = data[2];
+	                  const l = data[3];
+	                  const fl = (l >> 4) / 16;
 
-	                altVal = (m << 8 | c) + fl;
-	                altNow = (altNow * 3 + altVal) / 4;
+	                  altVal = ((m << 8) | c) + fl;
+	                  altNow = (altNow * 3 + altVal) / 4;
 
-	                computed.altitude = altNow - offset;
-	              }
+	                  computed.altitude = altNow - offset;
+	                }
 
-	              isPressure = !isPressure;
+	                isPressure = !isPressure;
 
-	              readValues();
-	            });
+	                readValues();
+	              },
+	            );
 	          });
 	        };
 
 	        const reads = [];
 	        const calibrate = () => {
 	          // Clear Oversampling and OST
-	          io.i2cWrite(address, this.REGISTER.CONTROL, 0x3B);
+	          io.i2cWrite(address, this.REGISTER.CONTROL, 0x3b);
 	          io.i2cWrite(address, this.REGISTER.CONTROL, 0x39);
 
 	          setTimeout(() => {
-	            io.i2cReadOnce(address, this.REGISTER.PRESSURE, READLENGTH, data => {
-	              const m = data[1];
-	              const c = data[2];
-	              const l = data[3];
-	              const fl = (l >> 4) / 4;
+	            io.i2cReadOnce(
+	              address,
+	              this.REGISTER.PRESSURE,
+	              READLENGTH,
+	              (data) => {
+	                const m = data[1];
+	                const c = data[2];
+	                const l = data[3];
+	                const fl = (l >> 4) / 4;
 
-	              reads.push((m << 10 | c << 2) + fl);
+	                reads.push(((m << 10) | (c << 2)) + fl);
 
-	              if (reads.length === 4) {
-	                const curpress = (reads[0] + reads[1] + reads[2] + reads[3]) / 4;
-	                const seapress = curpress / ((1 - elevation * 0.0000225577) ** 5.255);
+	                if (reads.length === 4) {
+	                  const curpress =
+	                    (reads[0] + reads[1] + reads[2] + reads[3]) / 4;
+	                  const seapress =
+	                    curpress / (1 - elevation * 0.0000225577) ** 5.255;
 
-	                // Update Barometric input for Altitude
-	                io.i2cWrite(address, this.REGISTER.BAR_IN_MSB, (seapress / 2) >> 8);
-	                io.i2cWrite(address, this.REGISTER.BAR_IN_LSB, (seapress / 2) & 0xFF);
+	                  // Update Barometric input for Altitude
+	                  io.i2cWrite(
+	                    address,
+	                    this.REGISTER.BAR_IN_MSB,
+	                    (seapress / 2) >> 8,
+	                  );
+	                  io.i2cWrite(
+	                    address,
+	                    this.REGISTER.BAR_IN_LSB,
+	                    (seapress / 2) & 0xff,
+	                  );
 
-	                // Get into Altitude mode
-	                // One shot & OST bit
-	                io.i2cWrite(address, this.REGISTER.CONTROL, 0xBB);
-	                io.i2cWrite(address, this.REGISTER.CONTROL, 0xB9);
+	                  // Get into Altitude mode
+	                  // One shot & OST bit
+	                  io.i2cWrite(address, this.REGISTER.CONTROL, 0xbb);
+	                  io.i2cWrite(address, this.REGISTER.CONTROL, 0xb9);
 
-	                setTimeout(() => {
-	                  io.i2cReadOnce(address, this.REGISTER.PRESSURE, READLENGTH, data => {
-	                    const m = data[1];
-	                    const c = data[2];
-	                    const l = data[3];
-	                    const fl = (l >> 4) / 16;
+	                  setTimeout(() => {
+	                    io.i2cReadOnce(
+	                      address,
+	                      this.REGISTER.PRESSURE,
+	                      READLENGTH,
+	                      (data) => {
+	                        const m = data[1];
+	                        const c = data[2];
+	                        const l = data[3];
+	                        const fl = (l >> 4) / 16;
 
-	                    altNow = (m << 8 | c) + fl;
+	                        altNow = ((m << 8) | c) + fl;
 
-	                    readValues();
-	                  });
-	                }, 550);
-
-	              } else {
-	                calibrate();
-	              }
-	            });
+	                        readValues();
+	                      },
+	                    );
+	                  }, 550);
+	                } else {
+	                  calibrate();
+	                }
+	              },
+	            );
 	          }, 500);
 	        };
 
 	        io.i2cConfig(
 	          Object.assign(options, {
 	            settings: {
-	              stopTX: true
-	            }
-	          })
+	              stopTX: true,
+	            },
+	          }),
 	        );
 
 	        // configure the chip
 	        // Set Altitude Offset.
-	        io.i2cWriteReg(address, 0x2D, 0x00);
+	        io.i2cWriteReg(address, 0x2d, 0x00);
 
 	        io.i2cWriteReg(address, this.REGISTER.BAR_IN_MSB, 0);
 	        io.i2cWriteReg(address, this.REGISTER.BAR_IN_LSB, 0);
 
-	        io.i2cWriteReg(address, this.REGISTER.CONFIG,
+	        io.i2cWriteReg(
+	          address,
+	          this.REGISTER.CONFIG,
 	          this.MASK.CONFIG.TDEFE |
-	          this.MASK.CONFIG.PDEFE |
-	          this.MASK.CONFIG.DREM);
+	            this.MASK.CONFIG.PDEFE |
+	            this.MASK.CONFIG.DREM,
+	        );
 
 	        if (elevation !== null) {
 	          calibrate();
 	        } else {
 	          readValues();
 	        }
-	      }
+	      },
 	    },
 	    identifier: {
 	      value(options) {
 	        const address = Drivers.addressResolver(Drivers.MPL3115A2, options);
 	        return `mpl3115a2-${address}`;
-	      }
-	    }
+	      },
+	    },
 	  },
 	  BMP180: {
 	    ADDRESSES: {
-	      value: [0x77]
+	      value: [0x77],
 	    },
 	    REGISTER: {
 	      value: {
-	        COEFFICIENTS: 0xAA,
+	        COEFFICIENTS: 0xaa,
 	        READ: 0x00,
-	        READ_START: 0xF4,
-	        READ_RESULT: 0xF6,
-	      }
+	        READ_START: 0xf4,
+	        READ_RESULT: 0xf6,
+	      },
 	    },
 	    initialize: {
 	      value(board, options) {
@@ -24844,8 +22798,7 @@ function requireSip () {
 	          elevation = options.elevation;
 	        }
 
-	        if ((elevation != null && elevation <= 0) ||
-	            elevation == null) {
+	        if ((elevation != null && elevation <= 0) || elevation == null) {
 	          offset = Math.abs(elevation) + 1;
 	          elevation = 1;
 	        }
@@ -24888,8 +22841,8 @@ function requireSip () {
 
 	        io.i2cConfig(options);
 
-	        const pCoefficients = new Promise(resolve => {
-	          io.i2cReadOnce(address, this.REGISTER.COEFFICIENTS, 22, data => {
+	        const pCoefficients = new Promise((resolve) => {
+	          io.i2cReadOnce(address, this.REGISTER.COEFFICIENTS, 22, (data) => {
 	            // BMP085
 	            // Page 12
 	            // 3.4 Calibration Coefficients
@@ -24915,7 +22868,6 @@ function requireSip () {
 	        });
 
 	        pCoefficients.then(() => {
-
 	          // BMP085
 	          // Pages 10, 11
 	          // 3.3 Measurement of pressure and temperature
@@ -24941,15 +22893,13 @@ function requireSip () {
 	          // 3.3 Measurement of pressure and temperature
 	          // 3.5 Calculating pressure and temperature
 	          const readCycle = () => {
-
 	            // cycle 0: temperature
 	            // cycle 1: pressure
 
 	            const isTemperatureCycle = cycle === 0;
-	            const component = isTemperatureCycle ? 0x2E : 0x34 + (oss << 6);
+	            const component = isTemperatureCycle ? 0x2e : 0x34 + (oss << 6);
 	            const numBytes = isTemperatureCycle ? 2 : 3;
 	            const delay = isTemperatureCycle ? 5 : kpDelay;
-
 
 	            io.i2cWriteReg(address, this.REGISTER.READ_START, component);
 
@@ -24957,87 +22907,95 @@ function requireSip () {
 	            // delay the READ_RESULT request based on the
 	            // mode value provided by the user, or default.
 	            setTimeout(() => {
-	              io.i2cReadOnce(address, this.REGISTER.READ_RESULT, numBytes, data => {
-	                let compensated;
-	                let uncompensated;
-	                let x1;
-	                let x2;
-	                let x3;
-	                let b3;
-	                let b4;
-	                let b6;
-	                let b7;
-	                let b6s;
-	                let bx;
+	              io.i2cReadOnce(
+	                address,
+	                this.REGISTER.READ_RESULT,
+	                numBytes,
+	                (data) => {
+	                  let compensated;
+	                  let uncompensated;
+	                  let x1;
+	                  let x2;
+	                  let x3;
+	                  let b3;
+	                  let b4;
+	                  let b6;
+	                  let b7;
+	                  let b6s;
+	                  let bx;
 
-	                if (isTemperatureCycle) {
-	                  // TEMPERATURE
-	                  uncompensated = int16(data[0], data[1]);
+	                  if (isTemperatureCycle) {
+	                    // TEMPERATURE
+	                    uncompensated = int16(data[0], data[1]);
 
-	                  // Compute the true temperature
-	                  x1 = ((uncompensated - cof.a6) * cof.a5) >> 15;
-	                  x2 = ((cof.mc << 11) / (x1 + cof.md)) >> 0;
+	                    // Compute the true temperature
+	                    x1 = ((uncompensated - cof.a6) * cof.a5) >> 15;
+	                    x2 = ((cof.mc << 11) / (x1 + cof.md)) >> 0;
 
-	                  // Compute b5, which is used by the pressure cycle
-	                  cof.b5 = (x1 + x2) | 0;
+	                    // Compute b5, which is used by the pressure cycle
+	                    cof.b5 = (x1 + x2) | 0;
 
-	                  // Steps of 0.1°C
-	                  computed.temperature = ((cof.b5 + 8) >> 4) / 10;
-	                } else {
-	                  // PRESSURE
-	                  uncompensated = uint24(data[0], data[1], data[2]) >> (8 - oss);
-
-	                  b6 = cof.b5 - 4000;
-	                  b6s = b6 * b6;
-	                  bx = b6s >> 12;
-
-	                  // Intermediary x1 & x2 to calculate x3 for b3
-	                  x1 = (cof.b2 * bx) >> 11;
-	                  x2 = (cof.a2 * b6) >> 11;
-	                  x3 = x1 + x2;
-	                  b3 = ((((cof.a1 * 4 + x3) << oss) + 2) / 4) >> 0;
-
-	                  // Intermediary x1 & x2 to calculate x3 for b4
-	                  x1 = (cof.a3 * b6) >> 13;
-	                  x2 = (cof.b1 * bx) >> 16;
-	                  x3 = ((x1 + x2) + 2) >> 2;
-	                  b4 = (cof.a4 * (x3 + 32768)) >> 15;
-	                  b7 = (uncompensated - b3) * (50000 >> oss);
-
-	                  if (b7 < Fn.POW_2_31) {
-	                    compensated = (b7 * 2) / b4;
+	                    // Steps of 0.1°C
+	                    computed.temperature = ((cof.b5 + 8) >> 4) / 10;
 	                  } else {
-	                    compensated = (b7 / b4) * 2;
+	                    // PRESSURE
+	                    uncompensated =
+	                      uint24(data[0], data[1], data[2]) >> (8 - oss);
+
+	                    b6 = cof.b5 - 4000;
+	                    b6s = b6 * b6;
+	                    bx = b6s >> 12;
+
+	                    // Intermediary x1 & x2 to calculate x3 for b3
+	                    x1 = (cof.b2 * bx) >> 11;
+	                    x2 = (cof.a2 * b6) >> 11;
+	                    x3 = x1 + x2;
+	                    b3 = ((((cof.a1 * 4 + x3) << oss) + 2) / 4) >> 0;
+
+	                    // Intermediary x1 & x2 to calculate x3 for b4
+	                    x1 = (cof.a3 * b6) >> 13;
+	                    x2 = (cof.b1 * bx) >> 16;
+	                    x3 = (x1 + x2 + 2) >> 2;
+	                    b4 = (cof.a4 * (x3 + 32768)) >> 15;
+	                    b7 = (uncompensated - b3) * (50000 >> oss);
+
+	                    if (b7 < Fn.POW_2_31) {
+	                      compensated = (b7 * 2) / b4;
+	                    } else {
+	                      compensated = (b7 / b4) * 2;
+	                    }
+
+	                    compensated >>= 0;
+
+	                    x1 = (compensated >> 8) * (compensated >> 8);
+	                    x1 = (x1 * 3038) >> 16;
+	                    x2 = (-7357 * compensated) >> 16;
+
+	                    compensated += (x1 + x2 + 3791) >> 4;
+
+	                    // Steps of 1Pa (= 0.01hPa = 0.01mbar) (=> 0.001kPa)
+	                    computed.pressure = compensated;
+
+	                    // 3.7 Calculating pressure at sea level
+	                    const seapress =
+	                      compensated / (1 - elevation * 0.0000225577) ** 5.255;
+	                    const altitude =
+	                      44330 * (1 - compensated / seapress ** (1 / 5.255));
+
+	                    // Page 3 (of BMP280 Datasheet)
+	                    // ...relative accuracy is ±0.12 hPa, which is equivalent to
+	                    // ±1 m difference in altitude.
+	                    computed.altitude = Math.round(altitude - offset);
 	                  }
 
-	                  compensated >>= 0;
+	                  if (++cycle === 2) {
+	                    cycle = 0;
+	                    this.emit("data", computed);
+	                  }
 
-	                  x1 = (compensated >> 8) * (compensated >> 8);
-	                  x1 = (x1 * 3038) >> 16;
-	                  x2 = (-7357 * compensated) >> 16;
-
-	                  compensated += (x1 + x2 + 3791) >> 4;
-
-	                  // Steps of 1Pa (= 0.01hPa = 0.01mbar) (=> 0.001kPa)
-	                  computed.pressure = compensated;
-
-	                  // 3.7 Calculating pressure at sea level
-	                  const seapress = compensated / ((1 - elevation * 0.0000225577) ** 5.255);
-	                  const altitude = 44330 * (1 - compensated / seapress ** (1 / 5.255));
-
-	                  // Page 3 (of BMP280 Datasheet)
-	                  // ...relative accuracy is ±0.12 hPa, which is equivalent to
-	                  // ±1 m difference in altitude.
-	                  computed.altitude = Math.round(altitude - offset);
-	                }
-
-	                if (++cycle === 2) {
-	                  cycle = 0;
-	                  this.emit("data", computed);
-	                }
-
-	                readCycle();
-	              });
+	                  readCycle();
+	                },
+	              );
 	            }, delay);
 	          };
 
@@ -25045,33 +23003,33 @@ function requireSip () {
 	          //
 	          readCycle();
 	        });
-	      }
+	      },
 	    },
 	    identifier: {
 	      value(options) {
 	        const address = Drivers.addressResolver(Drivers.BMP180, options);
 	        return `bmp180-${address}`;
-	      }
-	    }
+	      },
+	    },
 	  },
 
 	  BMP280: {
 	    ADDRESSES: {
-	      value: [0x77]
+	      value: [0x77],
 	    },
 	    REGISTER: {
 	      value: {
 	        COEFFICIENTS: 0x88,
-	        CONFIG: 0xF5,
-	        MEASURE: 0xF4,
+	        CONFIG: 0xf5,
+	        MEASURE: 0xf4,
 	        // 0xF7, 0xF8, 0xF9
 	        // MSB, LSB, XLSB
-	        PRESSURE: 0xF7,
+	        PRESSURE: 0xf7,
 	        // 0xFA, 0xFB, 0xFC
 	        // MSB, LSB, XLSB
-	        TEMPERATURE: 0xFA,
-	        RESET: 0xE0,
-	      }
+	        TEMPERATURE: 0xfa,
+	        RESET: 0xe0,
+	      },
 	    },
 	    initialize: {
 	      value(board, options) {
@@ -25083,8 +23041,7 @@ function requireSip () {
 	          elevation = options.elevation;
 	        }
 
-	        if ((elevation != null && elevation <= 0) ||
-	            elevation == null) {
+	        if ((elevation != null && elevation <= 0) || elevation == null) {
 	          offset = Math.abs(elevation) + 1;
 	          elevation = 1;
 	        }
@@ -25109,11 +23066,10 @@ function requireSip () {
 
 	        // Page. 24
 	        // 4.3.2 Register 0xE0 "reset"
-	        io.i2cWrite(address, this.REGISTER.RESET, 0xB6);
+	        io.i2cWrite(address, this.REGISTER.RESET, 0xb6);
 
-	        const pCoefficients = new Promise(resolve => {
-	          io.i2cReadOnce(address, this.REGISTER.COEFFICIENTS, 24, data => {
-
+	        const pCoefficients = new Promise((resolve) => {
+	          io.i2cReadOnce(address, this.REGISTER.COEFFICIENTS, 24, (data) => {
 	            // Page 21, Table 17
 	            // Compensation parameter storage, naming and data type
 	            // These are received LSB FIRST
@@ -25147,7 +23103,7 @@ function requireSip () {
 	          | 0 | 0 | 1 | 1 | 1 | 1 | 1 | 1 |
 	          */
 
-	          io.i2cWrite(address, this.REGISTER.MEASURE, 0x3F);
+	          io.i2cWrite(address, this.REGISTER.MEASURE, 0x3f);
 
 	          const computed = {
 	            altitude: null,
@@ -25163,7 +23119,7 @@ function requireSip () {
 	          // 3.3.2 Temperature measurement
 	          //
 
-	          io.i2cRead(address, this.REGISTER.PRESSURE, 6, data => {
+	          io.i2cRead(address, this.REGISTER.PRESSURE, 6, (data) => {
 	            let compensated = 0;
 
 	            // Page 45
@@ -25209,8 +23165,8 @@ function requireSip () {
 	            //
 	            const adc16 = T >> 4;
 	            const adc16subT1 = adc16 - dig.T1;
-	            v1  = (((T >> 3) - (dig.T1 << 1)) * dig.T2) >> 11;
-	            v2  = (((adc16subT1 * adc16subT1) >> 12) * dig.T3) >> 14;
+	            v1 = (((T >> 3) - (dig.T1 << 1)) * dig.T2) >> 11;
+	            v2 = (((adc16subT1 * adc16subT1) >> 12) * dig.T3) >> 14;
 
 	            // t_fine = var1 + var2;
 	            fine = v1 + v2;
@@ -25229,7 +23185,6 @@ function requireSip () {
 
 	            v1 = undefined;
 	            v2 = undefined;
-
 
 	            // PRESSURE
 	            // Page 46
@@ -25252,13 +23207,15 @@ function requireSip () {
 	            // var2 = (var2>>2)+(((BMP280_S32_t)dig_P4)<<16);
 	            v2 = (v2 >> 2) + (s32(dig.P4) << 16);
 
-
 	            // var1 = (((dig_P3 * (((var1>>2) * (var1>>2)) >> 13 )) >> 3) +
 	            //          ((((BMP280_S32_t)dig_P2) * var1)>>1))>>18;
-	            v1 = (((dig.P3 * (((v1 >> 2) * (v1 >> 2)) >> 13)) >> 3) + ((s32(dig.P2) * v1) >> 1)) >> 18;
+	            v1 =
+	              (((dig.P3 * (((v1 >> 2) * (v1 >> 2)) >> 13)) >> 3) +
+	                ((s32(dig.P2) * v1) >> 1)) >>
+	              18;
 
 	            // var1 =((((32768+var1))*((BMP280_S32_t)dig_P1))>>15);
-	            v1 = (((Fn.POW_2_15 + v1) * s32(dig.P1)) >> 15);
+	            v1 = ((Fn.POW_2_15 + v1) * s32(dig.P1)) >> 15;
 
 	            if (v1 === 0) {
 	              // Prevent division by zero
@@ -25266,7 +23223,7 @@ function requireSip () {
 	            }
 
 	            // p = (((BMP280_U32_t)(((BMP280_S32_t)1048576)-adc_P)-(var2>>12)))*3125;
-	            compensated = u32((s32(Fn.POW_2_20) - P) - (v2 >> 12)) * 3125;
+	            compensated = u32(s32(Fn.POW_2_20) - P - (v2 >> 12)) * 3125;
 
 	            if (compensated < Fn.POW_2_31) {
 	              // p = (p << 1) / ((BMP280_U32_t)var1);
@@ -25280,7 +23237,7 @@ function requireSip () {
 
 	            // var1 = (((BMP280_S32_t)dig_P9) * ((BMP280_S32_t)(((p>>3) * (p>>3))>>13)))>>12;
 	            const compshift3r = compensated >> 3;
-	            v1 = (s32(dig.P9) * s32(((compshift3r * compshift3r) >> 13))) >> 12;
+	            v1 = (s32(dig.P9) * s32((compshift3r * compshift3r) >> 13)) >> 12;
 
 	            // var2 = (((BMP280_S32_t)(p>>2)) * ((BMP280_S32_t)dig_P8))>>13;
 	            v2 = (s32(compensated >> 2) * s32(dig.P8)) >> 13;
@@ -25292,8 +23249,10 @@ function requireSip () {
 	            computed.pressure = compensated;
 
 	            // Calculating pressure at sea level (copied from BMP180)
-	            const seapress = compensated / ((1 - elevation * 0.0000225577) ** 5.255);
-	            const altitude = 44330 * (1 - compensated / seapress ** (1 / 5.255));
+	            const seapress =
+	              compensated / (1 - elevation * 0.0000225577) ** 5.255;
+	            const altitude =
+	              44330 * (1 - compensated / seapress ** (1 / 5.255));
 
 	            // Page 3
 	            // ...relative accuracy is ±0.12 hPa, which is equivalent to
@@ -25303,38 +23262,38 @@ function requireSip () {
 	            this.emit("data", computed);
 	          });
 	        });
-	      }
+	      },
 	    },
 	    identifier: {
 	      value(options) {
 	        const address = Drivers.addressResolver(Drivers.BMP280, options);
 	        return `bmp280-${address}`;
-	      }
-	    }
+	      },
+	    },
 	  },
 
 	  BME280: {
 	    ADDRESSES: {
-	      value: [0x77]
+	      value: [0x77],
 	    },
 	    REGISTER: {
 	      value: {
 	        COEFFICIENTS_TP: 0x88,
-	        COEFFICIENTS_H: 0xE1,
-	        CONFIG: 0xF5,
-	        MEASURE_H: 0xF2,
-	        MEASURE_TP: 0xF4,
-	        PRESSURE: 0xF7,
+	        COEFFICIENTS_H: 0xe1,
+	        CONFIG: 0xf5,
+	        MEASURE_H: 0xf2,
+	        MEASURE_TP: 0xf4,
+	        PRESSURE: 0xf7,
 	        // 0xF7, 0xF8, 0xF9
 	        //  MSB,  LSB, XLSB
-	        TEMPERATURE: 0xFA,
+	        TEMPERATURE: 0xfa,
 	        // 0xFA, 0xFB, 0xFC
 	        //  MSB,  LSB, XLSB
-	        HUMIDITY: 0xFD,
+	        HUMIDITY: 0xfd,
 	        // 0xFD, 0xFE
 	        //  MSB,  LSB
-	        RESET: 0xE0,
-	      }
+	        RESET: 0xe0,
+	      },
 	    },
 	    initialize: {
 	      value(board, options) {
@@ -25346,8 +23305,7 @@ function requireSip () {
 	          elevation = options.elevation;
 	        }
 
-	        if ((elevation != null && elevation <= 0) ||
-	            elevation == null) {
+	        if ((elevation != null && elevation <= 0) || elevation == null) {
 	          offset = Math.abs(elevation) + 1;
 	          elevation = 1;
 	        }
@@ -25378,20 +23336,18 @@ function requireSip () {
 
 	        // Page. 24
 	        // 4.3.2 Register 0xE0 "reset"
-	        io.i2cWrite(address, this.REGISTER.RESET, 0xB6);
+	        io.i2cWrite(address, this.REGISTER.RESET, 0xb6);
 
-	        const pCoefficients = new Promise(resolveCoeffs => {
-
+	        const pCoefficients = new Promise((resolveCoeffs) => {
 	          // Page 22,
 	          // Table 16: Compensation parameter storage, naming and data type
 	          // These are received LSB FIRST
 	          //
 	          // The H register is not contiguous!
 
-
 	          Promise.all([
-	            new Promise(resolve => {
-	              io.i2cReadOnce(address, 0x88, 24, data => {
+	            new Promise((resolve) => {
+	              io.i2cReadOnce(address, 0x88, 24, (data) => {
 	                dig.T1 = uint16(data[1], data[0]);
 	                dig.T2 = int16(data[3], data[2]);
 	                dig.T3 = int16(data[5], data[4]);
@@ -25408,14 +23364,14 @@ function requireSip () {
 	                resolve();
 	              });
 	            }),
-	            new Promise(resolve => {
-	              io.i2cReadOnce(address, 0xA1, 1, data => {
+	            new Promise((resolve) => {
+	              io.i2cReadOnce(address, 0xa1, 1, (data) => {
 	                dig.H1 = Fn.u8(data[0]);
 	                resolve();
 	              });
 	            }),
-	            new Promise(resolve => {
-	              io.i2cReadOnce(address, 0xE1, 8, data => {
+	            new Promise((resolve) => {
+	              io.i2cReadOnce(address, 0xe1, 8, (data) => {
 	                /*
 	                  0xE1 => data[0]
 	                  0xE2 => data[1]
@@ -25440,7 +23396,7 @@ function requireSip () {
 	                //      0xE6    0xE5
 	                // H5 [11:4]   [3:0]    signed short
 
-	                dig.H4 = s32((data[3] << 4) | (data[4] & 0xF));
+	                dig.H4 = s32((data[3] << 4) | (data[4] & 0xf));
 	                dig.H5 = s32((data[5] << 4) | (data[4] >> 4));
 
 	                // 0xE7
@@ -25448,7 +23404,7 @@ function requireSip () {
 
 	                resolve();
 	              });
-	            })
+	            }),
 	          ]).then(resolveCoeffs);
 	        });
 
@@ -25514,8 +23470,7 @@ function requireSip () {
 	            | 1 | 0 | 1 | 1 | 0 | 1 | 1 | 1 |
 
 	          */
-	          io.i2cWrite(address, this.REGISTER.MEASURE_TP, 0xB7);
-
+	          io.i2cWrite(address, this.REGISTER.MEASURE_TP, 0xb7);
 
 	          const computed = {
 	            altitude: null,
@@ -25534,7 +23489,7 @@ function requireSip () {
 
 	          const standby = Date.now();
 
-	          io.i2cRead(address, this.REGISTER.PRESSURE, 8, data => {
+	          io.i2cRead(address, this.REGISTER.PRESSURE, 8, (data) => {
 	            //
 	            // Response time to complete 63% of a step is 1 second.
 	            // Don't emit a reading until a complete step has occurred.
@@ -25542,7 +23497,7 @@ function requireSip () {
 	            // (1 / 63 * 100) * 1000 = 1587.3015873015872ms
 	            // if ((standby + 1587) > Date.now()) {
 	            if (!process.env.IS_TEST_MODE) {
-	              if ((standby + 1000) > Date.now()) {
+	              if (standby + 1000 > Date.now()) {
 	                return;
 	              }
 	            }
@@ -25594,8 +23549,8 @@ function requireSip () {
 	            //
 	            const adc16 = T >> 4;
 	            const adc16subT1 = adc16 - dig.T1;
-	            v1  = (((T >> 3) - (dig.T1 << 1)) * dig.T2) >> 11;
-	            v2  = (((adc16subT1 * adc16subT1) >> 12) * dig.T3) >> 14;
+	            v1 = (((T >> 3) - (dig.T1 << 1)) * dig.T2) >> 11;
+	            v2 = (((adc16subT1 * adc16subT1) >> 12) * dig.T3) >> 14;
 
 	            // t_fine = var1 + var2;
 	            fine = v1 + v2;
@@ -25614,7 +23569,6 @@ function requireSip () {
 
 	            v1 = undefined;
 	            v2 = undefined;
-
 
 	            // PRESSURE
 	            // Page 23
@@ -25637,13 +23591,15 @@ function requireSip () {
 	            // var2 = (var2>>2)+(((BMP280_S32_t)dig_P4)<<16);
 	            v2 = (v2 >> 2) + (s32(dig.P4) << 16);
 
-
 	            // var1 = (((dig_P3 * (((var1>>2) * (var1>>2)) >> 13 )) >> 3) +
 	            //          ((((BMP280_S32_t)dig_P2) * var1)>>1))>>18;
-	            v1 = (((dig.P3 * (((v1 >> 2) * (v1 >> 2)) >> 13)) >> 3) + ((s32(dig.P2) * v1) >> 1)) >> 18;
+	            v1 =
+	              (((dig.P3 * (((v1 >> 2) * (v1 >> 2)) >> 13)) >> 3) +
+	                ((s32(dig.P2) * v1) >> 1)) >>
+	              18;
 
 	            // var1 =((((32768+var1))*((BMP280_S32_t)dig_P1))>>15);
-	            v1 = (((Fn.POW_2_15 + v1) * s32(dig.P1)) >> 15);
+	            v1 = ((Fn.POW_2_15 + v1) * s32(dig.P1)) >> 15;
 
 	            if (v1 === 0) {
 	              // Prevent division by zero
@@ -25651,7 +23607,7 @@ function requireSip () {
 	            }
 
 	            // p = (((BMP280_U32_t)(((BMP280_S32_t)1048576)-adc_P)-(var2>>12)))*3125;
-	            compensated = u32((s32(Fn.POW_2_20) - P) - (v2 >> 12)) * 3125;
+	            compensated = u32(s32(Fn.POW_2_20) - P - (v2 >> 12)) * 3125;
 
 	            if (compensated < Fn.POW_2_31) {
 	              // p = (p << 1) / ((BMP280_U32_t)var1);
@@ -25665,7 +23621,7 @@ function requireSip () {
 
 	            // var1 = (((BMP280_S32_t)dig_P9) * ((BMP280_S32_t)(((p>>3) * (p>>3))>>13)))>>12;
 	            const compshift3r = compensated >> 3;
-	            v1 = (s32(dig.P9) * s32(((compshift3r * compshift3r) >> 13))) >> 12;
+	            v1 = (s32(dig.P9) * s32((compshift3r * compshift3r) >> 13)) >> 12;
 
 	            // var2 = (((BMP280_S32_t)(p>>2)) * ((BMP280_S32_t)dig_P8))>>13;
 	            v2 = (s32(compensated >> 2) * dig.P8) >> 13;
@@ -25677,14 +23633,15 @@ function requireSip () {
 	            computed.pressure = compensated;
 
 	            // Calculating pressure at sea level (copied from BMP180)
-	            const seapress = compensated / ((1 - elevation * 0.0000225577) ** 5.255);
-	            const altitude = 44330 * (1 - compensated / seapress ** (1 / 5.255));
+	            const seapress =
+	              compensated / (1 - elevation * 0.0000225577) ** 5.255;
+	            const altitude =
+	              44330 * (1 - compensated / seapress ** (1 / 5.255));
 
 	            // Page 3
 	            // ...relative accuracy is ±0.12 hPa, which is equivalent to
 	            // ±1 m difference in altitude.
 	            computed.altitude = Math.round(altitude - offset);
-
 
 	            // Page 23, 24
 	            // BME280_U32_t bme280_compensate_H_int32(BME280_S32_t adc_H)
@@ -25697,11 +23654,19 @@ function requireSip () {
 	            // ((BME280_S32_t)16384)) >> 15) * (((((((v_x1_u32r * ((BME280_S32_t)dig_H6)) >> 10) * (((v_x1_u32r * ((BME280_S32_t)dig_H3)) >> 11) + ((BME280_S32_t)32768))) >> 10) + ((BME280_S32_t)2097152)) *
 	            // ((BME280_S32_t)dig_H2) + 8192) >> 14));
 
-	            vx = (((((H << 14) - s32(dig.H4 << 20) - (dig.H5 * vx)) + Fn.POW_2_14) >> 15) *
-	                  (((((((vx * dig.H6) >> 10) * (((vx * dig.H3) >> 11) + Fn.POW_2_15)) >> 10) + Fn.POW_2_21) * dig.H2 + Fn.POW_2_13) >> 14));
+	            vx =
+	              (((H << 14) - s32(dig.H4 << 20) - dig.H5 * vx + Fn.POW_2_14) >>
+	                15) *
+	              (((((((vx * dig.H6) >> 10) *
+	                (((vx * dig.H3) >> 11) + Fn.POW_2_15)) >>
+	                10) +
+	                Fn.POW_2_21) *
+	                dig.H2 +
+	                Fn.POW_2_13) >>
+	                14);
 
 	            // v_x1_u32r = (v_x1_u32r - (((((v_x1_u32r >> 15) * (v_x1_u32r >> 15)) >> 7) * ((int32_t)_bme280_calib.dig_H1)) >> 4));
-	            vx -= (((((vx >> 15) * (vx >> 15)) >> 7) * s32(dig.H1) >> 4));
+	            vx -= ((((vx >> 15) * (vx >> 15)) >> 7) * s32(dig.H1)) >> 4;
 
 	            // v_x1_u32r = (v_x1_u32r < 0 ? 0 : v_x1_u32r);
 	            // v_x1_u32r = (v_x1_u32r > 419430400 ? 419430400 : v_x1_u32r);
@@ -25712,24 +23677,24 @@ function requireSip () {
 	            this.emit("data", computed);
 	          });
 	        });
-	      }
+	      },
 	    },
 	    identifier: {
 	      value(options) {
 	        const address = Drivers.addressResolver(Drivers.BME280, options);
 	        return `bme280-${address}`;
-	      }
-	    }
+	      },
+	    },
 	  },
 	  SI7020: {
 	    ADDRESSES: {
-	      value: [0x40]
+	      value: [0x40],
 	    },
 	    REGISTER: {
 	      value: {
-	        HUMIDITY: 0xE5,
-	        TEMPERATURE: 0xE0,
-	      }
+	        HUMIDITY: 0xe5,
+	        TEMPERATURE: 0xe0,
+	      },
 	    },
 	    initialize: {
 	      value(board, options) {
@@ -25753,37 +23718,37 @@ function requireSip () {
 	        // Despite the registers being back to back, the SI7020
 	        // does not like when 5 bytes are requested, so we put
 	        // the two data sources on their own read channels.
-	        io.i2cRead(address, this.REGISTER.TEMPERATURE, 2, data => {
+	        io.i2cRead(address, this.REGISTER.TEMPERATURE, 2, (data) => {
 	          computed.temperature = uint16(data[0], data[1]);
 	          this.emit("data", computed);
 	        });
 
-	        io.i2cRead(address, this.REGISTER.HUMIDITY, 2, data => {
+	        io.i2cRead(address, this.REGISTER.HUMIDITY, 2, (data) => {
 	          computed.humidity = uint16(data[0], data[1]);
 	          this.emit("data", computed);
 	        });
-	      }
+	      },
 	    },
 	    identifier: {
 	      value(options) {
 	        const address = Drivers.addressResolver(Drivers.SI7020, options);
 	        return `si7020-${address}`;
-	      }
+	      },
 	    },
 	  },
 
 	  MS5611: {
 	    ADDRESSES: {
-	      value: [0x77]
+	      value: [0x77],
 	    },
 	    REGISTER: {
 	      value: {
-	        COEFFICIENTS: 0xA2,
+	        COEFFICIENTS: 0xa2,
 	        READ: 0x00,
 	        PRESSURE: 0x40,
 	        TEMPERATURE: 0x50,
-	        RESET: 0x1E,
-	      }
+	        RESET: 0x1e,
+	      },
 	    },
 	    initialize: {
 	      value(board, options) {
@@ -25791,13 +23756,11 @@ function requireSip () {
 	        let elevation = null;
 	        let offset = 0;
 
-
 	        if (typeof options.elevation !== "undefined") {
 	          elevation = options.elevation;
 	        }
 
-	        if ((elevation != null && elevation <= 0) ||
-	            elevation == null) {
+	        if ((elevation != null && elevation <= 0) || elevation == null) {
 	          offset = Math.abs(elevation) + 1;
 	          elevation = 1;
 	        }
@@ -25847,21 +23810,20 @@ function requireSip () {
 
 	        const cKeys = Object.keys(cof);
 
-
 	        // TODO: confirm this is actually necessary?
 	        options.delay = kpDelay * 1000;
 
 	        io.i2cConfig(options);
 	        io.i2cWrite(address, this.REGISTER.RESET);
 
-	        const pCoefficients = new Promise(resolve => {
+	        const pCoefficients = new Promise((resolve) => {
 	          // First, a small delay is required following the reset...
 	          setTimeout(() => {
 	            // Next, each coefficient must be read on it's own.
 	            const cofs = cKeys.map((key, index) => {
-	              const register = this.REGISTER.COEFFICIENTS + (index * 2);
-	              return new Promise(resolve => {
-	                io.i2cReadOnce(address, register, 2, data => {
+	              const register = this.REGISTER.COEFFICIENTS + index * 2;
+	              return new Promise((resolve) => {
+	                io.i2cReadOnce(address, register, 2, (data) => {
 	                  cof[key] = uint16(data[0], data[1]);
 	                  resolve();
 	                });
@@ -25888,7 +23850,6 @@ function requireSip () {
 	          let SENS2;
 
 	          const readCycle = () => {
-
 	            // cycle 0: temperature
 	            // cycle 1: pressure
 
@@ -25915,8 +23876,7 @@ function requireSip () {
 	            // delay the READ_RESULT request based on the
 	            // mode value provided by the user, or default.
 	            setTimeout(() => {
-	              io.i2cReadOnce(address, this.REGISTER.READ, 3, data => {
-
+	              io.i2cReadOnce(address, this.REGISTER.READ, 3, (data) => {
 	                if (isTemperatureCycle) {
 	                  // TEMPERATURE
 	                  D2 = uint24(data[0], data[1], data[2]);
@@ -25927,13 +23887,13 @@ function requireSip () {
 	                  // dT
 	                  //  = D2 - TREF
 	                  //  = D2 - C5 * (2 ** 8)
-	                  dT = D2 - (cof.C5 * Fn.POW_2_8);
+	                  dT = D2 - cof.C5 * Fn.POW_2_8;
 
 	                  // Actual temperature (-40…85°C with 0.01°C resolution)
 	                  // TEMP
 	                  //  = 20°C + dT * TEMP * SENS
 	                  //  = 2000 + dT * C6 / (2 ** 23)
-	                  TEMP = 2000 + dT * cof.C6 / Fn.POW_2_23;
+	                  TEMP = 2000 + (dT * cof.C6) / Fn.POW_2_23;
 
 	                  // SECOND ORDER TEMPERATURE COMPENSATION
 	                  // Page 8
@@ -25942,15 +23902,14 @@ function requireSip () {
 	                  //
 	                  if (TEMP < 2000) {
 	                    TEMP2 = dT ** 2 / Fn.POW_2_31;
-	                    OFF2 = 5 * ((TEMP - 2000) ** 2) / 2;
-	                    SENS2 = 5 * ((TEMP - 2000) ** 2) / Fn.POW_2_2;
+	                    OFF2 = (5 * (TEMP - 2000) ** 2) / 2;
+	                    SENS2 = (5 * (TEMP - 2000) ** 2) / Fn.POW_2_2;
 
 	                    if (TEMP < -1500) {
-	                      OFF2 = OFF2 + 7 * ((TEMP + 1500) ** 2);
-	                      SENS2 = SENS2 + 11 * ((TEMP + 1500) ** 2) / 2;
+	                      OFF2 = OFF2 + 7 * (TEMP + 1500) ** 2;
+	                      SENS2 = SENS2 + (11 * (TEMP + 1500) ** 2) / 2;
 	                    }
 	                  }
-
 
 	                  TEMP -= TEMP2;
 
@@ -25975,13 +23934,13 @@ function requireSip () {
 
 	                  // Temperature compensated pressure (10…1200mbar with 0.01mbar resolution)
 	                  // P = D1 * SENS - OFF = (D1 * SENS / 2 21 - OFF) / 2 15
-	                  P = (D1 * SENS / Fn.POW_2_21 - OFF) / Fn.POW_2_15;
+	                  P = ((D1 * SENS) / Fn.POW_2_21 - OFF) / Fn.POW_2_15;
 
 	                  // Steps of 1Pa (= 0.01hPa = 0.01mbar) (=> 0.001kPa)
 	                  computed.pressure = P;
 
 	                  // Sea level pressure...
-	                  const seapress = P / ((1 - elevation * 0.0000225577) ** 5.255);
+	                  const seapress = P / (1 - elevation * 0.0000225577) ** 5.255;
 	                  const altitude = 44330 * (1 - P / seapress ** (1 / 5.255));
 
 	                  computed.altitude = altitude - offset;
@@ -26001,32 +23960,32 @@ function requireSip () {
 	          //
 	          readCycle();
 	        });
-	      }
+	      },
 	    },
 	    identifier: {
 	      value(options) {
 	        const address = Drivers.addressResolver(Drivers.MS5611, options);
 	        return `ms5611-${address}`;
-	      }
+	      },
 	    },
 	  },
 
 	  TH02: {
 	    ADDRESSES: {
-	      value: [0x40]
+	      value: [0x40],
 	    },
 	    COMMAND: {
 	      value: {
 	        MEASURE_HUMIDITY: 0x01,
 	        MEASURE_TEMPERATURE: 0x11,
-	      }
+	      },
 	    },
 	    REGISTER: {
 	      value: {
 	        STATUS: 0x00,
 	        READ: 0x01,
 	        CONFIG: 0x03,
-	      }
+	      },
 	    },
 	    initialize: {
 	      value(board, options) {
@@ -26042,20 +24001,19 @@ function requireSip () {
 	        io.i2cConfig(
 	          Object.assign(options, {
 	            settings: {
-	              stopTX: true
-	            }
-	          })
+	              stopTX: true,
+	            },
+	          }),
 	        );
 
 	        const readCycle = () => {
 	          // 1. Determine which data we want to request
 	          const isTemperatureCycle = cycle === 0;
-	          const command = isTemperatureCycle ?
-	            this.COMMAND.MEASURE_TEMPERATURE :
-	            this.COMMAND.MEASURE_HUMIDITY;
+	          const command = isTemperatureCycle
+	            ? this.COMMAND.MEASURE_TEMPERATURE
+	            : this.COMMAND.MEASURE_HUMIDITY;
 
-
-	          const conversion = new Promise(resolve => {
+	          const conversion = new Promise((resolve) => {
 	            // 2. Send the appropriate measurement/conversion
 	            //    command for this read cycle.
 	            io.i2cWrite(address, this.REGISTER.CONFIG, command);
@@ -26068,7 +24026,7 @@ function requireSip () {
 	            //    with. These peripherals have ample space to store data
 	            //    in different registers, but do not.
 	            const requestStatus = () => {
-	              io.i2cReadOnce(address, this.REGISTER.STATUS, 1, data => {
+	              io.i2cReadOnce(address, this.REGISTER.STATUS, 1, (data) => {
 	                const status = data[0];
 
 	                if (!(status & 0x01)) {
@@ -26097,22 +24055,22 @@ function requireSip () {
 	            // but that also produces garbage, so in the end we need to read
 	            // 3 bytes from 0x01.
 	            Promise.all([
-	              new Promise(resolve => {
-	                io.i2cReadOnce(address, 0x01, 1, data => {
+	              new Promise((resolve) => {
+	                io.i2cReadOnce(address, 0x01, 1, (data) => {
 	                  resolve(data[0]);
 	                });
 	              }),
-	              new Promise(resolve => {
-	                io.i2cReadOnce(address, 0x02, 1, data => {
+	              new Promise((resolve) => {
+	                io.i2cReadOnce(address, 0x02, 1, (data) => {
 	                  resolve(data[0]);
 	                });
-	              })
-	            ]).then(data => {
-
+	              }),
+	            ]).then((data) => {
 	              if (isTemperatureCycle) {
-	                computed.temperature = ((uint16(data[0], data[1]) >> 2) / 32) - 50;
+	                computed.temperature =
+	                  (uint16(data[0], data[1]) >> 2) / 32 - 50;
 	              } else {
-	                computed.humidity = ((uint16(data[0], data[1]) >> 4) / 16) - 24;
+	                computed.humidity = (uint16(data[0], data[1]) >> 4) / 16 - 24;
 	              }
 
 	              if (++cycle === 2) {
@@ -26132,8 +24090,8 @@ function requireSip () {
 	      value(options) {
 	        const address = Drivers.addressResolver(Drivers.TH02, options);
 	        return `th02-${address}`;
-	      }
-	    }
+	      },
+	    },
 	  },
 
 	  /**
@@ -26144,16 +24102,13 @@ function requireSip () {
 	   */
 	  LSM303C: {
 	    ADDRESSES: {
-	      value: [
-	        0x1D,
-	        0x1E,
-	      ]
+	      value: [0x1d, 0x1e],
 	    },
 	    COMMAND: {
 	      value: {
-	        ACC_SETUP: [0x4, 0x3F, 0x3F, 0x3F],
-	        MAG_SETUP: [0xD8, 0x60, 0x40, 0xD8, 0x8, 0x00]
-	      }
+	        ACC_SETUP: [0x4, 0x3f, 0x3f, 0x3f],
+	        MAG_SETUP: [0xd8, 0x60, 0x40, 0xd8, 0x8, 0x00],
+	      },
 	    },
 	    REGISTER: {
 	      value: {
@@ -26161,25 +24116,24 @@ function requireSip () {
 	        ACC_STATUS: 0x27,
 	        ACC_OUTX_L: 0x28,
 	        ACC_OUTX_H: 0x29,
-	        ACC_OUTY_L: 0x2A,
-	        ACC_OUTY_H: 0x2B,
-	        ACC_OUTZ_L: 0x2C,
-	        ACC_OUTZ_H: 0x2D,
+	        ACC_OUTY_L: 0x2a,
+	        ACC_OUTY_H: 0x2b,
+	        ACC_OUTZ_L: 0x2c,
+	        ACC_OUTZ_H: 0x2d,
 	        MAG_CTRL_SEQ: [0x20, 0x21, 0x24, 0x20, 0x23, 0x22],
 	        MAG_STATUS: 0x27,
 	        MAG_OUTX_L: 0x28,
 	        MAG_OUTX_H: 0x29,
-	        MAG_OUTY_L: 0x2A,
-	        MAG_OUTY_H: 0x2B,
-	        MAG_OUTZ_L: 0x2C,
-	        MAG_OUTZ_H: 0x2D,
-	        MAG_TEMP_OUT_L: 0x2E,
-	        MAG_TEMP_OUT_H: 0x2F,
-	      }
+	        MAG_OUTY_L: 0x2a,
+	        MAG_OUTY_H: 0x2b,
+	        MAG_OUTZ_L: 0x2c,
+	        MAG_OUTZ_H: 0x2d,
+	        MAG_TEMP_OUT_L: 0x2e,
+	        MAG_TEMP_OUT_H: 0x2f,
+	      },
 	    },
 	    initialize: {
 	      value(board, options) {
-
 	        const ACC_SENSITIVITY = 0.06103515625; // LSB/mg
 	        const MAG_SENSITIVITY = 0.00048828125; // LSB/Ga
 
@@ -26192,29 +24146,27 @@ function requireSip () {
 	        const computed = {
 	          temperature: 0,
 	          magnetometer,
-	          accelerometer
+	          accelerometer,
 	        };
 
 	        // ACC Initialization sequence (4 bytes)
 	        const initializeAccelerometer = () => {
 	          io.i2cConfig(Object.assign({}, options, { address: ACC_ADDRESS }));
-	          this.REGISTER.ACC_CTRL_SEQ
-	            .forEach((ctrlReg, i) => {
-	              io.i2cWrite(ACC_ADDRESS, ctrlReg, this.COMMAND.ACC_SETUP[i]);
-	            });
+	          this.REGISTER.ACC_CTRL_SEQ.forEach((ctrlReg, i) => {
+	            io.i2cWrite(ACC_ADDRESS, ctrlReg, this.COMMAND.ACC_SETUP[i]);
+	          });
 	        };
 
 	        // MAG Initialization sequence (6 bytes)
 	        const initializeMagnetometer = () => {
 	          io.i2cConfig(Object.assign({}, options, { address: MAG_ADDRESS }));
-	          this.REGISTER.MAG_CTRL_SEQ
-	            .forEach((ctrlReg, i) => {
-	              io.i2cWrite(MAG_ADDRESS, ctrlReg, this.COMMAND.MAG_SETUP[i]);
-	            });
+	          this.REGISTER.MAG_CTRL_SEQ.forEach((ctrlReg, i) => {
+	            io.i2cWrite(MAG_ADDRESS, ctrlReg, this.COMMAND.MAG_SETUP[i]);
+	          });
 	        };
 
-	        const readAccelerometer = done => {
-	          io.i2cReadOnce(ACC_ADDRESS, this.REGISTER.ACC_OUTX_L, 6, data => {
+	        const readAccelerometer = (done) => {
+	          io.i2cReadOnce(ACC_ADDRESS, this.REGISTER.ACC_OUTX_L, 6, (data) => {
 	            accelerometer.x = int16(data[1], data[0]) * ACC_SENSITIVITY;
 	            accelerometer.y = int16(data[3], data[2]) * ACC_SENSITIVITY;
 	            accelerometer.z = int16(data[5], data[4]) * ACC_SENSITIVITY;
@@ -26222,8 +24174,8 @@ function requireSip () {
 	          });
 	        };
 
-	        const readMagnetometer = done => {
-	          io.i2cReadOnce(MAG_ADDRESS, this.REGISTER.MAG_OUTX_L, 6, data => {
+	        const readMagnetometer = (done) => {
+	          io.i2cReadOnce(MAG_ADDRESS, this.REGISTER.MAG_OUTX_L, 6, (data) => {
 	            magnetometer.x = int16(data[1], data[0]) * MAG_SENSITIVITY;
 	            magnetometer.y = int16(data[3], data[2]) * MAG_SENSITIVITY;
 	            magnetometer.z = int16(data[5], data[4]) * MAG_SENSITIVITY;
@@ -26231,11 +24183,16 @@ function requireSip () {
 	          });
 	        };
 
-	        const readTemperature = done => {
-	          io.i2cReadOnce(MAG_ADDRESS, this.REGISTER.MAG_TEMP_OUT_L, 2, data => {
-	            computed.temperature = int16(data[1], data[0]);
-	            done();
-	          });
+	        const readTemperature = (done) => {
+	          io.i2cReadOnce(
+	            MAG_ADDRESS,
+	            this.REGISTER.MAG_TEMP_OUT_L,
+	            2,
+	            (data) => {
+	              computed.temperature = int16(data[1], data[0]);
+	              done();
+	            },
+	          );
 	        };
 
 	        // Rinse and repeat
@@ -26243,9 +24200,8 @@ function requireSip () {
 	          Promise.all([
 	            new Promise(readAccelerometer),
 	            new Promise(readMagnetometer),
-	            new Promise(readTemperature)
-	          ])
-	          .then(() => {
+	            new Promise(readTemperature),
+	          ]).then(() => {
 	            this.emit("data", computed);
 	            setTimeout(readCycle, frequency);
 	          });
@@ -26261,8 +24217,8 @@ function requireSip () {
 	      value(options) {
 	        const address = Drivers.addressResolver(Drivers.LSM303C, options);
 	        return `lsm303c-${address}`;
-	      }
-	    }
+	      },
+	    },
 	  },
 	};
 
@@ -26273,7 +24229,6 @@ function requireSip () {
 	Drivers.DHT11_I2C_NANO_BACKPACK = Drivers.DHT_I2C_NANO_BACKPACK;
 	Drivers.DHT21_I2C_NANO_BACKPACK = Drivers.DHT_I2C_NANO_BACKPACK;
 	Drivers.DHT22_I2C_NANO_BACKPACK = Drivers.DHT_I2C_NANO_BACKPACK;
-
 
 	Drivers.get = (board, driverName, options = {}) => {
 	  let drivers;
@@ -26299,9 +24254,9 @@ function requireSip () {
 
 	Drivers.addressResolver = (driver, options) => {
 	  const addresses = driver.ADDRESSES;
-	  const address = options.address || (
-	    Array.isArray(addresses) ? addresses[0] : addresses.value[0]
-	  );
+	  const address =
+	    options.address ||
+	    (Array.isArray(addresses) ? addresses[0] : addresses.value[0]);
 	  options.address = address;
 	  return address;
 	};
@@ -26321,10 +24276,10 @@ function requireSip () {
 	    initialize: {
 	      value(options) {
 	        Components.call(this, "MPU6050", options);
-	      }
+	      },
 	    },
 	    components: {
-	      value: [ACCELEROMETER, GYRO, THERMOMETER]
+	      value: [ACCELEROMETER, GYRO, THERMOMETER],
 	    },
 	  },
 
@@ -26334,92 +24289,94 @@ function requireSip () {
 	        const state = priv.get(this);
 	        const CONTROLLER = "BNO055";
 
-	        state.calibrationMask = options.calibrationMask || 0xC0;
+	        state.calibrationMask = options.calibrationMask || 0xc0;
 
 	        // here we want to catch the events coming out of the driver and re-emit them
 	        // not sure what is cleaner here, picking these up from a data event
 	        // in the sub controllers, or this
 	        Drivers.get(this.board, CONTROLLER, options)
 	          .on("calibrated", () => this.emit("calibrated"))
-	          .on("calibration", state => this.emit("calibration", state));
+	          .on("calibration", (state) => this.emit("calibration", state));
 
 	        Components.call(this, CONTROLLER, options);
-	      }
+	      },
 	    },
 	    components: {
-	      value: [ACCELEROMETER, GYRO, MAGNETOMETER, ORIENTATION, THERMOMETER]
+	      value: [ACCELEROMETER, GYRO, MAGNETOMETER, ORIENTATION, THERMOMETER],
 	    },
 	    calibration: {
 	      get() {
 	        return this.orientation.calibration;
-	      }
+	      },
 	    },
 	    isCalibrated: {
 	      get() {
 	        //returns if the system and all sensors are fully calibrated
-	        const {calibrationMask} = priv.get(this);
-	        return (this.orientation.calibration & calibrationMask) === calibrationMask;
-	      }
-	    }
+	        const { calibrationMask } = priv.get(this);
+	        return (
+	          (this.orientation.calibration & calibrationMask) === calibrationMask
+	        );
+	      },
+	    },
 	  },
 	  MPL115A2: {
 	    initialize: {
 	      value(options) {
 	        Components.call(this, "MPL115A2", options);
-	      }
+	      },
 	    },
 	    components: {
-	      value: [BAROMETER, THERMOMETER]
+	      value: [BAROMETER, THERMOMETER],
 	    },
 	  },
 	  SHT31D: {
 	    initialize: {
 	      value(options) {
 	        Components.call(this, "SHT31D", options);
-	      }
+	      },
 	    },
 	    components: {
-	      value: [HYGROMETER, THERMOMETER]
+	      value: [HYGROMETER, THERMOMETER],
 	    },
 	  },
 	  HTU21D: {
 	    initialize: {
 	      value(options) {
 	        Components.call(this, "HTU21D", options);
-	      }
+	      },
 	    },
 	    components: {
-	      value: [HYGROMETER, THERMOMETER]
+	      value: [HYGROMETER, THERMOMETER],
 	    },
 	  },
 	  HIH6130: {
 	    initialize: {
 	      value(options) {
 	        Components.call(this, "HIH6130", options);
-	      }
+	      },
 	    },
 	    components: {
-	      value: [HYGROMETER, THERMOMETER]
+	      value: [HYGROMETER, THERMOMETER],
 	    },
 	  },
 	  DHT_I2C_NANO_BACKPACK: {
 	    initialize: {
 	      value(options) {
 	        Components.call(this, "DHT_I2C_NANO_BACKPACK", options);
-	      }
+	      },
 	    },
 	    components: {
-	      value: [HYGROMETER, THERMOMETER]
+	      value: [HYGROMETER, THERMOMETER],
 	    },
 	  },
 	  MPL3115A2: {
 	    initialize: {
 	      value(options) {
 	        Components.call(this, "MPL3115A2", options);
-	      }
+	      },
 	    },
 	    components: {
-	      value: [ALTIMETER, BAROMETER, THERMOMETER]
+	      value: [ALTIMETER, BAROMETER, THERMOMETER],
 	    },
 	  },
 	  // This controller and driver pair are used for both
@@ -26428,50 +24385,50 @@ function requireSip () {
 	    initialize: {
 	      value(options) {
 	        Components.call(this, "BMP180", options);
-	      }
+	      },
 	    },
 	    components: {
-	      value: [ALTIMETER, BAROMETER, THERMOMETER]
+	      value: [ALTIMETER, BAROMETER, THERMOMETER],
 	    },
 	  },
 	  BMP280: {
 	    initialize: {
 	      value(options) {
 	        Components.call(this, "BMP280", options);
-	      }
+	      },
 	    },
 	    components: {
-	      value: [ALTIMETER, BAROMETER, THERMOMETER]
+	      value: [ALTIMETER, BAROMETER, THERMOMETER],
 	    },
 	  },
 	  BME280: {
 	    initialize: {
 	      value(options) {
 	        Components.call(this, "BME280", options);
-	      }
+	      },
 	    },
 	    components: {
-	      value: [ALTIMETER, BAROMETER, HYGROMETER, THERMOMETER]
+	      value: [ALTIMETER, BAROMETER, HYGROMETER, THERMOMETER],
 	    },
 	  },
 	  SI7020: {
 	    initialize: {
 	      value(options) {
 	        Components.call(this, "SI7020", options);
-	      }
+	      },
 	    },
 	    components: {
-	      value: [HYGROMETER, THERMOMETER]
+	      value: [HYGROMETER, THERMOMETER],
 	    },
 	  },
 	  MS5611: {
 	    initialize: {
 	      value(options) {
 	        Components.call(this, "MS5611", options);
-	      }
+	      },
 	    },
 	    components: {
-	      value: [ALTIMETER, BAROMETER, THERMOMETER]
+	      value: [ALTIMETER, BAROMETER, THERMOMETER],
 	    },
 	  },
 
@@ -26479,10 +24436,10 @@ function requireSip () {
 	    initialize: {
 	      value(options) {
 	        Components.call(this, "TH02", options);
-	      }
+	      },
 	    },
 	    components: {
-	      value: [HYGROMETER, THERMOMETER]
+	      value: [HYGROMETER, THERMOMETER],
 	    },
 	  },
 
@@ -26490,10 +24447,10 @@ function requireSip () {
 	    initialize: {
 	      value(options) {
 	        Components.call(this, "LSM303C", options);
-	      }
+	      },
 	    },
 	    components: {
-	      value: [MAGNETOMETER, THERMOMETER, ACCELEROMETER]
+	      value: [MAGNETOMETER, THERMOMETER, ACCELEROMETER],
 	    },
 	  },
 	};
@@ -26506,14 +24463,11 @@ function requireSip () {
 	Controllers.DHT21_I2C_NANO_BACKPACK = Controllers.DHT_I2C_NANO_BACKPACK;
 	Controllers.DHT22_I2C_NANO_BACKPACK = Controllers.DHT_I2C_NANO_BACKPACK;
 
-
 	class IMU extends Emitter {
 	  constructor(options) {
 	    super();
 
-	    Board.Component.call(
-	      this, options = Board.Options(options)
-	    );
+	    Board.Component.call(this, (options = Board.Options(options)));
 
 	    Board.Controller.call(this, Controllers, options);
 
@@ -26540,7 +24494,7 @@ function requireSip () {
 	    const awaiting = this.components.slice();
 
 	    if (this.components && this.components.length > 0) {
-	      this.components.forEach(component => {
+	      this.components.forEach((component) => {
 	        if (!(this[component] instanceof Emitter)) {
 	          return;
 	        }
@@ -26566,7 +24520,6 @@ function requireSip () {
 	    }
 	  }
 	}
-
 
 	IMU.Drivers = Drivers;
 
@@ -26597,26 +24550,24 @@ function requireBlokdots_sunlight () {
 	    initialize: {
 	      value(options, callback) {
 	        const { Drivers } = requireSip();
-	        Drivers.get(this.board, "SI1145", options)
-	          .on("data", data => callback(data));
-	      }
+	        Drivers.get(this.board, "SI1145", options).on("data", (data) =>
+	          callback(data),
+	        );
+	      },
 	    },
-	    toUVindex : {
-	      value( value ) {
+	    toUVindex: {
+	      value(value) {
 	        return toFixed(value / 100, 2);
-	      }
-	    }
-	  }
+	      },
+	    },
+	  },
 	};
-
 
 	class Sunlight extends Emitter {
 	  constructor(options) {
 	    super();
 
-	    Board.Component.call(
-	      this, options = Board.Options(options)
-	    );
+	    Board.Component.call(this, (options = Board.Options(options)));
 
 	    Board.Controller.call(this, Controllers, options);
 
@@ -26625,11 +24576,11 @@ function requireBlokdots_sunlight () {
 	    let raw = null;
 
 	    if (!this.toUVindex) {
-	      this.toUVindex = options.toUVindex || (x => x);
+	      this.toUVindex = options.toUVindex || ((x) => x);
 	    }
 
 	    if (typeof this.initialize === "function") {
-	      this.initialize(options, data => {
+	      this.initialize(options, (data) => {
 	        raw = data;
 	      });
 	    }
@@ -26638,18 +24589,18 @@ function requireBlokdots_sunlight () {
 	      uv: {
 	        get() {
 	          return this.toUVindex(raw.uv);
-	        }
+	        },
 	      },
 	      ir: {
 	        get() {
-	          return raw.ir
-	        }
+	          return raw.ir;
+	        },
 	      },
 	      vis: {
 	        get() {
-	          return raw.vis
-	        }
-	      }
+	          return raw.vis;
+	        },
+	      },
 	    });
 
 	    setInterval(() => {
@@ -26660,19 +24611,23 @@ function requireBlokdots_sunlight () {
 	      const data = {
 	        uv: this.uv,
 	        ir: this.ir,
-	        vis: this.vis
+	        vis: this.vis,
 	      };
 
 	      this.emit("data", data);
 
-	      if( last === null || this.vis !== last.vis || this.ir !== last.ir || this.uv !== last.uv){
-	        
+	      if (
+	        last === null ||
+	        this.vis !== last.vis ||
+	        this.ir !== last.ir ||
+	        this.uv !== last.uv
+	      ) {
 	        // only emit if has values
-	        if( last !== null ){
+	        if (last !== null) {
 	          this.emit("change", data);
 	        }
 
-	        last = {...data};
+	        last = { ...data };
 	      }
 	    }, freq);
 	  }
@@ -26681,7 +24636,7 @@ function requireBlokdots_sunlight () {
 	/* istanbul ignore else */
 	if (!!process.env.IS_TEST_MODE) {
 	  Sunlight.Controllers = Controllers;
-	  Sunlight.purge = function() {};
+	  Sunlight.purge = function () {};
 	}
 
 	blokdots_sunlight = Sunlight;
@@ -41459,14 +39414,13 @@ johnnyFive.exports;
 
 (function (module) {
 	module.exports = {
-
-
 	  CO2: co2,
 
 	  // extract-start:apinames
 
 	  // blokdots
 	  Sunlight: requireBlokdots_sunlight(),
+	  ColorSensor: requireBlokdots_colorsensor(),
 
 	  // Johnny Five
 	  Accelerometer: requireAccelerometer(),
@@ -41512,37 +39466,40 @@ johnnyFive.exports;
 	// Customized constructors
 	//
 	//
-	module.exports.Board.Virtual = function(options) {
+	module.exports.Board.Virtual = function (options) {
 	  let temp;
 
 	  if (options instanceof module.exports.Expander) {
 	    temp = {
-	      io: options
+	      io: options,
 	    };
 	  } else {
 	    temp = options;
 	  }
 
 	  return new module.exports.Board(
-	    Object.assign({}, {
-	      repl: false,
-	      debug: false,
-	      sigint: false
-	    }, temp)
+	    Object.assign(
+	      {},
+	      {
+	        repl: false,
+	        debug: false,
+	        sigint: false,
+	      },
+	      temp,
+	    ),
 	  );
 	};
 
 	module.exports.Sensor.Analog = module.exports.Sensor;
-	module.exports.Sensor.Digital = function(options) {
+	module.exports.Sensor.Digital = function (options) {
 	  let pin;
 	  let type = "digital";
 
-	  if (typeof options === "number" ||
-	      typeof options === "string") {
+	  if (typeof options === "number" || typeof options === "string") {
 	    pin = options;
 	    options = {
 	      type,
-	      pin
+	      pin,
 	    };
 	  } else {
 	    options.type = type;
@@ -42270,6 +40227,57 @@ function hexDouble(num) {
 
 var colorStringExports = colorString.exports;
 
+const START_SYSEX$2 = 0xF0;
+const STRING_DATA =       0x71;
+const END_SYSEX$2 =         0xF7;
+const FIRMATA_7BIT_MASK$3 = 0x7F;
+const PIXEL_SHIFT_WRAP$2 =  0x40;
+const PIXEL_COMMAND$2 =     0x51;
+const PIXEL_OFF =         0x00;
+const PIXEL_CONFIG$2 =      0x01;
+const PIXEL_SHOW$2 =        0x02;
+const PIXEL_SET_PIXEL$1 =   0x03;
+const PIXEL_SET_STRIP$2 =   0x04;
+const PIXEL_SHIFT$2 =       0x05;
+const SHIFT_FORWARD$2 =     0x20;
+const SHIFT_BACKWARD$1 =    0x00;
+
+const MAX_STRIPS$2 = 8;
+
+const PIN_DEFAULT$1 = 6; // use this if not supplied
+
+const I2C_DEFAULT$1 =   0x42;
+
+const GAMMA_DEFAULT$3 = 1.0; // set to 1.0 in 0.9, 2.8 in 0.10
+
+const COLOR_ORDER$3 = {
+  GRB: 0x00,
+  RGB: 0x01,
+  BRG: 0x02
+};
+
+var constants = {
+  START_SYSEX: START_SYSEX$2,
+  STRING_DATA,
+  END_SYSEX: END_SYSEX$2,
+  FIRMATA_7BIT_MASK: FIRMATA_7BIT_MASK$3,
+  PIXEL_SHIFT_WRAP: PIXEL_SHIFT_WRAP$2,
+  PIXEL_COMMAND: PIXEL_COMMAND$2,
+  PIXEL_OFF,
+  PIXEL_CONFIG: PIXEL_CONFIG$2,
+  PIXEL_SHOW: PIXEL_SHOW$2,
+  PIXEL_SET_PIXEL: PIXEL_SET_PIXEL$1,
+  PIXEL_SET_STRIP: PIXEL_SET_STRIP$2,
+  PIXEL_SHIFT: PIXEL_SHIFT$2,
+  SHIFT_FORWARD: SHIFT_FORWARD$2,
+  SHIFT_BACKWARD: SHIFT_BACKWARD$1,
+  MAX_STRIPS: MAX_STRIPS$2,
+  PIN_DEFAULT: PIN_DEFAULT$1,
+  I2C_DEFAULT: I2C_DEFAULT$1,
+  GAMMA_DEFAULT: GAMMA_DEFAULT$3,
+  COLOR_ORDER: COLOR_ORDER$3
+};
+
 // Defines a set of WS2812 LED Pixels for use
 
 // TODO:
@@ -42280,12 +40288,16 @@ var colorStringExports = colorString.exports;
 // Pixel grid should be able to:
 //      - Set pixels in a range from X->Y a colour
 
-const ColorString = colorStringExports; // used for color parsing
-const events = EventEmitter$2;
-const util = require$$1$1;
+const ColorString$1 = colorStringExports; // used for color parsing
+const {
+  START_SYSEX: START_SYSEX$1,
+  END_SYSEX: END_SYSEX$1,
+  FIRMATA_7BIT_MASK: FIRMATA_7BIT_MASK$2,
+  PIXEL_COMMAND: PIXEL_COMMAND$1,
+  PIXEL_SET_PIXEL
+} = constants;
 
-// create a helper to output an int so messages can be shorter
-ColorString.colorValue = function colorValue(colors, g_table) {
+function colorValue(colors, g_table) {
   // colors are assumed to be an array of [r, g, b] bytes
   // colorValue returns a packed value able to be pushed to firmata rather than
   // text values.
@@ -42293,59 +40305,17 @@ ColorString.colorValue = function colorValue(colors, g_table) {
   // correction table to correct the received value.
 
   // before sending, account for gamma correction.
-  colors[0] = g_table[colors[0]];
-  colors[1] = g_table[colors[1]];
-  colors[2] = g_table[colors[2]];
+  const gammaCorrectedColor = Object.assign({}, colors);
 
-  return ((colors[0] << 16) + (colors[1] << 8) + (colors[2]));
-};
+  gammaCorrectedColor[0] = g_table[gammaCorrectedColor[0]];
+  gammaCorrectedColor[1] = g_table[gammaCorrectedColor[1]];
+  gammaCorrectedColor[2] = g_table[gammaCorrectedColor[2]];
 
-// CONSTANTS
-const START_SYSEX = 0xF0;
-const END_SYSEX =         0xF7;
-const FIRMATA_7BIT_MASK = 0x7F;
-const PIXEL_SHIFT_WRAP =  0x40;
-const PIXEL_COMMAND =     0x51;
-const PIXEL_CONFIG =      0x01;
-const PIXEL_SHOW =        0x02;
-const PIXEL_SET_PIXEL =   0x03;
-const PIXEL_SET_STRIP =   0x04;
-const PIXEL_SHIFT =       0x05;
-const SHIFT_FORWARD =     0x20;
-const SHIFT_BACKWARD =    0x00;
-
-const MAX_STRIPS = 8;
-
-const PIN_DEFAULT = 6; // use this if not supplied
-
-const I2C_DEFAULT =   0x42;
-
-const GAMMA_DEFAULT = 1.0; // set to 1.0 in 0.9, 2.8 in 0.10
-
-// helper function for building gamma values
-function create_gamma_table(steps, gamma, warning) {
-  // used to build a gamma table for a particular value
-
-  if (! warning && gamma == GAMMA_DEFAULT && ! commonjsGlobal.IS_TEST_MODE) {
-    console.info('INFO: Default gamma behaviour is changing');
-    console.info('0.9 - gamma=1.0 - consistent with pre-gamma values');
-    console.info('0.10 - gamma=2.8 - default fix for WS2812 LEDs');
-    warning = true;
-  }
-
-  const g_table = new Array(steps);
-  for (let i = 0; i < steps; i++) {
-    g_table[i] = Math.floor(Math.pow((i / 255.0), gamma) * 255 + 0.5);
-  }
-
-  return g_table;
+  return ((gammaCorrectedColor[0] << 16) + (gammaCorrectedColor[1] << 8) + (gammaCorrectedColor[2]));
 }
 
-const COLOR_ORDER = {
-  GRB: 0x00,
-  RGB: 0x01,
-  BRG: 0x02
-};
+// create a helper to output an int so messages can be shorter
+ColorString$1.colorValue = colorValue;
 
 const pixels = new WeakMap();
 
@@ -42376,18 +40346,18 @@ const Pixel_Controllers = {
 
         const data   = [];
 
-        data.push(START_SYSEX);
-        data.push(PIXEL_COMMAND);
+        data.push(START_SYSEX$1);
+        data.push(PIXEL_COMMAND$1);
         data.push(PIXEL_SET_PIXEL);
-        data.push(pixel.address & FIRMATA_7BIT_MASK);
-        data.push((pixel.address >> 7) & FIRMATA_7BIT_MASK);
-        data.push(color & FIRMATA_7BIT_MASK);
-        data.push((color >> 7) & FIRMATA_7BIT_MASK);
-        data.push((color >> 14) & FIRMATA_7BIT_MASK);
-        data.push((color >> 21) & FIRMATA_7BIT_MASK);
-        data.push(END_SYSEX);
+        data.push(pixel.address & FIRMATA_7BIT_MASK$2);
+        data.push((pixel.address >> 7) & FIRMATA_7BIT_MASK$2);
+        data.push(color & FIRMATA_7BIT_MASK$2);
+        data.push((color >> 7) & FIRMATA_7BIT_MASK$2);
+        data.push((color >> 14) & FIRMATA_7BIT_MASK$2);
+        data.push((color >> 21) & FIRMATA_7BIT_MASK$2);
+        data.push(END_SYSEX$1);
 
-        pixel.port.write(new Buffer(data));
+        pixel.port.write(Buffer.from(data));
       }
     }
   },
@@ -42418,12 +40388,12 @@ const Pixel_Controllers = {
         const data   = [];
 
         data.push(PIXEL_SET_PIXEL);
-        data.push(pixel.address & FIRMATA_7BIT_MASK);
-        data.push((pixel.address >> 7) & FIRMATA_7BIT_MASK);
-        data.push(color & FIRMATA_7BIT_MASK);
-        data.push((color >> 7) & FIRMATA_7BIT_MASK);
-        data.push((color >> 14) & FIRMATA_7BIT_MASK);
-        data.push((color >> 21) & FIRMATA_7BIT_MASK);
+        data.push(pixel.address & FIRMATA_7BIT_MASK$2);
+        data.push((pixel.address >> 7) & FIRMATA_7BIT_MASK$2);
+        data.push(color & FIRMATA_7BIT_MASK$2);
+        data.push((color >> 7) & FIRMATA_7BIT_MASK$2);
+        data.push((color >> 14) & FIRMATA_7BIT_MASK$2);
+        data.push((color >> 21) & FIRMATA_7BIT_MASK$2);
 
         pixel.io.i2cWrite(pixel.i2c_address, data);
       }
@@ -42431,10 +40401,9 @@ const Pixel_Controllers = {
   }
 };
 
-
-function Pixel(opts) {
-  if (!(this instanceof Pixel)) {
-    return new Pixel(opts);
+function Pixel$2(opts, stripsInstance = new WeakMap()) {
+  if (!(this instanceof Pixel$2)) {
+    return new Pixel$2(opts, stripsInstance);
   }
 
   // we can assume this is set because the controller is set by the strip.
@@ -42455,16 +40424,16 @@ function Pixel(opts) {
     }
   });
 
-  pixels.set(this, this.initialize(opts));
+  pixels.set(this, this.initialize(opts, stripsInstance));
 }
 
-Pixel.prototype.off = Pixel.prototype.clear = function() {
+Pixel$2.prototype.off = Pixel$2.prototype.clear = function() {
   // sets the pixel value to [0, 0, 0]. Equivalent to calling
   // `strip.off()` but for an individual pixel.
   this.color([0, 0, 0]);
 };
 
-Pixel.prototype.colour = Pixel.prototype.color = function(color, opts) {
+Pixel$2.prototype.colour = Pixel$2.prototype.color = function(color, opts) {
   // use a particular form to set the color either
   // color = hex value or named colors or array of colors
   // opts can contain _sendmsg_ as bool. If set to false message won't be
@@ -42487,7 +40456,7 @@ Pixel.prototype.colour = Pixel.prototype.color = function(color, opts) {
         value: color
       };
     } else {
-      pixelcolor = ColorString.get(color);
+      pixelcolor = ColorString$1.get(color);
     }
   } else {
     return pixel.color;
@@ -42500,16 +40469,14 @@ Pixel.prototype.colour = Pixel.prototype.color = function(color, opts) {
     pixel.color.r = pixelcolor.value[0];
     pixel.color.g = pixelcolor.value[1];
     pixel.color.b = pixelcolor.value[2];
-    pixel.color.hexcode = ColorString.to.hex(pixelcolor.value);
-    pixel.color.color = ColorString.to.keyword(pixelcolor.value);
+    pixel.color.hexcode = ColorString$1.to.hex(pixelcolor.value);
+    pixel.color.color = ColorString$1.to.keyword(pixelcolor.value);
     if (pixelcolor.value.length == 4) {
       pixelcolor.value.pop();
     }
     pixel.color.rgb = pixelcolor.value;
 
-
-    // console.log(pixel.parent.gtable);
-    color = ColorString.colorValue(pixelcolor.value, pixel.parent.gtable);
+    color = ColorString$1.colorValue(pixelcolor.value, pixel.parent.gtable);
     if (sendmsg) {
       // TODO probably should be pulling the color off the obj rather than
       // sending it to this function....
@@ -42520,348 +40487,439 @@ Pixel.prototype.colour = Pixel.prototype.color = function(color, opts) {
   }
 };
 
-const strips = new WeakMap();
+// controllers for the pixel side as well.
+var pixel$1 = {
+  Pixel: Pixel$2,
+  ColorString: ColorString$1,
+  colorValue
+};
 
-const Controllers = {
-  FIRMATA: {
-    initialize: {
-      value(opts) {
-        const MAX_PIXELS = 216; // based on # bytes available in firmata
-        const strip_length = opts.length || 6; // just an arbitrary val
-        const data_pin = opts.data || PIN_DEFAULT;
-        const color_order = opts.color_order || COLOR_ORDER.GRB; // default GRB
-        const strip_definition = opts.strips || new Array();
-        const skip_firmware_check = !!opts.skip_firmware_check;
-        // do firmata / IO checks
-        let firmata = opts.firmata || undefined;
-        if (firmata == undefined) {
-          try {
-            firmata = opts.board.io;
-          } catch (e) {
-            if (e instanceof TypeError) {
-              // there's no board
-              firmata = undefined;
-            }
+const {
+  GAMMA_DEFAULT: GAMMA_DEFAULT$2
+} = constants;
+
+// helper function for building gamma values
+function create_gamma_table$2(steps, gamma, warning) {
+  // used to build a gamma table for a particular value
+
+  if (! warning && gamma == GAMMA_DEFAULT$2 && ! commonjsGlobal.IS_TEST_MODE) {
+    console.info('INFO: Default gamma behaviour is changing');
+    console.info('0.9 - gamma=1.0 - consistent with pre-gamma values');
+    console.info('0.10 - gamma=2.8 - default fix for WS2812 LEDs');
+    warning = true;
+  }
+
+  const g_table = new Array(steps);
+  for (let i = 0; i < steps; i++) {
+    g_table[i] = Math.floor(Math.pow((i / 255.0), gamma) * 255 + 0.5);
+  }
+
+  return g_table;
+}
+
+var utils$1 = {
+  create_gamma_table: create_gamma_table$2
+};
+
+const {
+  PIXEL_SHIFT_WRAP: PIXEL_SHIFT_WRAP$1,
+  PIXEL_CONFIG: PIXEL_CONFIG$1,
+  PIXEL_SHOW: PIXEL_SHOW$1,
+  PIXEL_SET_STRIP: PIXEL_SET_STRIP$1,
+  PIXEL_SHIFT: PIXEL_SHIFT$1,
+  MAX_STRIPS: MAX_STRIPS$1,
+  PIN_DEFAULT,
+  COLOR_ORDER: COLOR_ORDER$2,
+  GAMMA_DEFAULT: GAMMA_DEFAULT$1,
+  FIRMATA_7BIT_MASK: FIRMATA_7BIT_MASK$1,
+  START_SYSEX,
+  END_SYSEX,
+  PIXEL_COMMAND
+} = constants;
+const { create_gamma_table: create_gamma_table$1 } = utils$1;
+const { Pixel: Pixel$1 } = pixel$1;
+
+const Firmata$1 = {
+  initialize: {
+    value(opts, strips) {
+      const MAX_PIXELS = 216; // based on # bytes available in firmata
+      const strip_length = opts.length || 6; // just an arbitrary val
+      const data_pin = opts.data || PIN_DEFAULT;
+      const color_order = opts.color_order || COLOR_ORDER$2.GRB; // default GRB
+      const strip_definition = opts.strips || new Array();
+      const skip_firmware_check = !!opts.skip_firmware_check;
+      // do firmata / IO checks
+      let firmata = opts.firmata || undefined;
+      if (firmata == undefined) {
+        try {
+          firmata = opts.board.io;
+        } catch (e) {
+          if (e instanceof TypeError) {
+            // there's no board
+            firmata = undefined;
           }
         }
-        // check if we're *still* undefined
-        if (firmata == undefined) {
-          const err = new Error('A firmata or board object is required');
-          err.name = 'NoFirmataError';
-          throw err;
-        }
+      }
+      // check if we're *still* undefined
+      if (firmata == undefined) {
+        const err = new Error('A firmata or board object is required');
+        err.name = 'NoFirmataError';
+        throw err;
+      }
 
-        if (firmata.firmware.name !== 'node_pixel_firmata.ino' && !skip_firmware_check) {
-          const err = new Error('Please upload NodePixel Firmata to the board');
-          err.name = 'IncorrectFirmataVersionError';
-          throw err;
-        }
+      if (firmata.firmware.name !== 'node_pixel_firmata.ino' && !skip_firmware_check) {
+        const err = new Error('Please upload NodePixel Firmata to the board');
+        err.name = 'IncorrectFirmataVersionError';
+        throw err;
+      }
 
-        // figure out where we are writing to
-        const port = firmata.transport || firmata.sp || firmata;
+      // figure out where we are writing to
+      const port = firmata.transport || firmata.sp || firmata;
 
-        if (port.write === undefined) {
-          const err = new Error('Node Pixel FIRMATA controller requires IO that can write out');
-          err.name = 'NoWritablePortError';
-          throw err;
-        }
+      if (port.write === undefined) {
+        const err = new Error('Node Pixel FIRMATA controller requires IO that can write out');
+        err.name = 'NoWritablePortError';
+        throw err;
+      }
 
-        const gamma = opts.gamma || GAMMA_DEFAULT; // Changing to 2.8 in v0.10
+      const gamma = opts.gamma || GAMMA_DEFAULT$1; // Changing to 2.8 in v0.10
 
-        // set up the gamma table
-        const gtable = create_gamma_table(256, gamma, this.dep_warning.gamma);
+      // set up the gamma table
+      const gtable = create_gamma_table$1(256, gamma, this.dep_warning.gamma);
 
 
-        // work out the map of strips and pixels.
-        if (typeof(strip_definition[0]) == 'undefined') {
-          // there is nothing specified so it's probably a single strip
-          // using the length and pin shorthand
-          strip_definition.push( {
-            pin: data_pin,
-            color_order,
-            length: strip_length
-          });
-        }
-
-        // put in check if it's gone over value
-        if (strip_definition.length > MAX_STRIPS) {
-          const err = new RangeError('Maximum number of strips ' + MAX_STRIPS + ' exceeded');
-          this.emit('error', err);
-        }
-
-        let total_length = 0;
-        strip_definition.forEach(function(data) {
-          total_length += data.length;
+      // work out the map of strips and pixels.
+      if (typeof(strip_definition[0]) == 'undefined') {
+        // there is nothing specified so it's probably a single strip
+        // using the length and pin shorthand
+        strip_definition.push( {
+          pin: data_pin,
+          color_order,
+          length: strip_length
         });
+      }
 
-        // put in check if there are too many pixels.
-        if (total_length > MAX_PIXELS) {
-          const err = new RangeError('Maximum number of pixels ' + MAX_PIXELS + ' exceeded');
-          this.emit('error', err);
-        }
+      // put in check if it's gone over value
+      if (strip_definition.length > MAX_STRIPS$1) {
+        const err = new RangeError('Maximum number of strips ' + MAX_STRIPS$1 + ' exceeded');
+        this.emit('error', err);
+      }
 
-        const pixel_list = [];
+      let total_length = 0;
+      strip_definition.forEach(function(data) {
+        total_length += data.length;
+      });
 
-        for (let i=0; i< total_length; i++) {
-          pixel_list.push(new Pixel({
-            addr: i,
-            firmata,
-            port,
-            controller: 'FIRMATA',
-            strip: this
-          }) );
-        }
+      // put in check if there are too many pixels.
+      if (total_length > MAX_PIXELS) {
+        const err = new RangeError('Maximum number of pixels ' + MAX_PIXELS + ' exceeded');
+        this.emit('error', err);
+      }
 
-        strips.set(this, {
-          pixels: pixel_list,
-          data: data_pin,
+      const pixel_list = [];
+
+      for (let i=0; i< total_length; i++) {
+        pixel_list.push(new Pixel$1({
+          addr: i,
           firmata,
           port,
-          gtable,
-          gamma
+          controller: 'FIRMATA',
+          strip: this
+        }, strips) );
+      }
+
+      strips.set(this, {
+        pixels: pixel_list,
+        data: data_pin,
+        firmata,
+        port,
+        gtable,
+        gamma
+      });
+
+      this.strips_internal = strips;
+
+      // now send the config message with length and data point.
+      const data   = [];
+
+      data[0] = START_SYSEX;
+      data[1] = PIXEL_COMMAND;
+      data[2] = PIXEL_CONFIG$1;
+      strip_definition.forEach(function(strip) {
+        data.push( (strip.color_order << 5) | strip.pin);
+        data.push( strip.length & FIRMATA_7BIT_MASK$1);
+        data.push( (strip.length >> 7) & FIRMATA_7BIT_MASK$1);
+      });
+      data.push(END_SYSEX);
+
+      port.write(Buffer.from(data), function(error, res) {
+        let err = null;
+        if (error) {
+          err = error;
+          this.emit('error', err);
+        }
+        // there is a weird bug in OSX which sometimes causes
+        // a segfault if you try to write to fast. As such
+        // just delay the ready event by 1msec because even this
+        // is faster than hooman will perceive as a delay
+        setTimeout(() => {
+          this.emit('ready', err);
+        }, 1);
+      }.bind(this) );
+    }
+  },
+  show: {
+    value() {
+      // call the frame on the strip.
+      const strip = this.strips_internal.get(this);
+
+      const data   = [];
+      data[0] = START_SYSEX;
+      data[1] = PIXEL_COMMAND;
+      data[2] = PIXEL_SHOW$1;
+      data[3] = END_SYSEX;
+
+      // now just write that to the port and it should show the frame.
+      strip.port.write(Buffer.from(data));
+    }
+  },
+  strip_color: {
+    value(color) {
+      // colour work is already done this just sets it the appropriate
+      // way.
+      const strip = this.strips_internal.get(this);
+      const data   = [];
+
+      data[0] = START_SYSEX;
+      data[1] = PIXEL_COMMAND;
+      data[2] = PIXEL_SET_STRIP$1;
+      data[3] = color & FIRMATA_7BIT_MASK$1;
+      data[4] = (color >> 7) & FIRMATA_7BIT_MASK$1;
+      data[5] = (color >> 14) & FIRMATA_7BIT_MASK$1;
+      data[6] = (color >> 21) & FIRMATA_7BIT_MASK$1;
+      data[7] = END_SYSEX;
+
+      strip.port.write(Buffer.from(data));
+    }
+  },
+  _shift: {
+    value(amt, direction, wrap) {
+      // shifts the strip in the appropriate direction.
+      //
+      const wrap_val = wrap ? PIXEL_SHIFT_WRAP$1 : 0;
+      const strip = this.strips_internal.get(this);
+      const data = [];
+      data[0] = START_SYSEX;
+      data[1] = PIXEL_COMMAND;
+      data[2] = PIXEL_SHIFT$1;
+      data[3] = (amt | direction | wrap_val) & FIRMATA_7BIT_MASK$1;
+      data[4] = END_SYSEX;
+
+      strip.port.write(Buffer.from(data));
+    }
+  }
+};
+
+var firmata = {
+  Firmata: Firmata$1
+};
+
+const {
+  PIXEL_SHIFT_WRAP,
+  PIXEL_CONFIG,
+  PIXEL_SHOW,
+  PIXEL_SET_STRIP,
+  PIXEL_SHIFT,
+  MAX_STRIPS,
+  I2C_DEFAULT,
+  COLOR_ORDER: COLOR_ORDER$1,
+  GAMMA_DEFAULT,
+  FIRMATA_7BIT_MASK
+} = constants;
+const { Pixel } = pixel$1;
+const { create_gamma_table } = utils$1;
+
+const IC2Backpack$1 = {
+  initialize: {
+    value(opts, strips) {
+      const MAX_PIXELS = 500; // based on # bytes available in firmata
+      const strip_length = opts.length || 6; // just an arbitrary val
+      const strip_definition = opts.strips || new Array();
+      const color_order = opts.color_order || COLOR_ORDER$1.GRB; // default GRB
+      const gamma = opts.gamma || GAMMA_DEFAULT; // Changing to 2.8 in v0.10
+
+      // set up the gamma table
+      const gtable = create_gamma_table(256, gamma, this.dep_warning.gamma);
+
+      const io = opts.firmata || opts.board.io;
+
+      if (!opts.address) {
+        opts.address = I2C_DEFAULT;
+      }
+
+      if (io == undefined) {
+        const err = new Error('An IO object is required to I2C controller');
+        err.name = 'NoIOError';
+        throw err;
+      }
+
+      // work out the map of strips and pixels.
+      if (typeof(strip_definition[0]) == 'undefined') {
+        // there is nothing specified so it's probably a single strip
+        // using the length and colour type.
+        strip_definition.push( {
+          color_order,
+          length: strip_length
         });
+      } else if (parseInt(strip_definition[0], 10) != NaN) {
+        // we have the array of pin lengths but do we have the colour
 
-        // now send the config message with length and data point.
-        const data   = [];
+        for (let i = 0; i< strip_definition.length; i++) {
+          const len = strip_definition[i];
+          strip_definition[i] = {
+            color_order,
+            length: len
+          };
+        }
+      }
 
-        data[0] = START_SYSEX;
-        data[1] = PIXEL_COMMAND;
-        data[2] = PIXEL_CONFIG;
-        strip_definition.forEach(function(strip) {
-          data.push( (strip.color_order << 5) | strip.pin);
-          data.push( strip.length & FIRMATA_7BIT_MASK);
-          data.push( (strip.length >> 7) & FIRMATA_7BIT_MASK);
-        });
-        data.push(END_SYSEX);
+      // put in check if it's gone over.
+      if (strip_definition.length > MAX_STRIPS) {
+        const err = new RangeError('Maximum number of strips ' + MAX_STRIPS + ' exceeded');
+        this.emit('error', err);
+      }
 
-        port.write(new Buffer(data), function(error, res) {
-          let err = null;
-          if (error) {
-            err = error;
-            this.emit('error', err);
+      let total_length = 0;
+      strip_definition.forEach(function(data) {
+        total_length += data.length;
+      });
+
+      // put in check if there are too many pixels.
+      if (total_length > MAX_PIXELS) {
+        const err = new RangeError('Maximum number of pixels ' + MAX_PIXELS + ' exceeded');
+        this.emit('error', err);
+      }
+
+      const pixel_list = [];
+
+      for (let i=0; i < total_length; i++) {
+        pixel_list.push(new Pixel({
+          addr: i,
+          io,
+          controller: 'I2CBACKPACK',
+          i2c_address: opts.address,
+          strip: this
+        }, strips) );
+      }
+
+      strips.set(this, {
+        pixels: pixel_list,
+        io,
+        i2c_address: opts.address,
+        gtable,
+        gamma
+      });
+
+      this.strips_internal = strips;
+
+      // now send the config message with length and data point.
+      const data   = [];
+
+      data.push(PIXEL_CONFIG);
+      strip_definition.forEach(function(strip) {
+        data.push( (strip.color_order << 5) | strip.pin);
+        data.push( strip.length & FIRMATA_7BIT_MASK);
+        data.push( (strip.length >> 7) & FIRMATA_7BIT_MASK);
+      });
+      // send the I2C config message.
+      io.i2cConfig(opts);
+      process.nextTick(function() {
+        try {
+          io.i2cWrite(opts.address, data);
+        } catch (e) {
+          if (e instanceof Error && e.name == 'EIO') {
+            this.emit('np_i2c_write_error', data);
           }
-          // there is a weird bug in OSX which sometimes causes
-          // a segfault if you try to write to fast. As such
-          // just delay the ready event by 1msec because even this
-          // is faster than hooman will perceive as a delay
-          setTimeout(() => {
-            this.emit('ready', err);
-          }, 1);
+        }
+        process.nextTick(function() {
+          this.emit('ready', null);
         }.bind(this) );
-      }
-    },
-    show: {
-      value() {
-        // call the frame on the strip.
-        const strip = strips.get(this);
-
-        const data   = [];
-        data[0] = START_SYSEX;
-        data[1] = PIXEL_COMMAND;
-        data[2] = PIXEL_SHOW;
-        data[3] = END_SYSEX;
-
-        // now just write that to the port and it should show the frame.
-        strip.port.write(new Buffer(data));
-      }
-    },
-    strip_color: {
-      value(color) {
-        // colour work is already done this just sets it the appropriate
-        // way.
-        const strip = strips.get(this);
-        const data   = [];
-
-        data[0] = START_SYSEX;
-        data[1] = PIXEL_COMMAND;
-        data[2] = PIXEL_SET_STRIP;
-        data[3] = color & FIRMATA_7BIT_MASK;
-        data[4] = (color >> 7) & FIRMATA_7BIT_MASK;
-        data[5] = (color >> 14) & FIRMATA_7BIT_MASK;
-        data[6] = (color >> 21) & FIRMATA_7BIT_MASK;
-        data[7] = END_SYSEX;
-
-        strip.port.write(new Buffer(data));
-      }
-    },
-    _shift: {
-      value(amt, direction, wrap) {
-        // shifts the strip in the appropriate direction.
-        //
-        const wrap_val = wrap ? PIXEL_SHIFT_WRAP : 0;
-        const strip = strips.get(this);
-        const data = [];
-        data[0] = START_SYSEX;
-        data[1] = PIXEL_COMMAND;
-        data[2] = PIXEL_SHIFT;
-        data[3] = (amt | direction | wrap_val) & FIRMATA_7BIT_MASK;
-        data[4] = END_SYSEX;
-
-        strip.port.write(new Buffer(data));
+      }.bind(this) );
+    }
+  },
+  show: {
+    value() {
+      const strip = this.strips_internal.get(this);
+      try {
+        strip.io.i2cWrite(strip.i2c_address, [PIXEL_SHOW]);
+      } catch (e) {
+        if (e instanceof Error && e.name == 'EIO') {
+          this.emit('np_i2c_write_error', 'PIXEL_SHOW');
+        }
       }
     }
   },
-  I2CBACKPACK: {
-    initialize: {
-      value(opts) {
-        const MAX_PIXELS = 500; // based on # bytes available in firmata
-        const strip_length = opts.length || 6; // just an arbitrary val
-        const strip_definition = opts.strips || new Array();
-        const color_order = opts.color_order || COLOR_ORDER.GRB; // default GRB
-        const gamma = opts.gamma || GAMMA_DEFAULT; // Changing to 2.8 in v0.10
+  strip_color: {
+    value(color) {
+      const strip = this.strips_internal.get(this);
+      const data   = [];
 
-        // set up the gamma table
-        const gtable = create_gamma_table(256, gamma, this.dep_warning.gamma);
+      data[0] = PIXEL_SET_STRIP;
 
-        const io = opts.firmata || opts.board.io;
-
-        if (!opts.address) {
-          opts.address = I2C_DEFAULT;
-        }
-
-        if (io == undefined) {
-          const err = new Error('An IO object is required to I2C controller');
-          err.name = 'NoIOError';
-          throw err;
-        }
-
-        // work out the map of strips and pixels.
-        if (typeof(strip_definition[0]) == 'undefined') {
-          // there is nothing specified so it's probably a single strip
-          // using the length and colour type.
-          strip_definition.push( {
-            color_order,
-            length: strip_length
-          });
-        } else if (parseInt(strip_definition[0], 10) != NaN) {
-          // we have the array of pin lengths but do we have the colour
-
-          for (let i = 0; i< strip_definition.length; i++) {
-            const len = strip_definition[i];
-            strip_definition[i] = {
-              color_order,
-              length: len
-            };
-          }
-        }
-
-        // put in check if it's gone over.
-        if (strip_definition.length > MAX_STRIPS) {
-          const err = new RangeError('Maximum number of strips ' + MAX_STRIPS + ' exceeded');
-          this.emit('error', err);
-        }
-
-        let total_length = 0;
-        strip_definition.forEach(function(data) {
-          total_length += data.length;
-        });
-
-        // put in check if there are too many pixels.
-        if (total_length > MAX_PIXELS) {
-          const err = new RangeError('Maximum number of pixels ' + MAX_PIXELS + ' exceeded');
-          this.emit('error', err);
-        }
-
-        const pixel_list = [];
-
-        for (let i=0; i < total_length; i++) {
-          pixel_list.push(new Pixel({
-            addr: i,
-            io,
-            controller: 'I2CBACKPACK',
-            i2c_address: opts.address,
-            strip: this
-          }) );
-        }
-
-        strips.set(this, {
-          pixels: pixel_list,
-          io,
-          i2c_address: opts.address,
-          gtable,
-          gamma
-        });
-
-        // now send the config message with length and data point.
-        const data   = [];
-
-        data.push(PIXEL_CONFIG);
-        strip_definition.forEach(function(strip) {
-          data.push( (strip.color_order << 5) | strip.pin);
-          data.push( strip.length & FIRMATA_7BIT_MASK);
-          data.push( (strip.length >> 7) & FIRMATA_7BIT_MASK);
-        });
-        // send the I2C config message.
-        io.i2cConfig(opts);
-        process.nextTick(function() {
-          try {
-            io.i2cWrite(opts.address, data);
-          } catch (e) {
-            if (e instanceof Error && e.name == 'EIO') {
-              this.emit('np_i2c_write_error', data);
-            }
-          }
-          process.nextTick(function() {
-            this.emit('ready', null);
-          }.bind(this) );
-        }.bind(this) );
-      }
-    },
-    show: {
-      value() {
-        const strip = strips.get(this);
-        try {
-          strip.io.i2cWrite(strip.i2c_address, [PIXEL_SHOW]);
-        } catch (e) {
-          if (e instanceof Error && e.name == 'EIO') {
-            this.emit('np_i2c_write_error', 'PIXEL_SHOW');
-          }
+      data[1] = color & FIRMATA_7BIT_MASK;
+      data[2] = (color >> 7) & FIRMATA_7BIT_MASK;
+      data[3] = (color >> 14) & FIRMATA_7BIT_MASK;
+      data[4] = (color >> 21) & FIRMATA_7BIT_MASK;
+      try {
+        strip.io.i2cWrite(strip.i2c_address, data);
+      } catch (e) {
+        if (e instanceof Error && e.name == 'EIO') {
+          this.emit('np_i2c_write_error', data);
         }
       }
-    },
-    strip_color: {
-      value(color) {
-        const strip = strips.get(this);
-        const data   = [];
-
-        data[0] = PIXEL_SET_STRIP;
-
-        data[1] = color & FIRMATA_7BIT_MASK;
-        data[2] = (color >> 7) & FIRMATA_7BIT_MASK;
-        data[3] = (color >> 14) & FIRMATA_7BIT_MASK;
-        data[4] = (color >> 21) & FIRMATA_7BIT_MASK;
-        try {
-          strip.io.i2cWrite(strip.i2c_address, data);
-        } catch (e) {
-          if (e instanceof Error && e.name == 'EIO') {
-            this.emit('np_i2c_write_error', data);
-          }
-        }
-      }
-    },
-    _shift: {
-      value(amt, direction, wrap) {
-        // shifts the strip in the appropriate direction.
-        //
-        const wrap_val = wrap ? PIXEL_SHIFT_WRAP : 0;
-        const strip = strips.get(this);
-        const data = [];
-        data[0] = PIXEL_SHIFT;
-        data[1] = (amt | direction | wrap_val) & FIRMATA_7BIT_MASK;
-        try {
-          strip.io.i2cWrite(strip.i2c_address, data);
-        } catch (e) {
-          if (e instanceof Error && e.name == 'EIO') {
-            this.emit('np_i2c_write_error', data);
-          }
+    }
+  },
+  _shift: {
+    value(amt, direction, wrap) {
+      // shifts the strip in the appropriate direction.
+      //
+      const wrap_val = wrap ? PIXEL_SHIFT_WRAP : 0;
+      const strip = this.strips_internal.get(this);
+      const data = [];
+      data[0] = PIXEL_SHIFT;
+      data[1] = (amt | direction | wrap_val) & FIRMATA_7BIT_MASK;
+      try {
+        strip.io.i2cWrite(strip.i2c_address, data);
+      } catch (e) {
+        if (e instanceof Error && e.name == 'EIO') {
+          this.emit('np_i2c_write_error', data);
         }
       }
     }
   }
 };
 
+var backpack = {
+  IC2Backpack: IC2Backpack$1
+};
 
-function Strip(opts) {
+const events = EventEmitter$2;
+const util = require$$1$1;
+const { ColorString } = pixel$1;
+const {
+  SHIFT_FORWARD: SHIFT_FORWARD$1
+} = constants;
+const { Firmata } = firmata;
+const { IC2Backpack } = backpack;
+
+const strips = new WeakMap();
+
+const Controllers = {
+  FIRMATA: Firmata,
+  I2CBACKPACK: IC2Backpack
+};
+
+function Strip$1(opts) {
   // opts contains an object with.
   // data: data pin for the pixel strip // DEPRECATED will be phased out.
   // length: length of the pixel strip. // DEPRECATED, will be phased out.
@@ -42877,8 +40935,8 @@ function Strip(opts) {
   // gamma: A user specified value for gamma correction for the strip.
   //      default is 1.0 but will be changed to 2.8 over versions
 
-  if (!(this instanceof Strip)) {
-    return new Strip(opts);
+  if (!(this instanceof Strip$1)) {
+    return new Strip$1(opts);
   }
 
   let controller;
@@ -42918,19 +40976,19 @@ function Strip(opts) {
   });
 
   if (typeof this.initialize === 'function') {
-    this.initialize(opts);
+    this.initialize(opts, strips);
   }
 }
 
-util.inherits(Strip, events.EventEmitter);
+util.inherits(Strip$1, events.EventEmitter);
 
-Strip.prototype.pixel = function(addr) {
+Strip$1.prototype.pixel = function(addr) {
   const strip = strips.get(this);
 
   return strip.pixels[addr];
 };
 
-Strip.prototype.colour = Strip.prototype.color = function(color, opts) {
+Strip$1.prototype.colour = Strip$1.prototype.color = function(color, opts) {
   // sets the color of the entire strip
   // use a particular form to set the color either
   // color = hex value or named colors
@@ -42970,13 +41028,13 @@ Strip.prototype.colour = Strip.prototype.color = function(color, opts) {
   }
 };
 
-Strip.prototype.off = Strip.prototype.clear = function() {
+Strip$1.prototype.off = Strip$1.prototype.clear = function() {
   // sets the strip to 'black', effectively setting it to 'off'
   this.color([0, 0, 0]);
   this.show();
 };
 
-Strip.prototype.shift = function(amt, direction, wrap) {
+Strip$1.prototype.shift = function(amt, direction, wrap) {
   // public version of the shift function independent of the controller.
   // this looks after the actual internal shifting of the pixels within the
   // js side and then calls the controller to mirror the same function.
@@ -42986,7 +41044,7 @@ Strip.prototype.shift = function(amt, direction, wrap) {
 
     // take a copy of the pixels at the end that is being towards
     let start_element = 0;
-    if (direction == SHIFT_FORWARD) {
+    if (direction == SHIFT_FORWARD$1) {
       start_element = this.length - amt;
     }
     const tmp_pixels = strip.pixels.splice(start_element, amt);
@@ -42999,7 +41057,7 @@ Strip.prototype.shift = function(amt, direction, wrap) {
         px.color('#000');
       }
 
-      if (direction == SHIFT_FORWARD) {
+      if (direction == SHIFT_FORWARD$1) {
         strip.pixels.unshift(px);
       } else {
         strip.pixels.push(px);
@@ -43016,11 +41074,8 @@ Strip.prototype.shift = function(amt, direction, wrap) {
   }
 };
 
-Strip.prototype.stripLength = function() {
+Strip$1.prototype.stripLength = function() {
   // gets the number of pixels in the strip
-
-  strips.get(this);
-
   if (! this.dep_warning.stripLength) {
     console.info('ERROR: strip.stripLength() is deprecated in favour of strip.length');
     console.info('0.8 - notice');
@@ -43036,24 +41091,34 @@ Strip.prototype.stripLength = function() {
   });
 };
 
-// controllers for the pixel side as well.
-var pixel = {
+var strip = {
+  Strip: Strip$1
+};
+
+const {Strip} = strip;
+const {
+  COLOR_ORDER,
+  SHIFT_FORWARD,
+  SHIFT_BACKWARD
+} = constants;
+
+var lib = {
   Strip,
   COLOR_ORDER,
   FORWARD: SHIFT_FORWARD,
   BACKWARD: SHIFT_BACKWARD
 };
 
-var pixel$1 = /*@__PURE__*/getDefaultExportFromCjs(pixel);
+var pixel = /*@__PURE__*/getDefaultExportFromCjs(lib);
 
-class LEDStrip extends pixel$1.Strip {
+class LEDStrip extends pixel.Strip {
     constructor({ pin, board, ledCount = 30, gamma = 2.8, colorOrder = "GRB", }) {
         super({
             board: board,
             controller: "FIRMATA",
             strips: [{ pin: pin, length: ledCount }], // this is preferred form for definition
             gamma: gamma, // set to a gamma that works nicely for WS2812
-            color_order: pixel$1.COLOR_ORDER[colorOrder],
+            color_order: pixel.COLOR_ORDER[colorOrder],
         });
     }
 }
