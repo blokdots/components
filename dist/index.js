@@ -42631,11 +42631,11 @@ var Protocol;
     Protocol[Protocol["I2C"] = 0] = "I2C";
     Protocol[Protocol["SPI"] = 1] = "SPI";
 })(Protocol || (Protocol = {}));
-var TransferType;
+var TransferType$1;
 (function (TransferType) {
     TransferType[TransferType["Command"] = 0] = "Command";
     TransferType[TransferType["Data"] = 1] = "Data";
-})(TransferType || (TransferType = {}));
+})(TransferType$1 || (TransferType$1 = {}));
 var Oled = (function () {
     function Oled(board, five, opts) {
         this.HEIGHT = opts.height || 32;
@@ -42733,7 +42733,7 @@ var Oled = (function () {
             Oled.DISPLAY_ON,
         ];
         for (var i = 0; i < initSeq.length; i++) {
-            this._transfer(TransferType.Command, initSeq[i]);
+            this._transfer(TransferType$1.Command, initSeq[i]);
         }
     };
     Oled.prototype._setUpSPI = function () {
@@ -42759,10 +42759,10 @@ var Oled = (function () {
     };
     Oled.prototype._transfer = function (type, val) {
         var control;
-        if (type === TransferType.Data) {
+        if (type === TransferType$1.Data) {
             control = this.DATA;
         }
-        else if (type === TransferType.Command) {
+        else if (type === TransferType$1.Command) {
             control = this.COMMAND;
         }
         else {
@@ -42776,7 +42776,7 @@ var Oled = (function () {
         }
     };
     Oled.prototype._writeSPI = function (byte, mode) {
-        if (mode === TransferType.Command) {
+        if (mode === TransferType$1.Command) {
             this.dcPin.low();
         }
         else {
@@ -42925,10 +42925,10 @@ var Oled = (function () {
             var displaySeqLen = displaySeq.length;
             var bufferLen = _this.buffer.length;
             for (var i = 0; i < displaySeqLen; i += 1) {
-                _this._transfer(TransferType.Command, displaySeq[i]);
+                _this._transfer(TransferType$1.Command, displaySeq[i]);
             }
             for (var i = 0; i < bufferLen; i += 1) {
-                _this._transfer(TransferType.Data, _this.buffer[i]);
+                _this._transfer(TransferType$1.Data, _this.buffer[i]);
             }
         });
         this.dirtyBytes = [];
@@ -42944,14 +42944,14 @@ var Oled = (function () {
         else {
             contrast = 0xcf;
         }
-        this._transfer(TransferType.Command, Oled.SET_CONTRAST);
-        this._transfer(TransferType.Command, contrast);
+        this._transfer(TransferType$1.Command, Oled.SET_CONTRAST);
+        this._transfer(TransferType$1.Command, contrast);
     };
     Oled.prototype.turnOffDisplay = function () {
-        this._transfer(TransferType.Command, Oled.DISPLAY_OFF);
+        this._transfer(TransferType$1.Command, Oled.DISPLAY_OFF);
     };
     Oled.prototype.turnOnDisplay = function () {
-        this._transfer(TransferType.Command, Oled.DISPLAY_ON);
+        this._transfer(TransferType$1.Command, Oled.DISPLAY_ON);
     };
     Oled.prototype.clearDisplay = function (sync) {
         var immed = typeof sync === 'undefined' ? true : sync;
@@ -42969,10 +42969,10 @@ var Oled = (function () {
     };
     Oled.prototype.invertDisplay = function (bool) {
         if (bool) {
-            this._transfer(TransferType.Command, Oled.INVERT_DISPLAY);
+            this._transfer(TransferType$1.Command, Oled.INVERT_DISPLAY);
         }
         else {
-            this._transfer(TransferType.Command, Oled.NORMAL_DISPLAY);
+            this._transfer(TransferType$1.Command, Oled.NORMAL_DISPLAY);
         }
     };
     Oled.prototype.drawBitmap = function (pixels, sync) {
@@ -43053,11 +43053,11 @@ var Oled = (function () {
             ];
             var displaySeqLen = displaySeq.length;
             for (var i = 0; i < displaySeqLen; i += 1) {
-                _this._transfer(TransferType.Command, displaySeq[i]);
+                _this._transfer(TransferType$1.Command, displaySeq[i]);
             }
             for (var i = pageStart; i <= pageEnd; i += 1) {
                 for (var j = colStart; j <= colEnd; j += 1) {
-                    _this._transfer(TransferType.Data, _this.buffer[_this.WIDTH * i + j]);
+                    _this._transfer(TransferType$1.Data, _this.buffer[_this.WIDTH * i + j]);
                 }
             }
         });
@@ -43190,12 +43190,12 @@ var Oled = (function () {
                 cmdSeq.push(0x00, start, 0x00, stop, 0x00, 0xff, Oled.ACTIVATE_SCROLL);
             }
             for (var i = 0; i < cmdSeq.length; i += 1) {
-                _this._transfer(TransferType.Command, cmdSeq[i]);
+                _this._transfer(TransferType$1.Command, cmdSeq[i]);
             }
         });
     };
     Oled.prototype.stopScroll = function () {
-        this._transfer(TransferType.Command, Oled.DEACTIVATE_SCROLL);
+        this._transfer(TransferType$1.Command, Oled.DEACTIVATE_SCROLL);
     };
     Oled.DISPLAY_OFF = 0xae;
     Oled.DISPLAY_ON = 0xaf;
@@ -43234,6 +43234,12 @@ const OLED_HEIGHT = 64;
 const dataToQRCodeBuffer = (data) => {
     return addQrCodeToBuffer(1, 1, data, 4);
 };
+// copied from oled-js since it is not exported
+var TransferType;
+(function (TransferType) {
+    TransferType[TransferType["Command"] = 0] = "Command";
+    TransferType[TransferType["Data"] = 1] = "Data";
+})(TransferType || (TransferType = {}));
 class OLED extends _default {
     constructor({ board, five }) {
         super(board, five, {
@@ -43245,6 +43251,7 @@ class OLED extends _default {
         this.previousBitmap = null;
         this.drawingIsBlocked = false;
         this.drawingBuffer = Array(OLED_WIDTH * OLED_HEIGHT).fill(null);
+        this.isFlipped = false;
         this.clearDisplay = () => {
             this.drawBitmapOptimized(Array(OLED_WIDTH * OLED_HEIGHT).fill(0));
         };
@@ -43320,6 +43327,18 @@ class OLED extends _default {
             }
         }, blockingTime);
         this.drawPixel(pixels);
+    }
+    flip() {
+        // https://github.com/noopkat/oled-js/blob/eec79a88f36589dd06fa184aa9702d35d4dd072b/oled.ts#L196
+        this._transfer(TransferType.Command, _default.SEG_REMAP);
+        if (this.isFlipped) {
+            this._transfer(TransferType.Command, _default.COM_SCAN_DEC);
+            this.isFlipped = false;
+        }
+        else {
+            this._transfer(TransferType.Command, _default.COM_SCAN_INC);
+            this.isFlipped = true;
+        }
     }
 }
 /**

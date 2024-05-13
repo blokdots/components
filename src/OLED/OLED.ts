@@ -10,10 +10,17 @@ export const dataToQRCodeBuffer = (data: string) => {
   return addQrCodeToBuffer(1, 1, data, 4);
 };
 
+// copied from oled-js since it is not exported
+enum TransferType {
+  Command,
+  Data,
+}
+
 class OLED extends Oled {
   previousBitmap: Color[] | null;
   drawingIsBlocked: boolean;
   drawingBuffer: Array<Color | null>;
+  isFlipped: boolean;
 
   constructor({ board, five }: { board: five.Board; five: any }) {
     super(board, five, {
@@ -26,6 +33,7 @@ class OLED extends Oled {
     this.previousBitmap = null;
     this.drawingIsBlocked = false;
     this.drawingBuffer = Array(OLED_WIDTH * OLED_HEIGHT).fill(null);
+    this.isFlipped = false;
 
     this.clearDisplay = () => {
       this.drawBitmapOptimized(Array(OLED_WIDTH * OLED_HEIGHT).fill(0));
@@ -117,6 +125,18 @@ class OLED extends Oled {
     }, blockingTime);
 
     this.drawPixel(pixels);
+  }
+
+  flip() {
+    // https://github.com/noopkat/oled-js/blob/eec79a88f36589dd06fa184aa9702d35d4dd072b/oled.ts#L196
+    this._transfer(TransferType.Command, Oled.SEG_REMAP);
+    if (this.isFlipped) {
+      this._transfer(TransferType.Command, Oled.COM_SCAN_DEC);
+      this.isFlipped = false;
+    } else {
+      this._transfer(TransferType.Command, Oled.COM_SCAN_INC);
+      this.isFlipped = true;
+    }
   }
 }
 

@@ -7,6 +7,7 @@ declare class OLED extends Oled {
     previousBitmap: Color[] | null;
     drawingIsBlocked: boolean;
     drawingBuffer: Array<Color | null>;
+    isFlipped: boolean;
     constructor({ board, five }: {
         board: five.Board;
         five: any;
@@ -16,6 +17,7 @@ declare class OLED extends Oled {
     drawValue(label: string, value: string, apply?: boolean): Color[];
     drawBitmapOptimized(bitmap: Color[]): void;
     updatePixelsBlocking(pixels: Pixel[]): void;
+    flip(): void;
 }
 /**
  * Returns a clear buffer the size of the OLED Screen
