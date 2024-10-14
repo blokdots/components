@@ -1,4 +1,3 @@
-/// <reference path="../../src/@types/decs.d.ts" />
 import five from "johnny-five";
 import pixel from "node-pixel";
 declare class LEDStrip extends pixel.Strip {

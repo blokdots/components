@@ -7,10 +7,10 @@
   "object" == typeof exports && "object" == typeof module
     ? (module.exports = e())
     : "function" == typeof define && define.amd
-    ? define([], e)
-    : "object" == typeof exports
-    ? (exports.io = e())
-    : (t.io = e());
+      ? define([], e)
+      : "object" == typeof exports
+        ? (exports.io = e())
+        : (t.io = e());
 })(self, function () {
   return (function (t) {
     var e = {};
@@ -73,8 +73,8 @@
         "undefined" != typeof self
           ? self
           : "undefined" != typeof window
-          ? window
-          : Function("return this")();
+            ? window
+            : Function("return this")();
     },
     function (t, e, n) {
       var r = n(24),
@@ -2611,8 +2611,8 @@
                 ("undefined" != typeof location && location.port
                   ? location.port
                   : e.secure
-                  ? 443
-                  : 80)),
+                    ? 443
+                    : 80)),
               (e.transports = n.transports || ["polling", "websocket"]),
               (e.readyState = ""),
               (e.writeBuffer = []),
@@ -2938,8 +2938,8 @@
                             t.upgrading ? r() : e();
                           })
                         : this.upgrading
-                        ? r()
-                        : e()),
+                          ? r()
+                          : e()),
                     this
                   );
                 },
@@ -3381,15 +3381,15 @@
             ? n(u)
             : s(u, n)
           : i &&
-            (u instanceof ArrayBuffer ||
-              ((c = u),
-              "function" == typeof ArrayBuffer.isView
-                ? ArrayBuffer.isView(c)
-                : c && c.buffer instanceof ArrayBuffer))
-          ? e
-            ? n(u instanceof ArrayBuffer ? u : u.buffer)
-            : s(new Blob([u]), n)
-          : n(r[a] + (u || ""));
+              (u instanceof ArrayBuffer ||
+                ((c = u),
+                "function" == typeof ArrayBuffer.isView
+                  ? ArrayBuffer.isView(c)
+                  : c && c.buffer instanceof ArrayBuffer))
+            ? e
+              ? n(u instanceof ArrayBuffer ? u : u.buffer)
+              : s(new Blob([u]), n)
+            : n(r[a] + (u || ""));
       };
     },
     function (t, e, n) {
@@ -3420,10 +3420,10 @@
         return "b" === n
           ? { type: "message", data: c(t.substring(1), e) }
           : i[n]
-          ? t.length > 1
-            ? { type: i[n], data: t.substring(1) }
-            : { type: i[n] }
-          : s;
+            ? t.length > 1
+              ? { type: i[n], data: t.substring(1) }
+              : { type: i[n] }
+            : s;
       };
     },
     function (t, e) {

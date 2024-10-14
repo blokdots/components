@@ -20,9 +20,20 @@ class OLED extends Oled {
   previousBitmap: Color[] | null;
   drawingIsBlocked: boolean;
   drawingBuffer: Array<Color | null>;
-  isFlipped: boolean;
+  isRotated: boolean;
+  isMirrored: boolean;
 
-  constructor({ board, five }: { board: five.Board; five: any }) {
+  constructor({
+    board,
+    five,
+    isRotated = false,
+    isMirrored = false,
+  }: {
+    board: five.Board;
+    five: any;
+    isRotated?: boolean;
+    isMirrored?: boolean;
+  }) {
     super(board, five, {
       width: 128,
       height: 64,
@@ -33,7 +44,8 @@ class OLED extends Oled {
     this.previousBitmap = null;
     this.drawingIsBlocked = false;
     this.drawingBuffer = Array(OLED_WIDTH * OLED_HEIGHT).fill(null);
-    this.isFlipped = false;
+    this.isRotated = isRotated;
+    this.isMirrored = isMirrored;
 
     this.clearDisplay = () => {
       this.drawBitmapOptimized(Array(OLED_WIDTH * OLED_HEIGHT).fill(0));
@@ -69,7 +81,7 @@ class OLED extends Oled {
       const updatePixels: Pixel[] = [];
       for (let i = 0; i < bitmap.length; i++) {
         if (this.previousBitmap[i] !== bitmap[i]) {
-          const [col, row] = indexToCoords(i);
+          let [col, row] = indexToCoords(i);
 
           // x, y, color
           updatePixels.push([col, row, bitmap[i]]);
@@ -78,10 +90,29 @@ class OLED extends Oled {
 
       // update them on the OLED
       this.updatePixelsBlocking(updatePixels);
+
       this.previousBitmap = bitmap;
     } else {
-      this.drawBitmap(bitmap);
+      if (this.isRotated) {
+        let drawingBitmap = rotateBitmap([...bitmap]);
+        this.drawBitmap(drawingBitmap);
+      } else {
+        this.drawBitmap(bitmap);
+      }
       this.previousBitmap = bitmap;
+    }
+  }
+
+  redraw() {
+    if (this.previousBitmap) {
+      let drawingBitmap = [...this.previousBitmap];
+
+      if (this.isRotated) {
+        // we only want to visually rotate, not actually
+        drawingBitmap = rotateBitmap(drawingBitmap);
+      }
+
+      this.drawBitmap(drawingBitmap);
     }
   }
 
@@ -124,18 +155,31 @@ class OLED extends Oled {
       }
     }, blockingTime);
 
-    this.drawPixel(pixels);
+    if (this.isRotated) {
+      let drawingPixels = pixels.map((p) => {
+        let [newCol, newRow] = rotateCoords(p[0], p[1]);
+        return <Pixel>[newCol, newRow, p[2]];
+      });
+      this.drawPixel(drawingPixels);
+    } else {
+      this.drawPixel(pixels);
+    }
   }
 
-  flip() {
+  rotate() {
+    this.isRotated = !this.isRotated;
+    this.redraw();
+  }
+
+  mirror() {
     // https://github.com/noopkat/oled-js/blob/eec79a88f36589dd06fa184aa9702d35d4dd072b/oled.ts#L196
     this._transfer(TransferType.Command, Oled.SEG_REMAP);
-    if (this.isFlipped) {
+    if (this.isMirrored) {
       this._transfer(TransferType.Command, Oled.COM_SCAN_DEC);
-      this.isFlipped = false;
+      this.isMirrored = false;
     } else {
       this._transfer(TransferType.Command, Oled.COM_SCAN_INC);
-      this.isFlipped = true;
+      this.isMirrored = true;
     }
   }
 }
@@ -361,14 +405,26 @@ export const addTextToBuffer = (
 };
 
 const indexToCoords = (i: number) => {
-  const row = Math.floor(i / OLED_WIDTH);
-  const col = i - OLED_WIDTH * row; // i % OLED_WIDTH?
+  let row = Math.floor(i / OLED_WIDTH);
+  let col = i - OLED_WIDTH * row; // i % OLED_WIDTH?
 
   return [col, row];
 };
 
 const coordsToIndex = (col: number, row: number) => {
   return col + row * OLED_WIDTH;
+};
+
+const rotateCoords = (col: number, row: number) => {
+  row = OLED_HEIGHT - row - 1;
+  col = OLED_WIDTH - col - 1;
+
+  return [col, row];
+};
+
+// rotates the bitmap around 180°
+const rotateBitmap = (bitmap: Color[]) => {
+  return bitmap.reverse();
 };
 
 export default OLED;

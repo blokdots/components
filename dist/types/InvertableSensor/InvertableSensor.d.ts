@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import EventEmitter from "events";
 import five from "johnny-five";
 declare class InvertableSensor extends EventEmitter {

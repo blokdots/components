@@ -1,5 +1,3 @@
-/// <reference types="node" />
-/// <reference types="node" />
 import EventEmitter from "events";
 import five, { Board } from "johnny-five";
 declare class Encoder extends EventEmitter {

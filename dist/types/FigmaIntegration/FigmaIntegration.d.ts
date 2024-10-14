@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import EventEmitter from "events";
 import { BlokdotsSocketIOServer, Integration } from "../BlokdotsSocketIOServer";
 type ReactionMessageBase = {

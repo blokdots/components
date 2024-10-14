@@ -1,8 +1,8 @@
 import commonjs from "@rollup/plugin-commonjs";
 import resolve from "@rollup/plugin-node-resolve";
-import dts from "rollup-plugin-dts";
 import typescript from "@rollup/plugin-typescript";
 import { base64 } from "rollup-plugin-base64";
+import dts from "rollup-plugin-dts";
 
 const config = [
   {

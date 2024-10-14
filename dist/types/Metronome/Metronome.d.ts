@@ -1,5 +1,3 @@
-/// <reference types="node" />
-/// <reference types="node" />
 import EventEmitter from "events";
 declare class Metronome extends EventEmitter {
     frequency: number;

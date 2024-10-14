@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { BlokdotsSocketIOServer, Integration } from "../BlokdotsSocketIOServer";
 import EventEmitter from "events";
 declare class SocketIOIntegration extends EventEmitter {

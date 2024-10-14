@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import EventEmitter from "events";
 declare class SignalTower extends EventEmitter {
     value?: string;

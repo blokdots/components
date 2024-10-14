@@ -1,5 +1,3 @@
-/// <reference path="./src/@types/decs.d.ts" />
-/// <reference types="node" />
 import { Namespace, Server, Socket, DisconnectReason } from 'socket.io';
 import EventEmitter from 'events';
 import five, { Board } from 'johnny-five';
@@ -247,17 +245,22 @@ declare class OLED extends Oled {
     previousBitmap: Color[] | null;
     drawingIsBlocked: boolean;
     drawingBuffer: Array<Color | null>;
-    isFlipped: boolean;
-    constructor({ board, five }: {
+    isRotated: boolean;
+    isMirrored: boolean;
+    constructor({ board, five, isRotated, isMirrored, }: {
         board: five.Board;
         five: any;
+        isRotated?: boolean;
+        isMirrored?: boolean;
     });
     drawString(string: string): void;
     drawQRCodeNew(data: string): void;
     drawValue(label: string, value: string, apply?: boolean): Color[];
     drawBitmapOptimized(bitmap: Color[]): void;
+    redraw(): void;
     updatePixelsBlocking(pixels: Pixel[]): void;
-    flip(): void;
+    rotate(): void;
+    mirror(): void;
 }
 /**
  * Adds the text to the buffer given, if none is given a clear one is created

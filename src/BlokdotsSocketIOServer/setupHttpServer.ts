@@ -1,11 +1,16 @@
-import { Readable } from "stream";
 import http from "http";
+import { Readable } from "stream";
 
 import favicon from "./webserver/favicon.ico";
 import index from "./webserver/index.html";
+
 import logArrowIn from "./webserver/log-arrow-in.svg";
 import logArrowOut from "./webserver/log-arrow-out.svg";
-import socketIOJS from "./webserver/socket-io.min.js";
+// This is nota svg file – but if we call it js, rollip tries to compile it
+// as a module, which we don't want. So we call it svg and then it's just
+// served as a file.
+import socketIOJS from "./webserver/socket-io.min.svg";
+
 import style from "./webserver/style.css";
 
 const setupHttpServer = () => {

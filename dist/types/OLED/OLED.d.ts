@@ -7,17 +7,22 @@ declare class OLED extends Oled {
     previousBitmap: Color[] | null;
     drawingIsBlocked: boolean;
     drawingBuffer: Array<Color | null>;
-    isFlipped: boolean;
-    constructor({ board, five }: {
+    isRotated: boolean;
+    isMirrored: boolean;
+    constructor({ board, five, isRotated, isMirrored, }: {
         board: five.Board;
         five: any;
+        isRotated?: boolean;
+        isMirrored?: boolean;
     });
     drawString(string: string): void;
     drawQRCodeNew(data: string): void;
     drawValue(label: string, value: string, apply?: boolean): Color[];
     drawBitmapOptimized(bitmap: Color[]): void;
+    redraw(): void;
     updatePixelsBlocking(pixels: Pixel[]): void;
-    flip(): void;
+    rotate(): void;
+    mirror(): void;
 }
 /**
  * Returns a clear buffer the size of the OLED Screen
