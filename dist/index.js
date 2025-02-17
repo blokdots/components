@@ -1,6 +1,7 @@
 'use strict';
 
 var socket_io = require('socket.io');
+var WebSocket = require('ws');
 var require$$0$1 = require('os');
 var http = require('http');
 var require$$0 = require('stream');
@@ -148,7 +149,7 @@ class BlokdotsSocketIOServer {
     start() {
         const httpServer = setupHttpServer();
         this.io = new socket_io.Server(httpServer, {
-            // wsEngine: WebSocket.Server,
+            wsEngine: WebSocket.Server,
             pingInterval: 5000,
             pingTimeout: 5000,
             allowEIO3: true, // support older websocket clients
@@ -1011,7 +1012,7 @@ function requireConversions$1 () {
 
 		r = (x * 3.2406) + (y * -1.5372) + (z * -0.4986);
 		g = (x * -0.9689) + (y * 1.8758) + (z * 0.0415);
-		b = (x * 0.0557) + (y * -0.2040) + (z * 1.0570);
+		b = (x * 0.0557) + (y * -0.204) + (z * 1.0570);
 
 		// assume sRGB
 		r = r > 0.0031308
@@ -6141,17 +6142,17 @@ function requireBrowserSerialport () {
 	return browserSerialport;
 }
 
+var dist$f = {};
+
 var dist$e = {};
 
-var dist$d = {};
+var hasRequiredDist$f;
 
-var hasRequiredDist$e;
-
-function requireDist$e () {
-	if (hasRequiredDist$e) return dist$d;
-	hasRequiredDist$e = 1;
-	Object.defineProperty(dist$d, "__esModule", { value: true });
-	dist$d.ByteLengthParser = void 0;
+function requireDist$f () {
+	if (hasRequiredDist$f) return dist$e;
+	hasRequiredDist$f = 1;
+	Object.defineProperty(dist$e, "__esModule", { value: true });
+	dist$e.ByteLengthParser = void 0;
 	const stream_1 = require$$0;
 	/**
 	 * Emit data every number of bytes
@@ -6191,19 +6192,19 @@ function requireDist$e () {
 	        cb();
 	    }
 	}
-	dist$d.ByteLengthParser = ByteLengthParser;
-	return dist$d;
+	dist$e.ByteLengthParser = ByteLengthParser;
+	return dist$e;
 }
 
-var dist$c = {};
+var dist$d = {};
 
-var hasRequiredDist$d;
+var hasRequiredDist$e;
 
-function requireDist$d () {
-	if (hasRequiredDist$d) return dist$c;
-	hasRequiredDist$d = 1;
-	Object.defineProperty(dist$c, "__esModule", { value: true });
-	dist$c.CCTalkParser = void 0;
+function requireDist$e () {
+	if (hasRequiredDist$e) return dist$d;
+	hasRequiredDist$e = 1;
+	Object.defineProperty(dist$d, "__esModule", { value: true });
+	dist$d.CCTalkParser = void 0;
 	const stream_1 = require$$0;
 	/**
 	 * Parse the CCTalk protocol
@@ -6246,19 +6247,19 @@ function requireDist$d () {
 	        cb();
 	    }
 	}
-	dist$c.CCTalkParser = CCTalkParser;
-	return dist$c;
+	dist$d.CCTalkParser = CCTalkParser;
+	return dist$d;
 }
 
-var dist$b = {};
+var dist$c = {};
 
-var hasRequiredDist$c;
+var hasRequiredDist$d;
 
-function requireDist$c () {
-	if (hasRequiredDist$c) return dist$b;
-	hasRequiredDist$c = 1;
-	Object.defineProperty(dist$b, "__esModule", { value: true });
-	dist$b.DelimiterParser = void 0;
+function requireDist$d () {
+	if (hasRequiredDist$d) return dist$c;
+	hasRequiredDist$d = 1;
+	Object.defineProperty(dist$c, "__esModule", { value: true });
+	dist$c.DelimiterParser = void 0;
 	const stream_1 = require$$0;
 	/**
 	 * A transform stream that emits data each time a byte sequence is received.
@@ -6295,19 +6296,19 @@ function requireDist$c () {
 	        cb();
 	    }
 	}
-	dist$b.DelimiterParser = DelimiterParser;
-	return dist$b;
+	dist$c.DelimiterParser = DelimiterParser;
+	return dist$c;
 }
 
-var dist$a = {};
+var dist$b = {};
 
-var hasRequiredDist$b;
+var hasRequiredDist$c;
 
-function requireDist$b () {
-	if (hasRequiredDist$b) return dist$a;
-	hasRequiredDist$b = 1;
-	Object.defineProperty(dist$a, "__esModule", { value: true });
-	dist$a.InterByteTimeoutParser = void 0;
+function requireDist$c () {
+	if (hasRequiredDist$c) return dist$b;
+	hasRequiredDist$c = 1;
+	Object.defineProperty(dist$b, "__esModule", { value: true });
+	dist$b.InterByteTimeoutParser = void 0;
 	const stream_1 = require$$0;
 	/**
 	 * A transform stream that buffers data and emits it after not receiving any bytes for the specified amount of time or hitting a max buffer size.
@@ -6361,19 +6362,19 @@ function requireDist$b () {
 	        cb();
 	    }
 	}
-	dist$a.InterByteTimeoutParser = InterByteTimeoutParser;
-	return dist$a;
+	dist$b.InterByteTimeoutParser = InterByteTimeoutParser;
+	return dist$b;
 }
 
-var dist$9 = {};
+var dist$a = {};
 
-var hasRequiredDist$a;
+var hasRequiredDist$b;
 
-function requireDist$a () {
-	if (hasRequiredDist$a) return dist$9;
-	hasRequiredDist$a = 1;
-	Object.defineProperty(dist$9, "__esModule", { value: true });
-	dist$9.PacketLengthParser = void 0;
+function requireDist$b () {
+	if (hasRequiredDist$b) return dist$a;
+	hasRequiredDist$b = 1;
+	Object.defineProperty(dist$a, "__esModule", { value: true });
+	dist$a.PacketLengthParser = void 0;
 	const stream_1 = require$$0;
 	/**
 	 * A transform stream that decodes packets with a delimiter and length of payload
@@ -6428,20 +6429,20 @@ function requireDist$a () {
 	        cb();
 	    }
 	}
-	dist$9.PacketLengthParser = PacketLengthParser;
-	return dist$9;
+	dist$a.PacketLengthParser = PacketLengthParser;
+	return dist$a;
 }
 
-var dist$8 = {};
+var dist$9 = {};
 
-var hasRequiredDist$9;
+var hasRequiredDist$a;
 
-function requireDist$9 () {
-	if (hasRequiredDist$9) return dist$8;
-	hasRequiredDist$9 = 1;
-	Object.defineProperty(dist$8, "__esModule", { value: true });
-	dist$8.ReadlineParser = void 0;
-	const parser_delimiter_1 = requireDist$c();
+function requireDist$a () {
+	if (hasRequiredDist$a) return dist$9;
+	hasRequiredDist$a = 1;
+	Object.defineProperty(dist$9, "__esModule", { value: true });
+	dist$9.ReadlineParser = void 0;
+	const parser_delimiter_1 = requireDist$d();
 	/**
 	 *  A transform stream that emits data after a newline delimiter is received.
 	 * @summary To use the `Readline` parser, provide a delimiter (defaults to `\n`). Data is emitted as string controllable by the `encoding` option (defaults to `utf8`).
@@ -6459,19 +6460,19 @@ function requireDist$9 () {
 	        super(opts);
 	    }
 	}
-	dist$8.ReadlineParser = ReadlineParser;
-	return dist$8;
+	dist$9.ReadlineParser = ReadlineParser;
+	return dist$9;
 }
 
-var dist$7 = {};
+var dist$8 = {};
 
-var hasRequiredDist$8;
+var hasRequiredDist$9;
 
-function requireDist$8 () {
-	if (hasRequiredDist$8) return dist$7;
-	hasRequiredDist$8 = 1;
-	Object.defineProperty(dist$7, "__esModule", { value: true });
-	dist$7.ReadyParser = void 0;
+function requireDist$9 () {
+	if (hasRequiredDist$9) return dist$8;
+	hasRequiredDist$9 = 1;
+	Object.defineProperty(dist$8, "__esModule", { value: true });
+	dist$8.ReadyParser = void 0;
 	const stream_1 = require$$0;
 	/**
 	 * A transform stream that waits for a sequence of "ready" bytes before emitting a ready event and emitting data events
@@ -6518,19 +6519,19 @@ function requireDist$8 () {
 	        cb();
 	    }
 	}
-	dist$7.ReadyParser = ReadyParser;
-	return dist$7;
+	dist$8.ReadyParser = ReadyParser;
+	return dist$8;
 }
 
-var dist$6 = {};
+var dist$7 = {};
 
-var hasRequiredDist$7;
+var hasRequiredDist$8;
 
-function requireDist$7 () {
-	if (hasRequiredDist$7) return dist$6;
-	hasRequiredDist$7 = 1;
-	Object.defineProperty(dist$6, "__esModule", { value: true });
-	dist$6.RegexParser = void 0;
+function requireDist$8 () {
+	if (hasRequiredDist$8) return dist$7;
+	hasRequiredDist$8 = 1;
+	Object.defineProperty(dist$7, "__esModule", { value: true });
+	dist$7.RegexParser = void 0;
 	const stream_1 = require$$0;
 	/**
 	 * A transform stream that uses a regular expression to split the incoming text upon.
@@ -6568,11 +6569,11 @@ function requireDist$7 () {
 	        cb();
 	    }
 	}
-	dist$6.RegexParser = RegexParser;
-	return dist$6;
+	dist$7.RegexParser = RegexParser;
+	return dist$7;
 }
 
-var dist$5 = {};
+var dist$6 = {};
 
 var decoder = {};
 
@@ -6733,30 +6734,30 @@ function requireEncoder () {
 	return encoder;
 }
 
-var hasRequiredDist$6;
+var hasRequiredDist$7;
 
-function requireDist$6 () {
-	if (hasRequiredDist$6) return dist$5;
-	hasRequiredDist$6 = 1;
+function requireDist$7 () {
+	if (hasRequiredDist$7) return dist$6;
+	hasRequiredDist$7 = 1;
 	(function (exports) {
-		var __createBinding = (dist$5 && dist$5.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+		var __createBinding = (dist$6 && dist$6.__createBinding) || (Object.create ? (function(o, m, k, k2) {
 		    if (k2 === undefined) k2 = k;
 		    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 		}) : (function(o, m, k, k2) {
 		    if (k2 === undefined) k2 = k;
 		    o[k2] = m[k];
 		}));
-		var __exportStar = (dist$5 && dist$5.__exportStar) || function(m, exports) {
+		var __exportStar = (dist$6 && dist$6.__exportStar) || function(m, exports) {
 		    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 		};
 		Object.defineProperty(exports, "__esModule", { value: true });
 		__exportStar(requireDecoder(), exports);
 		__exportStar(requireEncoder(), exports); 
-	} (dist$5));
-	return dist$5;
+	} (dist$6));
+	return dist$6;
 }
 
-var dist$4 = {};
+var dist$5 = {};
 
 var utils$2 = {};
 
@@ -6813,13 +6814,13 @@ function requireUtils$1 () {
 	return utils$2;
 }
 
-var hasRequiredDist$5;
+var hasRequiredDist$6;
 
-function requireDist$5 () {
-	if (hasRequiredDist$5) return dist$4;
-	hasRequiredDist$5 = 1;
-	Object.defineProperty(dist$4, "__esModule", { value: true });
-	dist$4.SpacePacketParser = void 0;
+function requireDist$6 () {
+	if (hasRequiredDist$6) return dist$5;
+	hasRequiredDist$6 = 1;
+	Object.defineProperty(dist$5, "__esModule", { value: true });
+	dist$5.SpacePacketParser = void 0;
 	const stream_1 = require$$0;
 	const utils_1 = requireUtils$1();
 	/**
@@ -6932,13 +6933,13 @@ function requireDist$5 () {
 	        cb();
 	    }
 	}
-	dist$4.SpacePacketParser = SpacePacketParser;
-	return dist$4;
+	dist$5.SpacePacketParser = SpacePacketParser;
+	return dist$5;
 }
 
-var serialportMock = {};
+var serialportMock$1 = {};
 
-var dist$3 = {};
+var dist$4 = {};
 
 var src = {exports: {}};
 
@@ -6975,7 +6976,7 @@ function requireMs () {
 	 * @api public
 	 */
 
-	ms = function(val, options) {
+	ms = function (val, options) {
 	  options = options || {};
 	  var type = typeof val;
 	  if (type === 'string' && val.length > 0) {
@@ -7288,24 +7289,62 @@ function requireCommon () {
 			createDebug.names = [];
 			createDebug.skips = [];
 
-			let i;
-			const split = (typeof namespaces === 'string' ? namespaces : '').split(/[\s,]+/);
-			const len = split.length;
+			const split = (typeof namespaces === 'string' ? namespaces : '')
+				.trim()
+				.replace(' ', ',')
+				.split(',')
+				.filter(Boolean);
 
-			for (i = 0; i < len; i++) {
-				if (!split[i]) {
-					// ignore empty strings
-					continue;
-				}
-
-				namespaces = split[i].replace(/\*/g, '.*?');
-
-				if (namespaces[0] === '-') {
-					createDebug.skips.push(new RegExp('^' + namespaces.slice(1) + '$'));
+			for (const ns of split) {
+				if (ns[0] === '-') {
+					createDebug.skips.push(ns.slice(1));
 				} else {
-					createDebug.names.push(new RegExp('^' + namespaces + '$'));
+					createDebug.names.push(ns);
 				}
 			}
+		}
+
+		/**
+		 * Checks if the given string matches a namespace template, honoring
+		 * asterisks as wildcards.
+		 *
+		 * @param {String} search
+		 * @param {String} template
+		 * @return {Boolean}
+		 */
+		function matchesTemplate(search, template) {
+			let searchIndex = 0;
+			let templateIndex = 0;
+			let starIndex = -1;
+			let matchIndex = 0;
+
+			while (searchIndex < search.length) {
+				if (templateIndex < template.length && (template[templateIndex] === search[searchIndex] || template[templateIndex] === '*')) {
+					// Match character or proceed with wildcard
+					if (template[templateIndex] === '*') {
+						starIndex = templateIndex;
+						matchIndex = searchIndex;
+						templateIndex++; // Skip the '*'
+					} else {
+						searchIndex++;
+						templateIndex++;
+					}
+				} else if (starIndex !== -1) { // eslint-disable-line no-negated-condition
+					// Backtrack to the last '*' and try to match more characters
+					templateIndex = starIndex + 1;
+					matchIndex++;
+					searchIndex = matchIndex;
+				} else {
+					return false; // No match
+				}
+			}
+
+			// Handle trailing '*' in template
+			while (templateIndex < template.length && template[templateIndex] === '*') {
+				templateIndex++;
+			}
+
+			return templateIndex === template.length;
 		}
 
 		/**
@@ -7316,8 +7355,8 @@ function requireCommon () {
 		*/
 		function disable() {
 			const namespaces = [
-				...createDebug.names.map(toNamespace),
-				...createDebug.skips.map(toNamespace).map(namespace => '-' + namespace)
+				...createDebug.names,
+				...createDebug.skips.map(namespace => '-' + namespace)
 			].join(',');
 			createDebug.enable('');
 			return namespaces;
@@ -7331,39 +7370,19 @@ function requireCommon () {
 		* @api public
 		*/
 		function enabled(name) {
-			if (name[name.length - 1] === '*') {
-				return true;
-			}
-
-			let i;
-			let len;
-
-			for (i = 0, len = createDebug.skips.length; i < len; i++) {
-				if (createDebug.skips[i].test(name)) {
+			for (const skip of createDebug.skips) {
+				if (matchesTemplate(name, skip)) {
 					return false;
 				}
 			}
 
-			for (i = 0, len = createDebug.names.length; i < len; i++) {
-				if (createDebug.names[i].test(name)) {
+			for (const ns of createDebug.names) {
+				if (matchesTemplate(name, ns)) {
 					return true;
 				}
 			}
 
 			return false;
-		}
-
-		/**
-		* Convert regexp to namespace
-		*
-		* @param {RegExp} regxep
-		* @return {String} namespace
-		* @api private
-		*/
-		function toNamespace(regexp) {
-			return regexp.toString()
-				.substring(2, regexp.toString().length - 2)
-				.replace(/\.\*\?$/, '*');
 		}
 
 		/**
@@ -7530,14 +7549,17 @@ function requireBrowser () {
 				return false;
 			}
 
+			let m;
+
 			// Is webkit? http://stackoverflow.com/a/16459606/376773
 			// document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
+			// eslint-disable-next-line no-return-assign
 			return (typeof document !== 'undefined' && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance) ||
 				// Is firebug? http://stackoverflow.com/a/398120/376773
 				(typeof window !== 'undefined' && window.console && (window.console.firebug || (window.console.exception && window.console.table))) ||
 				// Is firefox >= v31?
 				// https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-				(typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31) ||
+				(typeof navigator !== 'undefined' && navigator.userAgent && (m = navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/)) && parseInt(m[1], 10) >= 31) ||
 				// Double check webkit in userAgent just in case we are in a worker
 				(typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/));
 		}
@@ -8032,11 +8054,11 @@ function requireNode () {
 		}
 
 		/**
-		 * Invokes `util.format()` with the specified arguments and writes to stderr.
+		 * Invokes `util.formatWithOptions()` with the specified arguments and writes to stderr.
 		 */
 
 		function log(...args) {
-			return process.stderr.write(util.format(...args) + '\n');
+			return process.stderr.write(util.formatWithOptions(exports.inspectOpts, ...args) + '\n');
 		}
 
 		/**
@@ -8128,16 +8150,16 @@ function requireSrc () {
 	return src.exports;
 }
 
-var hasRequiredDist$4;
+var hasRequiredDist$5;
 
-function requireDist$4 () {
-	if (hasRequiredDist$4) return dist$3;
-	hasRequiredDist$4 = 1;
-	var __importDefault = (dist$3 && dist$3.__importDefault) || function (mod) {
+function requireDist$5 () {
+	if (hasRequiredDist$5) return dist$4;
+	hasRequiredDist$5 = 1;
+	var __importDefault = (dist$4 && dist$4.__importDefault) || function (mod) {
 	    return (mod && mod.__esModule) ? mod : { "default": mod };
 	};
-	Object.defineProperty(dist$3, "__esModule", { value: true });
-	dist$3.SerialPortStream = dist$3.DisconnectedError = void 0;
+	Object.defineProperty(dist$4, "__esModule", { value: true });
+	dist$4.SerialPortStream = dist$4.DisconnectedError = void 0;
 	const stream_1 = require$$0;
 	const debug_1 = __importDefault(requireSrc());
 	const debug = (0, debug_1.default)('serialport/stream');
@@ -8147,7 +8169,7 @@ function requireDist$4 () {
 	        this.disconnected = true;
 	    }
 	}
-	dist$3.DisconnectedError = DisconnectedError;
+	dist$4.DisconnectedError = DisconnectedError;
 	const defaultSetFlags = {
 	    brk: false,
 	    cts: false,
@@ -8471,7 +8493,7 @@ function requireDist$4 () {
 	        });
 	    }
 	}
-	dist$3.SerialPortStream = SerialPortStream;
+	dist$4.SerialPortStream = SerialPortStream;
 	/**
 	 * The `error` event's callback is called with an error object whenever there is an error.
 	 * @event error
@@ -8506,18 +8528,18 @@ function requireDist$4 () {
 	 * @see pause
 	 * @returns `this`
 	 */
-	return dist$3;
+	return dist$4;
 }
 
-var dist$2 = {};
+var dist$3 = {};
 
-var hasRequiredDist$3;
+var hasRequiredDist$4;
 
-function requireDist$3 () {
-	if (hasRequiredDist$3) return dist$2;
-	hasRequiredDist$3 = 1;
+function requireDist$4 () {
+	if (hasRequiredDist$4) return dist$3;
+	hasRequiredDist$4 = 1;
 
-	Object.defineProperty(dist$2, '__esModule', { value: true });
+	Object.defineProperty(dist$3, '__esModule', { value: true });
 
 	var debugFactory = requireSrc();
 
@@ -8793,21 +8815,21 @@ function requireDist$3 () {
 	    }
 	}
 
-	dist$2.CanceledError = CanceledError;
-	dist$2.MockBinding = MockBinding;
-	dist$2.MockPortBinding = MockPortBinding;
-	return dist$2;
+	dist$3.CanceledError = CanceledError;
+	dist$3.MockBinding = MockBinding;
+	dist$3.MockPortBinding = MockPortBinding;
+	return dist$3;
 }
 
-var hasRequiredSerialportMock;
+var hasRequiredSerialportMock$1;
 
-function requireSerialportMock () {
-	if (hasRequiredSerialportMock) return serialportMock;
-	hasRequiredSerialportMock = 1;
-	Object.defineProperty(serialportMock, "__esModule", { value: true });
-	serialportMock.SerialPortMock = void 0;
-	const stream_1 = requireDist$4();
-	const binding_mock_1 = requireDist$3();
+function requireSerialportMock$1 () {
+	if (hasRequiredSerialportMock$1) return serialportMock$1;
+	hasRequiredSerialportMock$1 = 1;
+	Object.defineProperty(serialportMock$1, "__esModule", { value: true });
+	serialportMock$1.SerialPortMock = void 0;
+	const stream_1 = requireDist$5();
+	const binding_mock_1 = requireDist$4();
 	class SerialPortMock extends stream_1.SerialPortStream {
 	    constructor(options, openCallback) {
 	        const opts = {
@@ -8817,15 +8839,15 @@ function requireSerialportMock () {
 	        super(opts, openCallback);
 	    }
 	}
-	serialportMock.SerialPortMock = SerialPortMock;
+	serialportMock$1.SerialPortMock = SerialPortMock;
 	SerialPortMock.list = binding_mock_1.MockBinding.list;
 	SerialPortMock.binding = binding_mock_1.MockBinding;
-	return serialportMock;
+	return serialportMock$1;
 }
 
-var serialport = {};
+var serialport$1 = {};
 
-var dist$1 = {};
+var dist$2 = {};
 
 var darwin = {};
 
@@ -9530,7 +9552,7 @@ function requireLinuxList () {
 	Object.defineProperty(linuxList, "__esModule", { value: true });
 	linuxList.linuxList = void 0;
 	const child_process_1 = require$$0$3;
-	const parser_readline_1 = requireDist$9();
+	const parser_readline_1 = requireDist$a();
 	// get only serial port names
 	function checkPathOfDevice(path) {
 	    return /(tty(S|WCH|ACM|USB|AMA|MFD|O|XRUSB)|rfcomm)/.test(path) && path;
@@ -9831,7 +9853,7 @@ function requireWin32 () {
 	Object.defineProperty(win32, "__esModule", { value: true });
 	win32.WindowsPortBinding = win32.WindowsBinding = void 0;
 	const debug_1 = __importDefault(requireSrc());
-	const _1 = requireDist$1();
+	const _1 = requireDist$2();
 	const load_bindings_1 = requireLoadBindings();
 	const win32_sn_parser_1 = requireWin32SnParser();
 	const debug = (0, debug_1.default)('serialport/bindings-cpp');
@@ -9989,23 +10011,23 @@ function requireWin32 () {
 	return win32;
 }
 
-var dist = {};
+var dist$1 = {};
+
+var hasRequiredDist$3;
+
+function requireDist$3 () {
+	if (hasRequiredDist$3) return dist$1;
+	hasRequiredDist$3 = 1;
+	return dist$1;
+}
 
 var hasRequiredDist$2;
 
 function requireDist$2 () {
-	if (hasRequiredDist$2) return dist;
+	if (hasRequiredDist$2) return dist$2;
 	hasRequiredDist$2 = 1;
-	return dist;
-}
-
-var hasRequiredDist$1;
-
-function requireDist$1 () {
-	if (hasRequiredDist$1) return dist$1;
-	hasRequiredDist$1 = 1;
 	(function (exports) {
-		var __createBinding = (dist$1 && dist$1.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+		var __createBinding = (dist$2 && dist$2.__createBinding) || (Object.create ? (function(o, m, k, k2) {
 		    if (k2 === undefined) k2 = k;
 		    var desc = Object.getOwnPropertyDescriptor(m, k);
 		    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -10016,10 +10038,10 @@ function requireDist$1 () {
 		    if (k2 === undefined) k2 = k;
 		    o[k2] = m[k];
 		}));
-		var __exportStar = (dist$1 && dist$1.__exportStar) || function(m, exports) {
+		var __exportStar = (dist$2 && dist$2.__exportStar) || function(m, exports) {
 		    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 		};
-		var __importDefault = (dist$1 && dist$1.__importDefault) || function (mod) {
+		var __importDefault = (dist$2 && dist$2.__importDefault) || function (mod) {
 		    return (mod && mod.__esModule) ? mod : { "default": mod };
 		};
 		Object.defineProperty(exports, "__esModule", { value: true });
@@ -10030,7 +10052,7 @@ function requireDist$1 () {
 		const linux_1 = requireLinux();
 		const win32_1 = requireWin32();
 		const debug = (0, debug_1.default)('serialport/bindings-cpp');
-		__exportStar(requireDist$2(), exports);
+		__exportStar(requireDist$3(), exports);
 		__exportStar(requireDarwin(), exports);
 		__exportStar(requireLinux(), exports);
 		__exportStar(requireWin32(), exports);
@@ -10052,19 +10074,19 @@ function requireDist$1 () {
 		    }
 		}
 		exports.autoDetect = autoDetect; 
-	} (dist$1));
-	return dist$1;
+	} (dist$2));
+	return dist$2;
 }
 
-var hasRequiredSerialport;
+var hasRequiredSerialport$1;
 
-function requireSerialport () {
-	if (hasRequiredSerialport) return serialport;
-	hasRequiredSerialport = 1;
-	Object.defineProperty(serialport, "__esModule", { value: true });
-	serialport.SerialPort = void 0;
-	const stream_1 = requireDist$4();
-	const bindings_cpp_1 = requireDist$1();
+function requireSerialport$1 () {
+	if (hasRequiredSerialport$1) return serialport$1;
+	hasRequiredSerialport$1 = 1;
+	Object.defineProperty(serialport$1, "__esModule", { value: true });
+	serialport$1.SerialPort = void 0;
+	const stream_1 = requireDist$5();
+	const bindings_cpp_1 = requireDist$2();
 	const DetectedBinding = (0, bindings_cpp_1.autoDetect)();
 	class SerialPort extends stream_1.SerialPortStream {
 	    constructor(options, openCallback) {
@@ -10075,29 +10097,30 @@ function requireSerialport () {
 	        super(opts, openCallback);
 	    }
 	}
-	serialport.SerialPort = SerialPort;
+	serialport$1.SerialPort = SerialPort;
 	SerialPort.list = DetectedBinding.list;
 	SerialPort.binding = DetectedBinding;
-	return serialport;
+	return serialport$1;
 }
 
-var hasRequiredDist;
+var hasRequiredDist$1;
 
-function requireDist () {
-	if (hasRequiredDist) return dist$e;
-	hasRequiredDist = 1;
+function requireDist$1 () {
+	if (hasRequiredDist$1) return dist$f;
+	hasRequiredDist$1 = 1;
 	(function (exports) {
-		var __createBinding = (dist$e && dist$e.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+		var __createBinding = (dist$f && dist$f.__createBinding) || (Object.create ? (function(o, m, k, k2) {
 		    if (k2 === undefined) k2 = k;
 		    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 		}) : (function(o, m, k, k2) {
 		    if (k2 === undefined) k2 = k;
 		    o[k2] = m[k];
 		}));
-		var __exportStar = (dist$e && dist$e.__exportStar) || function(m, exports) {
+		var __exportStar = (dist$f && dist$f.__exportStar) || function(m, exports) {
 		    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 		};
 		Object.defineProperty(exports, "__esModule", { value: true });
+		__exportStar(requireDist$f(), exports);
 		__exportStar(requireDist$e(), exports);
 		__exportStar(requireDist$d(), exports);
 		__exportStar(requireDist$c(), exports);
@@ -10107,11 +10130,10 @@ function requireDist () {
 		__exportStar(requireDist$8(), exports);
 		__exportStar(requireDist$7(), exports);
 		__exportStar(requireDist$6(), exports);
-		__exportStar(requireDist$5(), exports);
-		__exportStar(requireSerialportMock(), exports);
-		__exportStar(requireSerialport(), exports); 
-	} (dist$e));
-	return dist$e;
+		__exportStar(requireSerialportMock$1(), exports);
+		__exportStar(requireSerialport$1(), exports); 
+	} (dist$f));
+	return dist$f;
 }
 
 var encoder7bit;
@@ -12884,6 +12906,94 @@ function requireFirmataIo () {
 	return firmataIo;
 }
 
+var dist = {};
+
+var serialportMock = {};
+
+var hasRequiredSerialportMock;
+
+function requireSerialportMock () {
+	if (hasRequiredSerialportMock) return serialportMock;
+	hasRequiredSerialportMock = 1;
+	Object.defineProperty(serialportMock, "__esModule", { value: true });
+	serialportMock.SerialPortMock = void 0;
+	const stream_1 = requireDist$5();
+	const binding_mock_1 = requireDist$4();
+	class SerialPortMock extends stream_1.SerialPortStream {
+	    constructor(options, openCallback) {
+	        const opts = {
+	            binding: binding_mock_1.MockBinding,
+	            ...options,
+	        };
+	        super(opts, openCallback);
+	    }
+	}
+	serialportMock.SerialPortMock = SerialPortMock;
+	SerialPortMock.list = binding_mock_1.MockBinding.list;
+	SerialPortMock.binding = binding_mock_1.MockBinding;
+	return serialportMock;
+}
+
+var serialport = {};
+
+var hasRequiredSerialport;
+
+function requireSerialport () {
+	if (hasRequiredSerialport) return serialport;
+	hasRequiredSerialport = 1;
+	Object.defineProperty(serialport, "__esModule", { value: true });
+	serialport.SerialPort = void 0;
+	const stream_1 = requireDist$5();
+	const bindings_cpp_1 = requireDist$2();
+	const DetectedBinding = (0, bindings_cpp_1.autoDetect)();
+	class SerialPort extends stream_1.SerialPortStream {
+	    constructor(options, openCallback) {
+	        const opts = {
+	            binding: DetectedBinding,
+	            ...options,
+	        };
+	        super(opts, openCallback);
+	    }
+	}
+	serialport.SerialPort = SerialPort;
+	SerialPort.list = DetectedBinding.list;
+	SerialPort.binding = DetectedBinding;
+	return serialport;
+}
+
+var hasRequiredDist;
+
+function requireDist () {
+	if (hasRequiredDist) return dist;
+	hasRequiredDist = 1;
+	(function (exports) {
+		var __createBinding = (dist && dist.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+		    if (k2 === undefined) k2 = k;
+		    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+		}) : (function(o, m, k, k2) {
+		    if (k2 === undefined) k2 = k;
+		    o[k2] = m[k];
+		}));
+		var __exportStar = (dist && dist.__exportStar) || function(m, exports) {
+		    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+		};
+		Object.defineProperty(exports, "__esModule", { value: true });
+		__exportStar(requireDist$f(), exports);
+		__exportStar(requireDist$e(), exports);
+		__exportStar(requireDist$d(), exports);
+		__exportStar(requireDist$c(), exports);
+		__exportStar(requireDist$b(), exports);
+		__exportStar(requireDist$a(), exports);
+		__exportStar(requireDist$9(), exports);
+		__exportStar(requireDist$8(), exports);
+		__exportStar(requireDist$7(), exports);
+		__exportStar(requireDist$6(), exports);
+		__exportStar(requireSerialportMock(), exports);
+		__exportStar(requireSerialport(), exports); 
+	} (dist));
+	return dist;
+}
+
 var com_1;
 var hasRequiredCom;
 
@@ -14654,7 +14764,7 @@ function requireExpander () {
 	        //
 	        // 0b0111 << 4 = 0b01110000
 	        //
-	        ctrl1  = (ctrl1 & ~(0xF0)) | (0x07 << 4);
+	        ctrl1  = (ctrl1 & -241) | (0x07 << 4);
 
 	        // ctrl1 = 0b01110111
 	        // 0b01110000 = 0x70 = 112
@@ -15098,7 +15208,7 @@ function requireBoard () {
 	    if (parseFloat(process.versions.nw) >= 0.13) {
 	      serialport = requireBrowserSerialport();
 	    } else {
-	      serialport = requireDist().SerialPort;
+	      serialport = requireDist$1().SerialPort;
 	    }
 
 	    // console.log(require);
@@ -17490,7 +17600,7 @@ function requireAccelerometer () {
 	          let ctrl1 = data[0];
 
 	          // Set to 200Hz
-	          ctrl1 &= ~0xF0;
+	          ctrl1 &= -241;
 	          ctrl1 |= 6 << 4;
 
 	          state.expander.i2cWrite(address, this.REGISTER.CTRL_REG1, ctrl1);
@@ -25100,7 +25210,7 @@ function requireEasing () {
 	  n *= 2;
 	  return n < 1 ?
 	    HALF * n * n :
-	    -HALF * (--n * (n - 2) - 1);
+	    -0.5 * (--n * (n - 2) - 1);
 	};
 	ease.inCube = n => n * n * n;
 	ease.outCube = n => --n * n * n + 1;
@@ -25117,7 +25227,7 @@ function requireEasing () {
 	  n *= 2;
 	  return n < 1 ?
 	    HALF * (n * n * n * n) :
-	    -HALF * ((n -= 2) * (n * n * n) - 2);
+	    -0.5 * ((n -= 2) * (n * n * n) - 2);
 	};
 
 	ease.inQuint = n => n * n * n * n * n;
@@ -25148,7 +25258,7 @@ function requireEasing () {
 	ease.inOutCirc = n => {
 	  n *= 2;
 	  return (n < 1) ?
-	    -HALF * (sqrt(1 - n * n) - 1) :
+	    -0.5 * (sqrt(1 - n * n) - 1) :
 	    HALF * (sqrt(1 - (n -= 2) * n) + 1);
 	};
 
@@ -29432,7 +29542,7 @@ function requireConversions () {
 
 		r = (x * 3.2406) + (y * -1.5372) + (z * -0.4986);
 		g = (x * -0.9689) + (y * 1.8758) + (z * 0.0415);
-		b = (x * 0.0557) + (y * -0.2040) + (z * 1.0570);
+		b = (x * 0.0557) + (y * -0.204) + (z * 1.0570);
 
 		// assume sRGB
 		r = r > 0.0031308
@@ -35558,7 +35668,7 @@ function requireShiftregister () {
 	        arg = arg.charCodeAt(0);
 	      }
 	      if (this.isAnode &&
-	        (arg !== 255 && !state.encoded.includes(arg) && !state.encoded.includes(arg & ~(1 << 7)))) {
+	        (arg !== 255 && !state.encoded.includes(arg) && !state.encoded.includes(arg & -129))) {
 
 	        const index = encoded.anode.findIndex(value => value === arg);
 

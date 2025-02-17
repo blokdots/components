@@ -1,5 +1,5 @@
 import { Server, Socket, Namespace, DisconnectReason } from "socket.io";
-// import WebSocket from "ws";
+import WebSocket from "ws";
 import { networkInterfaces } from "os";
 
 import setupHttpServer from "./setupHttpServer";
@@ -102,7 +102,7 @@ export class BlokdotsSocketIOServer {
       InterServerEvents,
       SocketData
     >(httpServer, {
-      // wsEngine: WebSocket.Server,
+      wsEngine: WebSocket.Server,
       pingInterval: 5000,
       pingTimeout: 5000,
       allowEIO3: true, // support older websocket clients

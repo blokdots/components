@@ -1,4 +1,4 @@
-import { Namespace, Server, Socket, DisconnectReason } from 'socket.io';
+import { Server, DisconnectReason, Namespace, Socket } from 'socket.io';
 import EventEmitter from 'events';
 import five, { Board } from 'johnny-five';
 import pixel from 'node-pixel';
