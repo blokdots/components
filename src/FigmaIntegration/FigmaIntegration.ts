@@ -1,7 +1,8 @@
 import EventEmitter from "events";
+
 import {
-  BlokdotsSocketIOServer,
-  Integration,
+  type BlokdotsSocketIOServer,
+  type Integration,
   default as getBlokdotsSocketIOServer,
 } from "../BlokdotsSocketIOServer";
 
@@ -68,7 +69,7 @@ export type ReactionMessage =
   | OpacityReactionMessage
   | ColorReactionMessage;
 
-type FigmaNode = {
+type _FigmaNode = {
   id: string;
   name: string;
   type: string;

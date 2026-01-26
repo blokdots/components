@@ -3,5 +3,5 @@ export {
   getBlokdotsSocketIOServerAddress,
   BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT,
   BlokdotsSocketIOServer,
-  Integration,
+  type Integration,
 } from "./BlokdotsSocketIOServer";

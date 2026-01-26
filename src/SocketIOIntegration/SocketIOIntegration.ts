@@ -1,10 +1,10 @@
+import EventEmitter from "events";
+
 import {
   default as getBlokdotsSocketIOServer,
-  BlokdotsSocketIOServer,
-  Integration,
+  type BlokdotsSocketIOServer,
+  type Integration,
 } from "../BlokdotsSocketIOServer";
-
-import EventEmitter from "events";
 
 class SocketIOIntegration extends EventEmitter {
   integrationName: string;

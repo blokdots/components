@@ -1,0 +1,25 @@
+import { default as EventEmitter } from 'events';
+import { BlokdotsSocketIOServer, Integration } from '../BlokdotsSocketIOServer';
+declare class SocketIOIntegration extends EventEmitter {
+    integrationName: string;
+    messageEventName: string;
+    format: {
+        message: string;
+        value: string;
+    };
+    server?: BlokdotsSocketIOServer;
+    integration?: Integration;
+    constructor(integrationName?: string, messageEventName?: string, format?: {
+        message: string;
+        value: string;
+    });
+    onMessage(data: {
+        [key: string]: any;
+    }): void;
+    send(message: {
+        message: string;
+        value?: any;
+    }): void;
+    cleanUp(): void;
+}
+export default SocketIOIntegration;

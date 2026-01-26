@@ -1,1 +1,1 @@
-export { default, ReactionMessage } from "./FigmaIntegration";
+export { default, type ReactionMessage } from "./FigmaIntegration";

@@ -5,6 +5,9 @@ export {
 } from "./BlokdotsSocketIOServer";
 export { default as Counter } from "./Counter";
 export { default as Encoder } from "./Encoder";
+export { default as Led } from "./Led";
+export { default as Relay } from "./Relay";
+export { default as Stepper } from "./Stepper";
 export { default as FigmaIntegration } from "./FigmaIntegration";
 export type { ReactionMessage as FigmaReactionMessage } from "./FigmaIntegration";
 export { default as Hapticlabs } from "./Hapticlabs";

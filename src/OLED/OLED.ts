@@ -1,6 +1,6 @@
-import five from "johnny-five";
+import type five from "johnny-five";
 import font from "oled-font-5x7";
-import Oled, { Pixel, Color } from "oled-js";
+import Oled, { type Pixel, type Color } from "oled-js";
 import qr from "qr-image";
 
 export const OLED_WIDTH = 128;
@@ -81,7 +81,7 @@ class OLED extends Oled {
       const updatePixels: Pixel[] = [];
       for (let i = 0; i < bitmap.length; i++) {
         if (this.previousBitmap[i] !== bitmap[i]) {
-          let [col, row] = indexToCoords(i);
+          const [col, row] = indexToCoords(i);
 
           // x, y, color
           updatePixels.push([col, row, bitmap[i]]);
@@ -94,7 +94,7 @@ class OLED extends Oled {
       this.previousBitmap = bitmap;
     } else {
       if (this.isRotated) {
-        let drawingBitmap = rotateBitmap([...bitmap]);
+        const drawingBitmap = rotateBitmap([...bitmap]);
         this.drawBitmap(drawingBitmap);
       } else {
         this.drawBitmap(bitmap);
@@ -125,7 +125,7 @@ class OLED extends Oled {
       return;
     }
 
-    let blockingTime = 50 + (2000 / 8096) * pixels.length;
+    const blockingTime = 50 + (2000 / 8096) * pixels.length;
     this.drawingIsBlocked = true;
 
     // console.log("blocking for", blockingTime, "ms, drawing", pixels.length);
@@ -156,8 +156,8 @@ class OLED extends Oled {
     }, blockingTime);
 
     if (this.isRotated) {
-      let drawingPixels = pixels.map((p) => {
-        let [newCol, newRow] = rotateCoords(p[0], p[1]);
+      const drawingPixels = pixels.map((p) => {
+        const [newCol, newRow] = rotateCoords(p[0], p[1]);
         return <Pixel>[newCol, newRow, p[2]];
       });
       this.drawPixel(drawingPixels);
@@ -278,9 +278,9 @@ const addCharToBuffer = (
  */
 const findCharBuf = (c: string) => {
   // use the lookup array as a ref to find where the current char bytes start
-  let cBufPos = font.lookup.indexOf(c) * font.width;
+  const cBufPos = font.lookup.indexOf(c) * font.width;
   // slice just the current char's bytes out of the fontData array and return
-  let cBuf = font.fontData.slice(
+  const cBuf = font.fontData.slice(
     cBufPos,
     cBufPos + font.width
   ) as Array<number>;
@@ -291,16 +291,16 @@ const findCharBuf = (c: string) => {
  * Reads the bytes for a character and returns a 2D array of bits
  */
 const readCharBytes = (byteArray: Array<number>, charHeight: number) => {
-  let bitArr: number[] = [],
-    bitCharArr: number[][] = [];
+  let bitArr: number[] = [];
+  const bitCharArr: number[][] = [];
   // loop through each byte supplied for a char
   for (let i = 0; i < byteArray.length; i += 1) {
     // set current byte
-    let byte = byteArray[i];
+    const byte = byteArray[i];
     // read each byte
     for (let j = 0; j < charHeight; j += 1) {
       // shift bits right until all are read
-      let bit = (byte >> j) & 1;
+      const bit = (byte >> j) & 1;
       bitArr.push(bit);
     }
     // push to array containing flattened bit sequence
@@ -328,7 +328,7 @@ export const addStringToBuffer = (
     ((OLED_WIDTH - x) / (font.width + LETTER_SPACING)) * size
   );
 
-  let wordArr = string.split(" ");
+  const wordArr = string.split(" ");
 
   let acc = "";
 
@@ -381,8 +381,8 @@ export const addStringToBuffer = (
     const lineY = Math.floor(char_index / charsPerRow);
     const charX = char_index - lineY * charsPerRow;
 
-    let xpos = x + charX * ((font.width + LETTER_SPACING) * size);
-    let ypos = y + lineY * ((font.height + LINE_SPACING) * size);
+    const xpos = x + charX * ((font.width + LETTER_SPACING) * size);
+    const ypos = y + lineY * ((font.height + LINE_SPACING) * size);
 
     buffer = addCharToBuffer(xpos, ypos, bytes, size, buffer);
   });
@@ -405,8 +405,8 @@ export const addTextToBuffer = (
 };
 
 const indexToCoords = (i: number) => {
-  let row = Math.floor(i / OLED_WIDTH);
-  let col = i - OLED_WIDTH * row; // i % OLED_WIDTH?
+  const row = Math.floor(i / OLED_WIDTH);
+  const col = i - OLED_WIDTH * row; // i % OLED_WIDTH?
 
   return [col, row];
 };

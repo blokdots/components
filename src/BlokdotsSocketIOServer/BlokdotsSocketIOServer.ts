@@ -1,6 +1,10 @@
-import { Server, Socket, Namespace, DisconnectReason } from "socket.io";
-import WebSocket from "ws";
 import { networkInterfaces } from "os";
+import {
+  Server,
+  type Socket,
+  type Namespace,
+  type DisconnectReason,
+} from "socket.io";
 
 import setupHttpServer from "./setupHttpServer";
 
@@ -102,7 +106,6 @@ export class BlokdotsSocketIOServer {
       InterServerEvents,
       SocketData
     >(httpServer, {
-      wsEngine: WebSocket.Server,
       pingInterval: 5000,
       pingTimeout: 5000,
       allowEIO3: true, // support older websocket clients
@@ -178,7 +181,7 @@ export class BlokdotsSocketIOServer {
         integration.onClientDisconnect.push(onClientDisconnect);
 
       // Register the new handlers on the already existing connections
-      for (let [, socket] of integration.ioNamespace.sockets) {
+      for (const [, socket] of integration.ioNamespace.sockets) {
         handlers.forEach(({ eventName, callback }) => {
           socket.on(eventName, callback);
         });
@@ -273,7 +276,7 @@ export class BlokdotsSocketIOServer {
     onClientConnect?: OnClientConnectListener;
     onClientDisconnect?: OnClientConnectListener;
   }) {
-    let integration = this.activeIntegrations[integrationName];
+    const integration = this.activeIntegrations[integrationName];
 
     if (!integration) {
       return;
@@ -294,7 +297,7 @@ export class BlokdotsSocketIOServer {
     );
 
     // Remove the handlers from the existing connections
-    for (let [, socket] of integration.ioNamespace.sockets) {
+    for (const [, socket] of integration.ioNamespace.sockets) {
       handlers.forEach(({ eventName, callback }) => {
         socket.off(eventName, callback);
       });

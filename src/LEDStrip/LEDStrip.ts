@@ -1,4 +1,4 @@
-import five from "johnny-five";
+import type five from "johnny-five";
 import pixel from "node-pixel";
 
 class LEDStrip extends pixel.Strip {

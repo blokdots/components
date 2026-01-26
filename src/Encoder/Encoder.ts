@@ -1,5 +1,5 @@
 import EventEmitter from "events";
-import five, { Board } from "johnny-five";
+import five, { type Board } from "johnny-five";
 
 class Encoder extends EventEmitter {
   value: number;
@@ -7,6 +7,7 @@ class Encoder extends EventEmitter {
   waveformTimeout?: NodeJS.Timeout;
   upButton: five.Button;
   downButton: five.Button;
+  invert: boolean;
 
   constructor({
     pin1,
@@ -14,15 +15,18 @@ class Encoder extends EventEmitter {
     board,
     initialValue = 0,
     debounce = 7,
+    invert = false,
   }: {
     pin1: number | string;
     pin2: number | string;
     board?: Board;
     initialValue?: number;
     debounce?: number;
+    invert?: boolean;
   }) {
     super();
     this.value = initialValue;
+    this.invert = invert;
 
     this.waveform = "";
     this.waveformTimeout;
@@ -50,15 +54,17 @@ class Encoder extends EventEmitter {
   }
 
   countUp() {
-    this.value++;
+    const delta = this.invert ? -1 : 1;
+    this.value += delta;
     this.emit("change", this.value);
-    this.emit("up", this.value);
+    this.emit(this.invert ? "down" : "up", this.value);
   }
 
   countDown() {
-    this.value--;
+    const delta = this.invert ? 1 : -1;
+    this.value += delta;
     this.emit("change", this.value);
-    this.emit("down", this.value);
+    this.emit(this.invert ? "up" : "down", this.value);
   }
 
   setCountTo(value: number) {
@@ -79,13 +85,15 @@ class Encoder extends EventEmitter {
     }
 
     if (this.waveform === "01") {
-      this.value = this.value + 1;
+      const delta = this.invert ? -1 : 1;
+      this.value = this.value + delta;
       this.emit("change", this.value);
-      this.emit("up", this.value);
+      this.emit(this.invert ? "down" : "up", this.value);
     } else if (this.waveform === "10") {
-      this.value = this.value - 1;
+      const delta = this.invert ? 1 : -1;
+      this.value = this.value + delta;
       this.emit("change", this.value);
-      this.emit("down", this.value);
+      this.emit(this.invert ? "up" : "down", this.value);
     }
 
     this.waveform = "";
