@@ -23,7 +23,7 @@ export default defineConfig({
       writeBundle() {
         const srcDir = path.resolve(
           __dirname,
-          "src/BlokdotsSocketIOServer/webserver"
+          "src/integrations/BlokdotsSocketIOServer/webserver"
         );
         const destDir = path.resolve(__dirname, "dist/webserver");
 
@@ -49,14 +49,13 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, "src/index.ts"),
       formats: ["es", "cjs"],
-      fileName: (format) => (format === "es" ? "index.mjs" : "index.js"),
+      fileName: (format) => (format === "es" ? "index.mjs" : "index.cjs"),
     },
     rollupOptions: {
       external: [
         "events",
         "socket.io",
         "ws",
-        "johnny-five",
         "fs",
         "path",
         "http",
@@ -66,6 +65,11 @@ export default defineConfig({
         "node:path",
         "node:url",
         "node:os",
+        // Serialport uses native bindings and must be external
+        "serialport",
+        "@serialport/bindings-cpp",
+        "@serialport/parser-readline",
+        "@serialport/parser-delimiter",
       ],
     },
     target: "node20",
