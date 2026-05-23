@@ -66,7 +66,14 @@ export {
   type LEDMatrixOptions,
   type LEDMatrixValue,
 } from "./components/LEDMatrix";
-export { OLED, type OLEDOptions, type OLEDValue } from "./components/OLED";
+export {
+  OLED,
+  type OLEDOptions,
+  type OLEDValue,
+  renderTextToBitmap,
+  GLYPH_WIDTH,
+  GLYPH_HEIGHT,
+} from "./components/OLED";
 export { Potentiometer } from "./components/Potentiometer";
 export {
   ServoMotor,

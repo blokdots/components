@@ -376,6 +376,8 @@ const getBlokdotsSocketIOServerAddress = () => {
   return `http://${currentIP}:${BLOKDOTS_SOCKET_IO_SERVER_DEFAULT_PORT}`;
 };
 class BlokdotsSocketIOServer {
+  io;
+  activeIntegrations;
   constructor() {
     this.activeIntegrations = {};
     this.io = null;
@@ -554,6 +556,8 @@ const getBlokdotsSocketIOServer = async () => {
 };
 const INTEGRATION_NAME = "figma";
 class FigmaIntegration extends EventEmitter {
+  server;
+  integration;
   constructor() {
     super();
     this.server;
@@ -649,6 +653,11 @@ class FigmaIntegration extends EventEmitter {
   }
 }
 class SocketIOIntegration extends EventEmitter {
+  integrationName;
+  messageEventName;
+  format;
+  server;
+  integration;
   constructor(integrationName = "blokdots", messageEventName = "blokdots", format = { message: "msg", value: "val" }) {
     super();
     this.integrationName = integrationName;
@@ -699,6 +708,7 @@ class SocketIOIntegration extends EventEmitter {
   }
 }
 class Counter extends EventEmitter {
+  value;
   constructor(initialValue = 0) {
     super();
     this.value = initialValue;
@@ -720,6 +730,7 @@ class Counter extends EventEmitter {
   }
 }
 class SignalTower extends EventEmitter {
+  value;
   constructor() {
     super();
   }
@@ -730,6 +741,8 @@ class SignalTower extends EventEmitter {
   }
 }
 class Timer extends EventEmitter {
+  value;
+  interval;
   constructor(value = 0) {
     super();
     this.value = value * 1e3;
@@ -776,6 +789,8 @@ class Timer extends EventEmitter {
   }
 }
 class Metronome extends EventEmitter {
+  frequency;
+  interval;
   constructor(frequency = 1e3) {
     super();
     this.frequency = frequency;
@@ -824,6 +839,9 @@ class Metronome extends EventEmitter {
   }
 }
 class ComponentBase extends EventEmitter {
+  board;
+  _value;
+  componentId;
   constructor(options) {
     super();
     this.board = options.board;
@@ -1138,18 +1156,39 @@ const SYSTEM_CMD_QUERY_HASH = `${RESPONSE_SYSTEM}${DELIMITER}${"HASH"}?`;
 const BAUD_RATE = 57600;
 const LIVE_MODE_IDENTIFIER = "BLOKDOTS_LIVE_MODE";
 class SerialProtocol extends EventEmitter {
+  port;
+  parser;
+  // -------------------------------------------------------
+  // Universal chunking (UNO-safe)
+  // - If a single outgoing W: frame exceeds MAX_LINE_LEN,
+  //   we send:
+  //     W:id:CMD_BEGIN
+  //     W:id:CMD_CHUNK:<chunk>
+  //     ...
+  //     W:id:CMD_END
+  //
+  // The Arduino side reassembles args and then calls the write handler once:
+  //   writeHandler(pinId, "CMD", "<reassembled args>")
+  //
+  // IMPORTANT:
+  // - We only chunk W:id:cmd:args... frames (parts length >= 4).
+  // - We do NOT change OLED / component code. Components still send:
+  //     W:i2c-0:DRAWSTRING:<encodedText>
+  //   and the protocol splits automatically if needed.
+  // -------------------------------------------------------
+  // UNO-safe: Arduino RX buffer is 64 bytes, it drops overlong lines completely.
+  // Keep a margin for safety (newline, \0, occasional \r, etc.)
+  static MAX_LINE_LEN = 60;
+  // Extra headroom so chunk lines stay comfortably below MAX_LINE_LEN
+  // even if prefixes are longer than expected.
+  static CHUNK_OVERHEAD = 8;
+  // serialize writes so we never interleave chunk sequences
+  writeChain = Promise.resolve();
   constructor(port) {
     super();
-    this.writeChain = Promise.resolve();
     this.port = port;
     this.parser = port.pipe(new serialport.ReadlineParser({ delimiter: "\n" }));
     this.parser.on("data", (line) => this.parseLine(line));
-  }
-  static {
-    this.MAX_LINE_LEN = 60;
-  }
-  static {
-    this.CHUNK_OVERHEAD = 8;
   }
   /**
    * Parse incoming line from Arduino
@@ -1363,10 +1402,12 @@ const utils = {
   encodeProtocolString
 };
 class DigitalActor extends ComponentBase {
+  pin;
+  invert;
+  _value = 0;
+  _isAnimating = false;
   constructor(options) {
     super(options);
-    this._value = 0;
-    this._isAnimating = false;
     this.pin = toDigitalPin(options.pin);
     this.invert = options.invert ?? false;
     this.board.registerComponent(this.pin, this);
@@ -1473,6 +1514,8 @@ class DigitalActor extends ComponentBase {
   }
 }
 class AnalogActor extends DigitalActor {
+  minValue;
+  maxValue;
   constructor(options) {
     super(options);
     this.minValue = options?.minValue ?? 0;
@@ -1566,9 +1609,14 @@ class AnalogActor extends DigitalActor {
   }
 }
 class AnalogSensor extends ComponentBase {
+  pin;
+  invert;
+  _value = 0;
+  minValue;
+  maxValue;
+  threshold;
   constructor(options) {
     super(options);
-    this._value = 0;
     this.pin = options.pin;
     this.invert = options.invert ?? false;
     this.minValue = options?.minValue ?? 0;
@@ -1603,6 +1651,7 @@ class I2cComponentBase extends ComponentBase {
   }
 }
 class Accelerometer extends I2cComponentBase {
+  address;
   constructor(options) {
     super(options);
     this.address = options.address ?? 25;
@@ -1702,10 +1751,13 @@ class Barometer extends I2cComponentBase {
 }
 const DEFAULT_HOLD_TIME = 500;
 class Button extends ComponentBase {
+  pin;
+  invert;
+  holdTime;
+  holdTimer = null;
+  _value = 0;
   constructor(options) {
     super(options);
-    this.holdTimer = null;
-    this._value = 0;
     this.pin = toDigitalPin(options.pin);
     this.invert = options.invert ?? false;
     this.holdTime = options.holdTime ?? DEFAULT_HOLD_TIME;
@@ -1838,9 +1890,10 @@ function clampGapMs(stepMs) {
   return g;
 }
 class Buzzer extends ComponentBase {
+  componentId;
+  songTimer = null;
   constructor(options) {
     super(options);
-    this.songTimer = null;
     this.componentId = String(options.pin);
     this.board.registerComponent(this.componentId, this);
   }
@@ -1950,6 +2003,9 @@ class CO2Sensor extends ComponentBase {
   }
 }
 class ColorSensor extends I2cComponentBase {
+  gain;
+  integrationTime;
+  sampleInterval;
   constructor(options) {
     super(options);
     this.gain = options.gain;
@@ -2006,10 +2062,13 @@ class ColorSensor extends I2cComponentBase {
   }
 }
 class Encoder extends ComponentBase {
+  pin1;
+  pin2;
+  invert;
+  _value = 0;
+  lastValue = 0;
   constructor(options) {
     super(options);
-    this._value = 0;
-    this.lastValue = 0;
     this.pin1 = toDigitalPin(options.pin1);
     this.pin2 = toDigitalPin(options.pin2);
     this.invert = options.invert ?? false;
@@ -2060,6 +2119,8 @@ class Encoder extends ComponentBase {
   }
 }
 class HapticTrack {
+  sendFn;
+  trackNumber;
   constructor(sendFn, trackNumber) {
     this.sendFn = sendFn;
     this.trackNumber = trackNumber;
@@ -2080,6 +2141,8 @@ class HapticTrack {
   }
 }
 class Hapticlabs extends ComponentBase {
+  track1;
+  track2;
   constructor(options) {
     super(options);
     this.componentId = String(options.pin1);
@@ -2102,6 +2165,13 @@ class Hapticlabs extends ComponentBase {
   }
 }
 class Joystick extends ComponentBase {
+  pin1;
+  pin2;
+  invertX;
+  invertY;
+  range;
+  axisThreshold;
+  detectButton;
   constructor(options) {
     super(options);
     this.pin1 = options.pin1;
@@ -2182,6 +2252,8 @@ class Led extends DigitalActor {
   }
 }
 class MotorChannel {
+  sendFn;
+  channel;
   constructor(sendFn, channel) {
     this.sendFn = sendFn;
     this.channel = channel;
@@ -2201,6 +2273,8 @@ class MotorChannel {
   }
 }
 class MotorDriver extends ComponentBase {
+  M1;
+  M2;
   constructor(options) {
     super(options);
     this.componentId = options.pin;
@@ -2321,6 +2395,10 @@ class LCD extends I2cComponentBase {
   }
 }
 class LEDStrip extends ComponentBase {
+  pin;
+  ledCount;
+  colorOrder;
+  gamma;
   constructor(options) {
     super(options);
     this.pin = toDigitalPin(options.pin);
@@ -2459,6 +2537,7 @@ const DEFAULT_LED_MATRIX_VALUE = {
   color: "#0000ff"
 };
 class LEDMatrix extends I2cComponentBase {
+  orientation;
   get valueSafe() {
     return this._value ?? DEFAULT_LED_MATRIX_VALUE;
   }
@@ -2644,33 +2723,41 @@ const DEFAULT_OLED_VALUE = {
   string: "blokdots"
 };
 class OLED extends I2cComponentBase {
+  isRotated;
+  isMirrored;
+  previousPacked = null;
+  pendingBitmapTimer = null;
+  drawingIsBlocked = false;
+  drawingBuffer;
+  get valueSafe() {
+    return this._value ?? DEFAULT_OLED_VALUE;
+  }
   constructor(options) {
     super(options);
-    this.previousPacked = null;
-    this.drawingIsBlocked = false;
     this.isRotated = options.isRotated ?? false;
     this.isMirrored = options.isMirrored ?? false;
     this._value = DEFAULT_OLED_VALUE;
     this.drawingBuffer = new Array(OLED_PACKED_BYTES).fill(null);
-  }
-  get valueSafe() {
-    return this._value ?? DEFAULT_OLED_VALUE;
   }
   handleData(_data) {
   }
   send(cmd) {
     this.board.sendCommand(`${COMMAND_WRITE}:${this.componentId}:${cmd}`);
   }
-  resetBitmapState() {
+  cancelPendingBitmap() {
+    if (this.pendingBitmapTimer !== null) {
+      clearTimeout(this.pendingBitmapTimer);
+      this.pendingBitmapTimer = null;
+    }
     this.drawingIsBlocked = false;
     this.drawingBuffer = new Array(OLED_PACKED_BYTES).fill(null);
   }
-  /** Draw a text string on the display. Clears any active bitmap. */
+  /** Draw a text string on the display. */
   drawString(text) {
     this.ensureBoardSet();
-    this.resetBitmapState();
-    this.send(`DRAWSTRING:${encodeProtocolString(text ?? "")}`);
+    this.cancelPendingBitmap();
     this.previousPacked = null;
+    this.send(`DRAWSTRING:${encodeProtocolString(text ?? "")}`);
     this._value = {
       ...this.valueSafe,
       type: "string",
@@ -2679,14 +2766,14 @@ class OLED extends I2cComponentBase {
     };
     this.emit("change", this._value);
   }
-  /** Draw a label and a value on two lines. Clears any active bitmap. */
+  /** Draw a label (1×) and a value (2×) on the display. */
   drawValue(label, value) {
     this.ensureBoardSet();
-    this.resetBitmapState();
+    this.cancelPendingBitmap();
+    this.previousPacked = null;
     this.send(
       `DRAWVALUE:${encodeProtocolString(label ?? "")}:${encodeProtocolString(value ?? "")}`
     );
-    this.previousPacked = null;
     this._value = {
       ...this.valueSafe,
       type: "string",
@@ -2702,15 +2789,25 @@ ${value}`,
     if (!Array.isArray(bitmap) || bitmap.length < OLED_PIXELS) {
       return;
     }
+    this.sendBitmapDiff(bitmap);
+    this._value = {
+      ...this.valueSafe,
+      type: "bitmap",
+      bitmap,
+      string: void 0
+    };
+    this.emit("change", this._value);
+  }
+  /** Send only the changed bytes between the new bitmap and the last transmitted state. */
+  sendBitmapDiff(bitmap) {
     const packed = packBitmapToPages(bitmap);
     if (!this.previousPacked) {
       this.send("CLEAR_BITMAP");
-      setTimeout(() => {
+      this.pendingBitmapTimer = setTimeout(() => {
+        this.pendingBitmapTimer = null;
         const nonZeroBytes = [];
         for (let i = 0; i < OLED_PACKED_BYTES; i++) {
-          if (packed[i] !== 0) {
-            nonZeroBytes.push({ idx: i, value: packed[i] });
-          }
+          if (packed[i] !== 0) nonZeroBytes.push({ idx: i, value: packed[i] });
         }
         this.updateBytesBlocking(nonZeroBytes);
         this.previousPacked = packed;
@@ -2725,13 +2822,6 @@ ${value}`,
       this.updateBytesBlocking(changed);
       this.previousPacked = packed;
     }
-    this._value = {
-      ...this.valueSafe,
-      type: "bitmap",
-      bitmap,
-      string: void 0
-    };
-    this.emit("change", this._value);
   }
   /** Clear the display. */
   clearDisplay() {
@@ -2778,10 +2868,9 @@ ${value}`,
     this.redraw();
   }
   cleanup() {
+    this.cancelPendingBitmap();
     this.clearDisplay();
     this.previousPacked = null;
-    this.drawingIsBlocked = false;
-    this.drawingBuffer = new Array(OLED_PACKED_BYTES).fill(null);
     super.cleanup();
   }
   redraw() {
@@ -2838,9 +2927,839 @@ function packBitmapToPages(bitmap) {
   }
   return out;
 }
+const GLYPH_WIDTH = 6;
+const GLYPH_HEIGHT = 8;
+const FIRST_CHAR = 32;
+const CHAR_COUNT = 96;
+const EXTRA_FIRST = 128;
+const DATA_6X8 = new Uint8Array([
+  // 32 space
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  // 33 !
+  0,
+  0,
+  95,
+  0,
+  0,
+  0,
+  // 34 "
+  0,
+  7,
+  0,
+  7,
+  0,
+  0,
+  // 35 #
+  20,
+  127,
+  20,
+  127,
+  20,
+  0,
+  // 36 $
+  36,
+  42,
+  127,
+  42,
+  18,
+  0,
+  // 37 %
+  35,
+  19,
+  8,
+  100,
+  98,
+  0,
+  // 38 &
+  54,
+  73,
+  85,
+  34,
+  80,
+  0,
+  // 39 '
+  0,
+  5,
+  3,
+  0,
+  0,
+  0,
+  // 40 (
+  0,
+  28,
+  34,
+  65,
+  0,
+  0,
+  // 41 )
+  0,
+  65,
+  34,
+  28,
+  0,
+  0,
+  // 42 *
+  8,
+  42,
+  28,
+  42,
+  8,
+  0,
+  // 43 +
+  8,
+  8,
+  62,
+  8,
+  8,
+  0,
+  // 44 ,
+  0,
+  80,
+  48,
+  0,
+  0,
+  0,
+  // 45 -
+  8,
+  8,
+  8,
+  8,
+  8,
+  0,
+  // 46 .
+  0,
+  96,
+  96,
+  0,
+  0,
+  0,
+  // 47 /
+  32,
+  16,
+  8,
+  4,
+  2,
+  0,
+  // 48 0
+  62,
+  81,
+  73,
+  69,
+  62,
+  0,
+  // 49 1
+  0,
+  66,
+  127,
+  64,
+  0,
+  0,
+  // 50 2
+  66,
+  97,
+  81,
+  73,
+  70,
+  0,
+  // 51 3
+  33,
+  65,
+  69,
+  75,
+  49,
+  0,
+  // 52 4
+  24,
+  20,
+  18,
+  127,
+  16,
+  0,
+  // 53 5
+  39,
+  69,
+  69,
+  69,
+  57,
+  0,
+  // 54 6
+  60,
+  74,
+  73,
+  73,
+  48,
+  0,
+  // 55 7
+  1,
+  113,
+  9,
+  5,
+  3,
+  0,
+  // 56 8
+  54,
+  73,
+  73,
+  73,
+  54,
+  0,
+  // 57 9
+  6,
+  73,
+  73,
+  41,
+  30,
+  0,
+  // 58 :
+  0,
+  54,
+  54,
+  0,
+  0,
+  0,
+  // 59 ;
+  0,
+  86,
+  54,
+  0,
+  0,
+  0,
+  // 60 <
+  0,
+  8,
+  20,
+  34,
+  65,
+  0,
+  // 61 =
+  20,
+  20,
+  20,
+  20,
+  20,
+  0,
+  // 62 >
+  65,
+  34,
+  20,
+  8,
+  0,
+  0,
+  // 63 ?
+  2,
+  1,
+  81,
+  9,
+  6,
+  0,
+  // 64 @
+  50,
+  73,
+  121,
+  65,
+  62,
+  0,
+  // 65 A
+  126,
+  17,
+  17,
+  17,
+  126,
+  0,
+  // 66 B
+  127,
+  73,
+  73,
+  73,
+  54,
+  0,
+  // 67 C
+  62,
+  65,
+  65,
+  65,
+  34,
+  0,
+  // 68 D
+  127,
+  65,
+  65,
+  34,
+  28,
+  0,
+  // 69 E
+  127,
+  73,
+  73,
+  73,
+  65,
+  0,
+  // 70 F
+  127,
+  9,
+  9,
+  1,
+  1,
+  0,
+  // 71 G
+  62,
+  65,
+  65,
+  81,
+  50,
+  0,
+  // 72 H
+  127,
+  8,
+  8,
+  8,
+  127,
+  0,
+  // 73 I
+  0,
+  65,
+  127,
+  65,
+  0,
+  0,
+  // 74 J
+  32,
+  64,
+  65,
+  63,
+  1,
+  0,
+  // 75 K
+  127,
+  8,
+  20,
+  34,
+  65,
+  0,
+  // 76 L
+  127,
+  64,
+  64,
+  64,
+  64,
+  0,
+  // 77 M
+  127,
+  2,
+  4,
+  2,
+  127,
+  0,
+  // 78 N
+  127,
+  4,
+  8,
+  16,
+  127,
+  0,
+  // 79 O
+  62,
+  65,
+  65,
+  65,
+  62,
+  0,
+  // 80 P
+  127,
+  9,
+  9,
+  9,
+  6,
+  0,
+  // 81 Q
+  62,
+  65,
+  81,
+  33,
+  94,
+  0,
+  // 82 R
+  127,
+  9,
+  25,
+  41,
+  70,
+  0,
+  // 83 S
+  70,
+  73,
+  73,
+  73,
+  49,
+  0,
+  // 84 T
+  1,
+  1,
+  127,
+  1,
+  1,
+  0,
+  // 85 U
+  63,
+  64,
+  64,
+  64,
+  63,
+  0,
+  // 86 V
+  31,
+  32,
+  64,
+  32,
+  31,
+  0,
+  // 87 W
+  127,
+  32,
+  24,
+  32,
+  127,
+  0,
+  // 88 X
+  99,
+  20,
+  8,
+  20,
+  99,
+  0,
+  // 89 Y
+  3,
+  4,
+  120,
+  4,
+  3,
+  0,
+  // 90 Z
+  97,
+  81,
+  73,
+  69,
+  67,
+  0,
+  // 91 [
+  0,
+  0,
+  127,
+  65,
+  65,
+  0,
+  // 92 backslash
+  2,
+  4,
+  8,
+  16,
+  32,
+  0,
+  // 93 ]
+  65,
+  65,
+  127,
+  0,
+  0,
+  0,
+  // 94 ^
+  4,
+  2,
+  1,
+  2,
+  4,
+  0,
+  // 95 _
+  64,
+  64,
+  64,
+  64,
+  64,
+  0,
+  // 96 `
+  0,
+  1,
+  2,
+  4,
+  0,
+  0,
+  // 97 a
+  32,
+  84,
+  84,
+  84,
+  120,
+  0,
+  // 98 b
+  127,
+  72,
+  68,
+  68,
+  56,
+  0,
+  // 99 c
+  56,
+  68,
+  68,
+  68,
+  32,
+  0,
+  // 100 d
+  56,
+  68,
+  68,
+  72,
+  127,
+  0,
+  // 101 e
+  56,
+  84,
+  84,
+  84,
+  24,
+  0,
+  // 102 f
+  8,
+  126,
+  9,
+  1,
+  2,
+  0,
+  // 103 g
+  8,
+  20,
+  84,
+  84,
+  60,
+  0,
+  // 104 h
+  127,
+  8,
+  4,
+  4,
+  120,
+  0,
+  // 105 i
+  0,
+  68,
+  125,
+  64,
+  0,
+  0,
+  // 106 j
+  32,
+  64,
+  68,
+  61,
+  0,
+  0,
+  // 107 k
+  0,
+  127,
+  16,
+  40,
+  68,
+  0,
+  // 108 l
+  0,
+  65,
+  127,
+  64,
+  0,
+  0,
+  // 109 m
+  124,
+  4,
+  24,
+  4,
+  120,
+  0,
+  // 110 n
+  124,
+  8,
+  4,
+  4,
+  120,
+  0,
+  // 111 o
+  56,
+  68,
+  68,
+  68,
+  56,
+  0,
+  // 112 p
+  124,
+  20,
+  20,
+  20,
+  8,
+  0,
+  // 113 q
+  8,
+  20,
+  20,
+  24,
+  124,
+  0,
+  // 114 r
+  124,
+  8,
+  4,
+  4,
+  8,
+  0,
+  // 115 s
+  72,
+  84,
+  84,
+  84,
+  32,
+  0,
+  // 116 t
+  4,
+  63,
+  68,
+  64,
+  32,
+  0,
+  // 117 u
+  60,
+  64,
+  64,
+  32,
+  124,
+  0,
+  // 118 v
+  28,
+  32,
+  64,
+  32,
+  28,
+  0,
+  // 119 w
+  60,
+  64,
+  48,
+  64,
+  60,
+  0,
+  // 120 x
+  68,
+  40,
+  16,
+  40,
+  68,
+  0,
+  // 121 y
+  12,
+  80,
+  80,
+  80,
+  60,
+  0,
+  // 122 z
+  68,
+  100,
+  84,
+  76,
+  68,
+  0,
+  // 123 {
+  0,
+  8,
+  54,
+  65,
+  0,
+  0,
+  // 124 |
+  0,
+  0,
+  127,
+  0,
+  0,
+  0,
+  // 125 }
+  0,
+  65,
+  54,
+  8,
+  0,
+  0,
+  // 126 ~
+  8,
+  8,
+  42,
+  28,
+  8,
+  0,
+  // 127 DEL (right arrow)
+  8,
+  28,
+  42,
+  8,
+  8,
+  0
+]);
+const EXTRA_6X8 = new Uint8Array([
+  // 128 ä
+  32,
+  85,
+  84,
+  85,
+  120,
+  0,
+  // 129 ö
+  56,
+  69,
+  68,
+  69,
+  56,
+  0,
+  // 130 ü
+  60,
+  65,
+  64,
+  33,
+  124,
+  0,
+  // 131 Ä
+  126,
+  37,
+  36,
+  37,
+  126,
+  0,
+  // 132 Ö
+  126,
+  67,
+  66,
+  67,
+  126,
+  0,
+  // 133 Ü
+  126,
+  65,
+  64,
+  65,
+  126,
+  0,
+  // 134 ß
+  126,
+  17,
+  21,
+  47,
+  74,
+  0,
+  // 135 °
+  0,
+  6,
+  9,
+  9,
+  6,
+  0
+]);
+function glyphBytes(idx) {
+  if (idx >= EXTRA_FIRST && idx < EXTRA_FIRST + EXTRA_6X8.length / GLYPH_WIDTH) {
+    const off2 = (idx - EXTRA_FIRST) * GLYPH_WIDTH;
+    return EXTRA_6X8.subarray(off2, off2 + GLYPH_WIDTH);
+  }
+  const clampedIdx = idx >= FIRST_CHAR && idx < FIRST_CHAR + CHAR_COUNT ? idx : FIRST_CHAR;
+  const off = (clampedIdx - FIRST_CHAR) * GLYPH_WIDTH;
+  return DATA_6X8.subarray(off, off + GLYPH_WIDTH);
+}
+function decodeUtf8Char(str, pos) {
+  const c0 = str.charCodeAt(pos);
+  if (c0 >= 55296 && c0 <= 56319) {
+    return [FIRST_CHAR, 2];
+  }
+  if (c0 < 128) {
+    return [c0, 1];
+  }
+  const c1 = pos + 1 < str.length ? str.charCodeAt(pos + 1) : 0;
+  const codePoint = c0 <= 55295 ? c0 : (c0 & 1023) << 10 | c1 & 1023;
+  switch (codePoint) {
+    case 228:
+      return [128, 1];
+    // ä
+    case 246:
+      return [129, 1];
+    // ö
+    case 252:
+      return [130, 1];
+    // ü
+    case 196:
+      return [131, 1];
+    // Ä
+    case 214:
+      return [132, 1];
+    // Ö
+    case 220:
+      return [133, 1];
+    // Ü
+    case 223:
+      return [134, 1];
+    // ß
+    case 176:
+      return [135, 1];
+    // °
+    default:
+      return [FIRST_CHAR, 1];
+  }
+}
+function renderTextToBitmap(text, startY, scale, bitmap, maxY = 64) {
+  const glyphW = GLYPH_WIDTH * scale;
+  let cursorX = 0;
+  let cursorY = startY;
+  let i = 0;
+  while (i < text.length) {
+    const ch = text[i];
+    if (ch === "\n") {
+      cursorX = 0;
+      cursorY += GLYPH_HEIGHT * scale;
+      i++;
+      continue;
+    }
+    const [glyphIdx, consumed] = decodeUtf8Char(text, i);
+    i += consumed;
+    if (cursorX + glyphW > 128) {
+      cursorX = 0;
+      cursorY += GLYPH_HEIGHT * scale;
+    }
+    if (cursorY >= maxY) break;
+    const glyph = glyphBytes(glyphIdx);
+    for (let col = 0; col < GLYPH_WIDTH; col++) {
+      const colByte = glyph[col];
+      for (let row = 0; row < GLYPH_HEIGHT; row++) {
+        const px = colByte >> row & 1;
+        if (!px) continue;
+        const px0x = cursorX + col * scale;
+        const px0y = cursorY + row * scale;
+        for (let sy = 0; sy < scale; sy++) {
+          const py = px0y + sy;
+          if (py < 0 || py >= maxY) continue;
+          for (let sx = 0; sx < scale; sx++) {
+            const px2 = px0x + sx;
+            if (px2 < 0 || px2 >= 128) continue;
+            bitmap[py * 128 + px2] = 1;
+          }
+        }
+      }
+    }
+    cursorX += glyphW;
+  }
+}
 class Potentiometer extends AnalogSensor {
 }
 class ServoMotor extends AnalogActor {
+  startAngle;
+  minUs;
+  maxUs;
   constructor(options) {
     super({
       ...options,
@@ -2953,13 +3872,16 @@ class ServoMotor extends AnalogActor {
   }
 }
 class StepperMotor extends ComponentBase {
+  pin;
+  dirPin;
+  stepsPerRevolution;
+  _value = 0;
+  _speed = 0;
+  _maxSpeed = 0;
+  _acceleration = 0;
+  _deceleration = 0;
   constructor(options) {
     super(options);
-    this._value = 0;
-    this._speed = 0;
-    this._maxSpeed = 0;
-    this._acceleration = 0;
-    this._deceleration = 0;
     if (options.flipPins) {
       this.dirPin = toDigitalPin(options.pin);
       this.pin = toDigitalPin(options.dirPin);
@@ -3227,6 +4149,17 @@ const autoDetectPort = async (timeoutMs = PROBE_TIMEOUT_MS) => {
   });
 };
 class Board extends EventEmitter {
+  // Initialized in initWithPort / initWithExistingConnection.
+  // All public methods check isReady before use, so these are guaranteed to
+  // exist by the time any caller can interact with the board.
+  port;
+  protocol;
+  components = /* @__PURE__ */ new Map();
+  isReady = false;
+  // Buffer the last received value per pin ID for components that register after the initial data arrives.
+  // This handles the race condition where sensors emit their initial value in Arduino setup()
+  // before the Node.js component instance has been registered with the board.
+  pendingData = /* @__PURE__ */ new Map();
   /**
    * Create a Board instance.
    *
@@ -3237,9 +4170,6 @@ class Board extends EventEmitter {
    */
   constructor(portPath, options) {
     super();
-    this.components = /* @__PURE__ */ new Map();
-    this.isReady = false;
-    this.pendingData = /* @__PURE__ */ new Map();
     if (portPath) {
       this.initWithPort(portPath, options?.expectedHash);
     } else {
@@ -3386,6 +4316,8 @@ exports.DELIMITER = DELIMITER;
 exports.DigitalActor = DigitalActor;
 exports.Encoder = Encoder;
 exports.FigmaIntegration = FigmaIntegration;
+exports.GLYPH_HEIGHT = GLYPH_HEIGHT;
+exports.GLYPH_WIDTH = GLYPH_WIDTH;
 exports.HapticTrack = HapticTrack;
 exports.Hapticlabs = Hapticlabs;
 exports.I2cComponentBase = I2cComponentBase;
@@ -3421,5 +4353,6 @@ exports.getBlokdotsSocketIOServerAddress = getBlokdotsSocketIOServerAddress;
 exports.hexToRgb = hexToRgb;
 exports.invertValue = invertValue;
 exports.mapValue = mapValue;
+exports.renderTextToBitmap = renderTextToBitmap;
 exports.rgbToHex = rgbToHex;
 exports.utils = utils;

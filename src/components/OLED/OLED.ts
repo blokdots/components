@@ -49,6 +49,7 @@ export class OLED extends I2cComponentBase<OLEDValue, OLEDEventMap> {
   isMirrored: boolean;
 
   private previousPacked: Uint8Array | null = null;
+  private pendingBitmapTimer: ReturnType<typeof setTimeout> | null = null;
 
   private drawingIsBlocked = false;
   private drawingBuffer: Array<number | null>;
@@ -75,21 +76,23 @@ export class OLED extends I2cComponentBase<OLEDValue, OLEDEventMap> {
     this.board.sendCommand(`${COMMAND_WRITE}:${this.componentId}:${cmd}`);
   }
 
-  private resetBitmapState() {
-    // Reset bitmap drawing state so a subsequent bitmap draw starts fresh
+  private cancelPendingBitmap() {
+    if (this.pendingBitmapTimer !== null) {
+      clearTimeout(this.pendingBitmapTimer);
+      this.pendingBitmapTimer = null;
+    }
     this.drawingIsBlocked = false;
     this.drawingBuffer = new Array(OLED_PACKED_BYTES).fill(null);
   }
 
-  /** Draw a text string on the display. Clears any active bitmap. */
+  /** Draw a text string on the display. */
   drawString(text: string): void {
     this.ensureBoardSet();
-    this.resetBitmapState();
+    this.cancelPendingBitmap();
+    this.previousPacked = null;
 
-    // Encode string param
     this.send(`DRAWSTRING:${encodeProtocolString(text ?? "")}`);
 
-    this.previousPacked = null;
     this._value = {
       ...this.valueSafe,
       type: "string",
@@ -99,17 +102,16 @@ export class OLED extends I2cComponentBase<OLEDValue, OLEDEventMap> {
     this.emit("change", this._value);
   }
 
-  /** Draw a label and a value on two lines. Clears any active bitmap. */
+  /** Draw a label (1×) and a value (2×) on the display. */
   drawValue(label: string, value: string): void {
     this.ensureBoardSet();
-    this.resetBitmapState();
+    this.cancelPendingBitmap();
+    this.previousPacked = null;
 
-    // Encode each string param independently
     this.send(
       `DRAWVALUE:${encodeProtocolString(label ?? "")}:${encodeProtocolString(value ?? "")}`
     );
 
-    this.previousPacked = null;
     this._value = {
       ...this.valueSafe,
       type: "string",
@@ -123,41 +125,10 @@ export class OLED extends I2cComponentBase<OLEDValue, OLEDEventMap> {
   drawBitmapOptimized(bitmap: Array<0 | 1>): void {
     this.ensureBoardSet();
     if (!Array.isArray(bitmap) || bitmap.length < OLED_PIXELS) {
-      // Can happen during transitional states (e.g., empty bitmap before asset loads)
       return;
     }
 
-    const packed = packBitmapToPages(bitmap);
-
-    if (!this.previousPacked) {
-      // Optimized initial draw: clear display, then send only non-zero bytes
-      // This is much faster than sending all 1024 bytes
-      this.send("CLEAR_BITMAP");
-
-      // Small delay to allow clear to complete before sending pixels
-      setTimeout(() => {
-        const nonZeroBytes: Array<{ idx: number; value: number }> = [];
-        for (let i = 0; i < OLED_PACKED_BYTES; i++) {
-          if (packed[i] !== 0) {
-            nonZeroBytes.push({ idx: i, value: packed[i] });
-          }
-        }
-
-        this.updateBytesBlocking(nonZeroBytes);
-        this.previousPacked = packed;
-      }, 30); // 30ms delay for I2C clear operation
-    } else {
-      const prev = this.previousPacked;
-      const changed: Array<{ idx: number; value: number }> = [];
-
-      for (let i = 0; i < OLED_PACKED_BYTES; i++) {
-        const v = packed[i];
-        if (v !== prev[i]) changed.push({ idx: i, value: v });
-      }
-
-      this.updateBytesBlocking(changed);
-      this.previousPacked = packed;
-    }
+    this.sendBitmapDiff(bitmap);
 
     this._value = {
       ...this.valueSafe,
@@ -166,6 +137,35 @@ export class OLED extends I2cComponentBase<OLEDValue, OLEDEventMap> {
       string: undefined,
     };
     this.emit("change", this._value);
+  }
+
+  /** Send only the changed bytes between the new bitmap and the last transmitted state. */
+  private sendBitmapDiff(bitmap: Array<0 | 1>): void {
+    const packed = packBitmapToPages(bitmap);
+
+    if (!this.previousPacked) {
+      // Fresh draw: clear hardware display, then send all non-zero bytes after a brief I2C settle.
+      this.send("CLEAR_BITMAP");
+
+      this.pendingBitmapTimer = setTimeout(() => {
+        this.pendingBitmapTimer = null;
+        const nonZeroBytes: Array<{ idx: number; value: number }> = [];
+        for (let i = 0; i < OLED_PACKED_BYTES; i++) {
+          if (packed[i] !== 0) nonZeroBytes.push({ idx: i, value: packed[i] });
+        }
+        this.updateBytesBlocking(nonZeroBytes);
+        this.previousPacked = packed;
+      }, 30);
+    } else {
+      const prev = this.previousPacked;
+      const changed: Array<{ idx: number; value: number }> = [];
+      for (let i = 0; i < OLED_PACKED_BYTES; i++) {
+        const v = packed[i];
+        if (v !== prev[i]) changed.push({ idx: i, value: v });
+      }
+      this.updateBytesBlocking(changed);
+      this.previousPacked = packed;
+    }
   }
 
   /** Clear the display. */
@@ -220,10 +220,9 @@ export class OLED extends I2cComponentBase<OLEDValue, OLEDEventMap> {
   }
 
   cleanup(): void {
+    this.cancelPendingBitmap();
     this.clearDisplay();
     this.previousPacked = null;
-    this.drawingIsBlocked = false;
-    this.drawingBuffer = new Array(OLED_PACKED_BYTES).fill(null);
     super.cleanup();
   }
 

@@ -21,19 +21,22 @@ export declare class OLED extends I2cComponentBase<OLEDValue, OLEDEventMap> {
     isRotated: boolean;
     isMirrored: boolean;
     private previousPacked;
+    private pendingBitmapTimer;
     private drawingIsBlocked;
     private drawingBuffer;
     private get valueSafe();
     constructor(options: OLEDOptions);
     handleData(_data: unknown): void;
     private send;
-    private resetBitmapState;
-    /** Draw a text string on the display. Clears any active bitmap. */
+    private cancelPendingBitmap;
+    /** Draw a text string on the display. */
     drawString(text: string): void;
-    /** Draw a label and a value on two lines. Clears any active bitmap. */
+    /** Draw a label (1×) and a value (2×) on the display. */
     drawValue(label: string, value: string): void;
     /** Draw a 128×64 monochrome bitmap using a diff-based transfer to minimise serial traffic. */
     drawBitmapOptimized(bitmap: Array<0 | 1>): void;
+    /** Send only the changed bytes between the new bitmap and the last transmitted state. */
+    private sendBitmapDiff;
     /** Clear the display. */
     clearDisplay(): void;
     /** Turn the display on. */
